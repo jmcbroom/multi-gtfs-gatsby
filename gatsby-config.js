@@ -1,3 +1,7 @@
+require("dotenv").config({
+  path: `.env.${process.env.NODE_ENV}`,
+})
+
 module.exports = {
   siteMetadata: {
     siteUrl: "https://www.yourdomain.tld",
@@ -5,12 +9,12 @@ module.exports = {
   },
   plugins: [
     "gatsby-plugin-image",
-    {
-      resolve: "gatsby-plugin-google-analytics",
-      options: {
-        trackingId: "",
-      },
-    },
+    // {
+    //   resolve: "gatsby-plugin-google-analytics",
+    //   options: {
+    //     trackingId: "",
+    //   },
+    // },
     "gatsby-plugin-react-helmet",
     "gatsby-plugin-sitemap",
     {
@@ -37,6 +41,15 @@ module.exports = {
         path: "./src/pages/",
       },
       __key: "pages",
+    },
+    {
+      resolve: "gatsby-source-pg",
+      options: {
+        connectionString: process.env.PG_CONN,
+        schema: "gtfs",
+        refetchInterval: 60, // Refetch data every 60 seconds
+        appendPlugins: [require("@graphile-contrib/pg-simplify-inflector"), require("postgraphile-plugin-connection-filter")],
+      },
     },
   ],
 };
