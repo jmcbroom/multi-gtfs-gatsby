@@ -1,5 +1,6 @@
 import React from "react"
 import { graphql, Link } from "gatsby";
+import FeedInfo from "../components/FeedInfo";
 
 const Agency = ({ data, pageContext }) => {
 
@@ -8,13 +9,15 @@ const Agency = ({ data, pageContext }) => {
     9: `smart`
   }
 
-  let { agencyName, agencyUrl, routes, feedIndex } = data.postgres.agencies[0]
+  let agency = data.postgres.agencies[0]
+  let { agencyName, agencyUrl, routes, feedIndex, feedInfo } = agency
 
   return (
     <div>
       <Link to={`/`}>Home</Link>
       <h1>Agency: {agencyName}</h1>
       <a href={agencyUrl}>Website</a>
+      <FeedInfo agency={agency} />
       <ul>
         {routes.map(r => (
           <Link to={`/${feedIndexes[feedIndex]}/route/${r.routeShortName}`}>
@@ -43,6 +46,18 @@ export const query = graphql`
         routes: routesByFeedIndexAndAgencyIdList {
           routeShortName
           routeLongName
+        }
+        feedInfo: feedInfoByFeedIndex {
+          serviceCalendars: calendarsByFeedIndexList {
+            sunday
+            thursday
+            tuesday
+            wednesday
+            monday
+            friday
+            saturday
+            serviceId
+          }
         }
       }
     }
