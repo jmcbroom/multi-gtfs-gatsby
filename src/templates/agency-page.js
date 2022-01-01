@@ -10,7 +10,7 @@ const Agency = ({ data, pageContext }) => {
   }
 
   let agency = data.postgres.agencies[0]
-  let { agencyName, agencyUrl, routes, feedIndex, feedInfo } = agency
+  let { agencyName, agencyUrl, routes, feedIndex } = agency
 
   return (
     <div>
