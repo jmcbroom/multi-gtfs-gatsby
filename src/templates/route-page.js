@@ -1,10 +1,8 @@
 import { graphql, Link } from "gatsby"
 import React from "react"
-import { getServiceDays } from "../components/FeedInfo"
+import { getServiceDays, getTripsByServiceDay } from "../util"
 
 const Route = ({ data, pageContext }) => {
-
-  console.log(data, pageContext)
 
   let { routeShortName, routeLongName, routeColor, feedIndex, trips } = data.postgres.routes[0]
 
@@ -22,6 +20,7 @@ const Route = ({ data, pageContext }) => {
   }
 
   let serviceDays = getServiceDays(serviceCalendars)
+  let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
 
   return (
     <div>
@@ -30,8 +29,12 @@ const Route = ({ data, pageContext }) => {
         <h1 style={style}>
           {routeShortName} -- {routeLongName}
         </h1>
+        </Link>
         <p>This route has {trips.length} trips.</p>
-      </Link>
+        {Object.keys(tripsByServiceDay).map(day => (
+          <p>There are {tripsByServiceDay[day].length} trips on {day}</p>
+        ))}
+        
     </div>
   )
 }
