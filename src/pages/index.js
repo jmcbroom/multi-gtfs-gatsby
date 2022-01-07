@@ -4,7 +4,7 @@ import { graphql, Link } from "gatsby";
 // markup
 const IndexPage = ({ data }) => {
 
-  let { agencies, routes } = data.postgres
+  let { agencies } = data.postgres
 
   let feedIndexes = {
     8: `ddot`,
