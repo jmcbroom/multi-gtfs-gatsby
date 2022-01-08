@@ -26,8 +26,11 @@ const RouteTimetable = ({ data, pageContext }) => {
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
-
   let filteredTrips = tripsByServiceAndDirection[service][direction]
+  
+  if(filteredTrips === undefined) {
+    filteredTrips = []
+  }
 
   return (
     <div>
@@ -39,7 +42,7 @@ const RouteTimetable = ({ data, pageContext }) => {
       </Link>
       <DirectionPicker directions={headsignsByDirectionId} {...{direction, setDirection}} />
       <ServicePicker services={tripsByServiceDay} {...{service, setService}} />
-      <h3>There are {filteredTrips.length} trips in that direction of travel on that day.</h3>
+      {filteredTrips && <h3>There are {filteredTrips.length} trips in that direction of travel on that day.</h3>}
       {filteredTrips.length > 0 && filteredTrips.map(trip => (
         <div>
           {trip.tripId}
