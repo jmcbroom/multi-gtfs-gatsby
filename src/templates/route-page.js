@@ -1,6 +1,6 @@
 import { graphql, Link } from "gatsby"
 import React from "react"
-import { getServiceDays, getTripsByServiceDay, getHeadsignsByDirectionId } from "../util"
+import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId } from "../util"
 import config from "../config"
 
 const Route = ({ data, pageContext }) => {
@@ -20,7 +20,7 @@ const Route = ({ data, pageContext }) => {
   let serviceDays = getServiceDays(serviceCalendars)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips)
-  console.log(headsignsByDirectionId)
+  let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
 
   return (
     <div>
@@ -34,12 +34,17 @@ const Route = ({ data, pageContext }) => {
           This route has {Object.keys(headsignsByDirectionId).length} directions.
         </p>
         {Object.keys(headsignsByDirectionId).map(dir => (
-          <p>Direction {dir} goes to {headsignsByDirectionId[dir].join(", ")}</p>
+          <p key={dir}>Direction {dir} goes to {headsignsByDirectionId[dir].join(", ")}</p>
         ))}
         <hr />
         <p>This route has {trips.length} trips.</p>
         {Object.keys(tripsByServiceDay).map(day => (
-          <p>There are {tripsByServiceDay[day].length} trips on {day}</p>
+          <>
+          <p key={day}>There are {tripsByServiceDay[day].length} trips on {day}</p>
+          {Object.keys(headsignsByDirectionId).map(dir => (
+            <p>{tripsByServiceAndDirection[day][dir].length} go in direction {dir}: {headsignsByDirectionId[dir].join(", ")}</p>
+          ))}
+          </>
         ))}
         
     </div>
