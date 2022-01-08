@@ -1,13 +1,11 @@
 import React from "react"
 import { graphql, Link } from "gatsby";
 import FeedInfo from "../components/FeedInfo";
+import config from "../config";
 
 const Agency = ({ data, pageContext }) => {
 
-  let feedIndexes = {
-    8: `ddot`,
-    9: `smart`
-  }
+  let {feedIndexes} = config
 
   let agency = data.postgres.agencies[0]
   let { agencyName, agencyUrl, routes, feedIndex } = agency
