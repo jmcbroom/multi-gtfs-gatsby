@@ -1,6 +1,7 @@
 import { graphql, Link } from "gatsby"
 import React from "react"
 import { getServiceDays, getTripsByServiceDay } from "../util"
+import config from "../config"
 
 const Route = ({ data, pageContext }) => {
 
@@ -14,10 +15,7 @@ const Route = ({ data, pageContext }) => {
     borderBottomColor: `#${routeColor}`
   }
 
-  let feedIndexes = {
-    8: `ddot`,
-    9: `smart`
-  }
+  let {feedIndexes} = config
 
   let serviceDays = getServiceDays(serviceCalendars)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)

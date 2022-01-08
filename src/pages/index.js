@@ -1,15 +1,13 @@
 import React from "react"
 import { graphql, Link } from "gatsby";
+import config from "../config";
 
 // markup
 const IndexPage = ({ data }) => {
 
   let { agencies } = data.postgres
 
-  let feedIndexes = {
-    8: `ddot`,
-    9: `smart`
-  }
+  let {feedIndexes} = config
 
   return (
     <main>
