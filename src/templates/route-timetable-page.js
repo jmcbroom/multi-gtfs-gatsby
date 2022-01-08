@@ -11,24 +11,24 @@ import ServicePicker from "../components/ServicePicker"
  */
 const RouteTimetableTrip = ({ trip }) => {
   return (
-    <div>
-      <h4>
-        {trip.tripId}: {trip.tripHeadsign}
-      </h4>
-      <p>Departs {formatArrivalTime(trip.stopTimes[0].arrivalTime)} from {trip.stopTimes[0].stop.stopName}</p>
-      <p>Arrives {formatArrivalTime(trip.stopTimes[trip.stopTimes.length - 1].arrivalTime)} at {trip.stopTimes[trip.stopTimes.length - 1].stop.stopName}</p>
+    <div style={{ padding: 10, margin: 10, background: '#eee' }}>
+    <h4 style={{}}>
+      Trip #{trip.tripId}: {trip.tripHeadsign}
+    </h4>
+      {/* <p>Departs {formatArrivalTime(trip.stopTimes[0].arrivalTime)} from {trip.stopTimes[0].stop.stopName}</p>
+      <p>Arrives {formatArrivalTime(trip.stopTimes[trip.stopTimes.length - 1].arrivalTime)} at {trip.stopTimes[trip.stopTimes.length - 1].stop.stopName}</p> */}
       <table>
-      <tbody>
+        <tbody>
 
-      {trip.stopTimes.map(st => (
-        <tr key={st.stop.stopId}>
-          <td>{st.stop.stopName}</td>
-          <td>{formatArrivalTime(st.arrivalTime)}</td>
-        </tr>
-      ))}
-      </tbody>
+          {trip.stopTimes.map(st => (
+            <tr key={st.stop.stopId}>
+              <td>{st.stop.stopName}</td>
+              <td>{formatArrivalTime(st.arrivalTime)}</td>
+            </tr>
+          ))}
+        </tbody>
       </table>
-    
+
     </div>
   )
 }
@@ -60,7 +60,7 @@ const RouteTimetable = ({ data, pageContext }) => {
   if (selectedTrips !== undefined && selectedTrips.length > 0) {
     sortedTrips = sortTripsByFrequentTimepoint(selectedTrips)
   }
-  
+
 
   return (
     <div>
@@ -74,7 +74,7 @@ const RouteTimetable = ({ data, pageContext }) => {
       <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
       {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>}
       {sortedTrips.length > 0 && sortedTrips.map(trip => (
-        <RouteTimetableTrip trip={trip} key={trip.tripId}/>
+        <RouteTimetableTrip trip={trip} key={trip.tripId} />
       ))}
     </div>
   )
