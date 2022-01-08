@@ -1,7 +1,7 @@
 /**
- * 
- * @param {*} serviceCalendars 
- * @returns 
+ * Convert GTFS service calendars into the specific days of the week.
+ * @param {*} serviceCalendars: an array of a feed's Calendars, describing which days of the week are applicable for that service
+ * @returns an object whose keys are `weekday`, `saturday`, `sunday` and the corresponding serviceId values
  */
 export const getServiceDays = ( serviceCalendars ) => {
   // let's figure out which service ID is which
@@ -33,9 +33,19 @@ export const getServiceDays = ( serviceCalendars ) => {
   return serviceDays;
 }
 
+/**
+ * Group a route's trips by the serviceDay (weekday/sat/sun)
+ * @param {Array} trips: an array of trip objects
+ * @param {Object} serviceDays: getServiceDays returned value
+ * @returns a grouping of trips by weekday, saturday, sunday
+ */
 export const getTripsByServiceDay = (trips, serviceDays) => {
 
-  let tripsByServiceDay = {}
+  let tripsByServiceDay = {
+    'weekday': [],
+    'saturday': [],
+    'sunday': []
+  }
 
   Object.keys(serviceDays).forEach(day => {
     let thisDayTrips = trips.filter(trip => trip.serviceId === serviceDays[day])
@@ -45,3 +55,44 @@ export const getTripsByServiceDay = (trips, serviceDays) => {
   return tripsByServiceDay
 }
 
+/**
+ * Group a route's trips by service day & direction
+ * @param {*} trips: an array of trip objects
+ * @param {*} serviceDays: getServiceDays returned value
+ * @param {*} headsignsByDirectionId: an object whose keys are directionId and values an array of distinct tripHeadsigns in that direction
+ * @returns a nested object whose top keys are serviceDays (weekday/saturday/sunday), intermediate keys the directionId, and values are the trips which fall in that filter
+ */
+export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDirectionId) => {
+
+  let tripsByServiceAndDirection = {}
+
+  Object.keys(serviceDays).forEach(day => {
+    tripsByServiceAndDirection[day] = {}
+    Object.keys(headsignsByDirectionId).forEach(dir => {
+      let filteredTrips = trips.filter(trip => (trip.serviceId) === serviceDays[day] && trip.directionId == dir)
+      tripsByServiceAndDirection[day][dir] = filteredTrips
+    })
+  })
+
+  return tripsByServiceAndDirection
+}
+
+/**
+ * Get distinct tripHeadsigns for each directionId of a route
+ * @param {*} trips: an array of trip objects
+ * @returns an object whose keys are directionIds and values an array of distinct tripHeadsigns
+ */
+export const getHeadsignsByDirectionId = (trips) => {
+  let headsignsByDirectionId = {}
+
+  const directions = [...new Set(trips.map(trip => trip.directionId))].sort()
+
+  directions.forEach(dir => {
+    let tripsThisDirection = trips.filter(trip => trip.directionId === dir)
+    // get the unique tripHeadsigns
+    let headsigns = [...new Set(tripsThisDirection.map(trip => trip.tripHeadsign))]
+    headsignsByDirectionId[dir] = headsigns
+  })
+
+  return headsignsByDirectionId
+}
