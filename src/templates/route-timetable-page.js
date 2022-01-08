@@ -1,6 +1,6 @@
 import { graphql, Link } from "gatsby"
 import React, { useState } from "react"
-import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, arrivalTimeDisplay, formatArrivalTime } from "../util"
+import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, arrivalTimeDisplay, formatArrivalTime, sortTripsByFrequentTimepoint } from "../util"
 import config from "../config"
 import DirectionPicker from "../components/DirectionPicker"
 import ServicePicker from "../components/ServicePicker"
@@ -49,11 +49,13 @@ const RouteTimetable = ({ data, pageContext }) => {
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
-  let filteredTrips = tripsByServiceAndDirection[service][direction]
 
-  if (filteredTrips === undefined) {
-    filteredTrips = []
+  let selectedTrips = tripsByServiceAndDirection[service][direction]
+  let sortedTrips = []
+  if (selectedTrips !== undefined) {
+    sortedTrips = sortTripsByFrequentTimepoint(selectedTrips)
   }
+  
 
   return (
     <div>
@@ -65,8 +67,8 @@ const RouteTimetable = ({ data, pageContext }) => {
       </Link>
       <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
       <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
-      {filteredTrips && <h3>There are {filteredTrips.length} trips in that direction of travel on that day.</h3>}
-      {filteredTrips.length > 0 && filteredTrips.map(trip => (
+      {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>}
+      {sortedTrips.length > 0 && sortedTrips.map(trip => (
         <RouteTimetableTrip trip={trip} />
       ))}
     </div>
