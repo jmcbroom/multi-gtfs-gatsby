@@ -4,13 +4,16 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
 
   let agencyFeedIndexes = {
     8: `ddot`,
-    9: `smart`
+    9: `smart`,
+    10: `the-ride`,
+    11: `mta`,
+    // 12: `transit-windsor`
   }
 
   const result = await graphql(`
     {
       postgres {
-        agencies: agenciesList(filter: {feedIndex: {greaterThan: 7}}) {
+        agencies: agenciesList(filter: {feedIndex: {greaterThan: 7, lessThan: 12}}) {
           agencyName
           agencyUrl
           agencyTimezone
@@ -21,7 +24,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           bikesPolicyUrl
           feedIndex
         }
-        routes: routesList(filter: {feedIndex: {greaterThan: 7}}) {
+        routes: routesList(filter: {feedIndex: {greaterThan: 7, lessThan: 12}}) {
           agencyId
           routeShortName
           routeLongName

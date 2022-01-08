@@ -1,6 +1,6 @@
 import { graphql, Link } from "gatsby"
 import React, { useState } from "react"
-import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, arrivalTimeDisplay, formatArrivalTime } from "../util"
+import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, formatArrivalTime, sortTripsByFrequentTimepoint } from "../util"
 import config from "../config"
 import DirectionPicker from "../components/DirectionPicker"
 import ServicePicker from "../components/ServicePicker"
@@ -11,19 +11,24 @@ import ServicePicker from "../components/ServicePicker"
  */
 const RouteTimetableTrip = ({ trip }) => {
   return (
-    <div key={trip.tripId}>
-      <h4>
-        {trip.tripId}: {trip.tripHeadsign}
-      </h4>
-      <p>Departs {formatArrivalTime(trip.stopTimes[0].arrivalTime)} from {trip.stopTimes[0].stop.stopName}</p>
-      <p>Arrives {formatArrivalTime(trip.stopTimes[trip.stopTimes.length - 1].arrivalTime)} at {trip.stopTimes[trip.stopTimes.length - 1].stop.stopName}</p>
-      {trip.stopTimes.map(st => (
-        <tr>
-          <td>{st.stop.stopName}</td>
-          <td>{formatArrivalTime(st.arrivalTime)}</td>
-        </tr>
-      ))}
-    
+    <div style={{ padding: 10, margin: 10, background: '#eee' }}>
+    <h4 style={{}}>
+      Trip #{trip.tripId}: {trip.tripHeadsign}
+    </h4>
+      {/* <p>Departs {formatArrivalTime(trip.stopTimes[0].arrivalTime)} from {trip.stopTimes[0].stop.stopName}</p>
+      <p>Arrives {formatArrivalTime(trip.stopTimes[trip.stopTimes.length - 1].arrivalTime)} at {trip.stopTimes[trip.stopTimes.length - 1].stop.stopName}</p> */}
+      <table>
+        <tbody>
+
+          {trip.stopTimes.map(st => (
+            <tr key={st.stop.stopId}>
+              <td>{st.stop.stopName}</td>
+              <td>{formatArrivalTime(st.arrivalTime)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
     </div>
   )
 }
@@ -49,11 +54,13 @@ const RouteTimetable = ({ data, pageContext }) => {
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
-  let filteredTrips = tripsByServiceAndDirection[service][direction]
 
-  if (filteredTrips === undefined) {
-    filteredTrips = []
+  let selectedTrips = tripsByServiceAndDirection[service][direction]
+  let sortedTrips = []
+  if (selectedTrips !== undefined && selectedTrips.length > 0) {
+    sortedTrips = sortTripsByFrequentTimepoint(selectedTrips)
   }
+
 
   return (
     <div>
@@ -65,9 +72,9 @@ const RouteTimetable = ({ data, pageContext }) => {
       </Link>
       <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
       <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
-      {filteredTrips && <h3>There are {filteredTrips.length} trips in that direction of travel on that day.</h3>}
-      {filteredTrips.length > 0 && filteredTrips.map(trip => (
-        <RouteTimetableTrip trip={trip} />
+      {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>}
+      {sortedTrips.length > 0 && sortedTrips.map(trip => (
+        <RouteTimetableTrip trip={trip} key={trip.tripId} />
       ))}
     </div>
   )
