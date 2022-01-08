@@ -1,6 +1,6 @@
 import { graphql, Link } from "gatsby"
 import React, { useState } from "react"
-import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, arrivalTimeDisplay, formatArrivalTime, sortTripsByFrequentTimepoint } from "../util"
+import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, formatArrivalTime, sortTripsByFrequentTimepoint } from "../util"
 import config from "../config"
 import DirectionPicker from "../components/DirectionPicker"
 import ServicePicker from "../components/ServicePicker"
@@ -11,18 +11,23 @@ import ServicePicker from "../components/ServicePicker"
  */
 const RouteTimetableTrip = ({ trip }) => {
   return (
-    <div key={trip.tripId}>
+    <div>
       <h4>
         {trip.tripId}: {trip.tripHeadsign}
       </h4>
       <p>Departs {formatArrivalTime(trip.stopTimes[0].arrivalTime)} from {trip.stopTimes[0].stop.stopName}</p>
       <p>Arrives {formatArrivalTime(trip.stopTimes[trip.stopTimes.length - 1].arrivalTime)} at {trip.stopTimes[trip.stopTimes.length - 1].stop.stopName}</p>
+      <table>
+      <tbody>
+
       {trip.stopTimes.map(st => (
-        <tr>
+        <tr key={st.stop.stopId}>
           <td>{st.stop.stopName}</td>
           <td>{formatArrivalTime(st.arrivalTime)}</td>
         </tr>
       ))}
+      </tbody>
+      </table>
     
     </div>
   )
@@ -52,7 +57,7 @@ const RouteTimetable = ({ data, pageContext }) => {
 
   let selectedTrips = tripsByServiceAndDirection[service][direction]
   let sortedTrips = []
-  if (selectedTrips !== undefined) {
+  if (selectedTrips !== undefined && selectedTrips.length > 0) {
     sortedTrips = sortTripsByFrequentTimepoint(selectedTrips)
   }
   
@@ -69,7 +74,7 @@ const RouteTimetable = ({ data, pageContext }) => {
       <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
       {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>}
       {sortedTrips.length > 0 && sortedTrips.map(trip => (
-        <RouteTimetableTrip trip={trip} />
+        <RouteTimetableTrip trip={trip} key={trip.tripId}/>
       ))}
     </div>
   )
