@@ -35,7 +35,7 @@ const IndexPage = ({ data }) => {
 export const query = graphql`
   {
     postgres {
-      agencies: agenciesList(filter: {feedIndex: {greaterThan: 7}}) {
+      agencies: agenciesList(filter: {feedIndex: {greaterThan: 7, lessThan: 12}}) {
         agencyName
         agencyUrl
         agencyTimezone
