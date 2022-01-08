@@ -30,6 +30,47 @@ export const formatArrivalTime = (time, showAp=true) => {
 };
 
 /**
+ * Sort an array of trips chronologically.
+ * @param {*} trips: must have an array of stopTimes attached
+ * @returns the same array, but sorted
+ */
+export const sortTripsByFrequentTimepoint = (trips) => {
+  const mostTimepointsTrip = trips.sort((a, b) => {
+    return b.stopTimes.length - a.stopTimes.length;
+  })[0];
+
+  // get the timepoints for that trip
+  const timepoints = mostTimepointsTrip.stopTimes;
+
+  // sort by frequency
+  let stopIdOccurences = trips.map(t => t.stopTimes.map(s => s.stop.stopId));
+
+  let defaultTimepoint = 0;
+
+  // we iterate through the timepoints and find the most frequent one
+  timepoints
+    .map(t => t.stop.stopId)
+    .some((tp, j) => {
+      let included = stopIdOccurences.map(sio => sio.includes(tp));
+      if (included.every(i => i)) {
+        defaultTimepoint = tp;
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+  let sorted = trips.sort((a, b) => {
+    let aStopTime = a.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0].arrivalTime;
+    let bStopTime = b.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0].arrivalTime;
+
+    return aStopTime.hours * 60 + aStopTime.minutes - (bStopTime.hours * 60 + bStopTime.minutes);
+  });
+
+  return sorted;
+}
+
+/**
  * Convert GTFS service calendars into the specific days of the week.
  * @param {*} serviceCalendars: an array of a feed's Calendars, describing which days of the week are applicable for that service
  * @returns an object whose keys are `weekday`, `saturday`, `sunday` and the corresponding serviceId values
