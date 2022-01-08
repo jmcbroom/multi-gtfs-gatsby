@@ -49,9 +49,21 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
   });
 
   result.data.postgres.routes.forEach(r => {
+
+    // main route page
     createPage({
       path: `/${agencyFeedIndexes[r.feedIndex]}/route/${r.routeShortName}`,
       component: path.resolve("./src/templates/route-page.js"),
+      context: {
+        routeNo: r.routeShortName,
+        feedIndex: r.feedIndex
+      }
+    });
+
+    // timetable page
+    createPage({
+      path: `/${agencyFeedIndexes[r.feedIndex]}/route/${r.routeShortName}/timetable`,
+      component: path.resolve("./src/templates/route-timetable-page.js"),
       context: {
         routeNo: r.routeShortName,
         feedIndex: r.feedIndex
