@@ -1,3 +1,34 @@
+
+/**
+ * Convert the GraphQL arrivalTime to a human-readable string.
+ * @param {arrivalTime} time 
+ * @param {boolean} showAp 
+ * @returns 
+ */
+export const formatArrivalTime = (time, showAp=true) => {
+  let hour = time.hours;
+  let minutes = time.minutes ? time.minutes.toString().padStart(2, "0") : "00";
+  let ap = "am";
+
+  // vary hours & am/pm based on what hour it is
+  // gtfs has hours that are greater than 24
+  if (time.hours < 12 && time.hours > 0) {
+    hour = time.hours;
+    ap = "am";
+  } else if (time.hours > 12 && time.hours < 24) {
+    hour = time.hours - 12;
+    ap = "pm";
+  } else if (time.hours % 12 === 0) {
+    hour = 12;
+    ap = time.hours === 12 ? "pm" : "am";
+  } else if (time.hours >= 24) {
+    hour = time.hours - 24;
+    ap = "am";
+  }
+
+  return `${hour}:${minutes} ${ap}`;
+};
+
 /**
  * Convert GTFS service calendars into the specific days of the week.
  * @param {*} serviceCalendars: an array of a feed's Calendars, describing which days of the week are applicable for that service
