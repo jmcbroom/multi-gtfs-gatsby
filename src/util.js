@@ -141,7 +141,7 @@ export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDir
   Object.keys(serviceDays).forEach(day => {
     tripsByServiceAndDirection[day] = {}
     Object.keys(headsignsByDirectionId).forEach(dir => {
-      let filteredTrips = trips.filter(trip => (trip.serviceId) === serviceDays[day] && trip.directionId == dir)
+      let filteredTrips = trips.filter(trip => (trip.serviceId) === serviceDays[day] && trip.directionId === parseInt(dir))
       tripsByServiceAndDirection[day][dir] = filteredTrips
     })
   })
