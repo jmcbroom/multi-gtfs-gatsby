@@ -4,7 +4,10 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
 
   let agencyFeedIndexes = {
     8: `ddot`,
-    9: `smart`
+    9: `smart`,
+    10: `the-ride`,
+    11: `mta`,
+    12: `transit-windsor`
   }
 
   const result = await graphql(`
