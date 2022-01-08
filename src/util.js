@@ -45,3 +45,17 @@ export const getTripsByServiceDay = (trips, serviceDays) => {
   return tripsByServiceDay
 }
 
+export const getHeadsignsByDirectionId = (trips) => {
+  let headsignsByDirectionId = {}
+
+  const directions = [...new Set(trips.map(trip => trip.directionId))].sort()
+
+  directions.forEach(dir => {
+    let tripsThisDirection = trips.filter(trip => trip.directionId === dir)
+    // get the unique tripHeadsigns
+    let headsigns = [...new Set(tripsThisDirection.map(trip => trip.tripHeadsign))]
+    headsignsByDirectionId[dir] = headsigns
+  })
+
+  return headsignsByDirectionId
+}
