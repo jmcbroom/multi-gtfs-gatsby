@@ -1,9 +1,32 @@
 import { graphql, Link } from "gatsby"
 import React, { useState } from "react"
-import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId } from "../util"
+import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, arrivalTimeDisplay, formatArrivalTime } from "../util"
 import config from "../config"
 import DirectionPicker from "../components/DirectionPicker"
 import ServicePicker from "../components/ServicePicker"
+
+/**
+ * Tiny testing component for a new route
+ * @param {Object} trip: trip element from GraphQL response 
+ */
+const RouteTimetableTrip = ({ trip }) => {
+  return (
+    <div key={trip.tripId}>
+      <h4>
+        {trip.tripId}: {trip.tripHeadsign}
+      </h4>
+      <p>Departs {formatArrivalTime(trip.stopTimes[0].arrivalTime)} from {trip.stopTimes[0].stop.stopName}</p>
+      <p>Arrives {formatArrivalTime(trip.stopTimes[trip.stopTimes.length - 1].arrivalTime)} at {trip.stopTimes[trip.stopTimes.length - 1].stop.stopName}</p>
+      {trip.stopTimes.map(st => (
+        <tr>
+          <td>{st.stop.stopName}</td>
+          <td>{formatArrivalTime(st.arrivalTime)}</td>
+        </tr>
+      ))}
+    
+    </div>
+  )
+}
 
 const RouteTimetable = ({ data, pageContext }) => {
 
@@ -27,8 +50,8 @@ const RouteTimetable = ({ data, pageContext }) => {
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
   let filteredTrips = tripsByServiceAndDirection[service][direction]
-  
-  if(filteredTrips === undefined) {
+
+  if (filteredTrips === undefined) {
     filteredTrips = []
   }
 
@@ -40,13 +63,11 @@ const RouteTimetable = ({ data, pageContext }) => {
           {routeShortName} -- {routeLongName}
         </h1>
       </Link>
-      <DirectionPicker directions={headsignsByDirectionId} {...{direction, setDirection}} />
-      <ServicePicker services={tripsByServiceDay} {...{service, setService}} />
+      <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
+      <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
       {filteredTrips && <h3>There are {filteredTrips.length} trips in that direction of travel on that day.</h3>}
       {filteredTrips.length > 0 && filteredTrips.map(trip => (
-        <div>
-          {trip.tripId}
-        </div>
+        <RouteTimetableTrip trip={trip} />
       ))}
     </div>
   )
@@ -71,23 +92,25 @@ export const query = graphql`
           directionId
           tripId
           tripHeadsign
+          stopTimes: stopTimesByFeedIndexAndTripIdList(
+            orderBy: STOP_SEQUENCE_ASC
+            condition: {timepoint: 1}
+          ) {
+            stop: stopByFeedIndexAndStopId {
+              stopName
+              stopId
+              stopCode
+            }
+            arrivalTime {
+              hours
+              minutes
+              seconds
+            }
+          }
         }
       }
       agencies: agenciesList(condition: {feedIndex: $feedIndex}) {
-        agencyName
-        agencyUrl
-        agencyTimezone
-        agencyLang
-        agencyPhone
-        agencyFareUrl
-        agencyEmail
-        bikesPolicyUrl
         feedIndex
-        agencyId
-        routes: routesByFeedIndexAndAgencyIdList {
-          routeShortName
-          routeLongName
-        }
         feedInfo: feedInfoByFeedIndex {
           serviceCalendars: calendarsByFeedIndexList {
             sunday
