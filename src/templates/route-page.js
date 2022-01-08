@@ -8,14 +8,14 @@ const Route = ({ data, pageContext }) => {
   let { routeShortName, routeLongName, routeColor, feedIndex, trips } = data.postgres.routes[0]
 
   let { serviceCalendars } = data.postgres.agencies[0].feedInfo
-  
+
   let style = {
-    borderBottomStyle: `solid`, 
-    borderBottomWidth: 3, 
+    borderBottomStyle: `solid`,
+    borderBottomWidth: 3,
     borderBottomColor: `#${routeColor}`
   }
 
-  let {feedIndexes} = config
+  let { feedIndexes } = config
 
   let serviceDays = getServiceDays(serviceCalendars)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
@@ -29,24 +29,27 @@ const Route = ({ data, pageContext }) => {
         <h1 style={style}>
           {routeShortName} -- {routeLongName}
         </h1>
-        </Link>
-        <p>
-          This route has {Object.keys(headsignsByDirectionId).length} directions.
-        </p>
-        {Object.keys(headsignsByDirectionId).map(dir => (
-          <p key={dir}>Direction {dir} goes to {headsignsByDirectionId[dir].join(", ")}</p>
-        ))}
-        <hr />
-        <p>This route has {trips.length} trips.</p>
-        {Object.keys(tripsByServiceDay).map(day => (
-          <>
+      </Link>
+      <Link to={`./timetable`}>
+        <h2>Route timetable</h2>
+      </Link>
+      <p>
+        This route has {Object.keys(headsignsByDirectionId).length} directions.
+      </p>
+      {Object.keys(headsignsByDirectionId).map(dir => (
+        <p key={dir}>Direction {dir} goes to {headsignsByDirectionId[dir].join(", ")}</p>
+      ))}
+      <hr />
+      <p>This route has {trips.length} trips.</p>
+      {Object.keys(tripsByServiceDay).map(day => (
+        <>
           <p key={day}>There are {tripsByServiceDay[day].length} trips on {day}</p>
           {Object.keys(headsignsByDirectionId).map(dir => (
             <p>{tripsByServiceAndDirection[day][dir].length} go in direction {dir}: {headsignsByDirectionId[dir].join(", ")}</p>
           ))}
-          </>
-        ))}
-        
+        </>
+      ))}
+
     </div>
   )
 }
