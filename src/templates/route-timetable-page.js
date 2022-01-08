@@ -1,9 +1,11 @@
 import { graphql, Link } from "gatsby"
-import React from "react"
+import React, { useState } from "react"
 import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId } from "../util"
 import config from "../config"
+import DirectionPicker from "../components/DirectionPicker"
+import ServicePicker from "../components/ServicePicker"
 
-const Route = ({ data, pageContext }) => {
+const RouteTimetable = ({ data, pageContext }) => {
 
   let { routeShortName, routeLongName, routeColor, feedIndex, trips } = data.postgres.routes[0]
 
@@ -22,6 +24,11 @@ const Route = ({ data, pageContext }) => {
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips)
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
 
+  const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
+  const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
+
+  let filteredTrips = tripsByServiceAndDirection[service][direction]
+
   return (
     <div>
       <Link to={`/`}>Home</Link>
@@ -30,32 +37,20 @@ const Route = ({ data, pageContext }) => {
           {routeShortName} -- {routeLongName}
         </h1>
       </Link>
-      <Link to={`./timetable`}>
-        <h2>Route timetable</h2>
-      </Link>
-      <p>
-        This route has {Object.keys(headsignsByDirectionId).length} directions.
-      </p>
-      {Object.keys(headsignsByDirectionId).map(dir => (
-        <p key={dir}>Direction {dir} goes to {headsignsByDirectionId[dir].join(", ")}</p>
+      <DirectionPicker directions={headsignsByDirectionId} {...{direction, setDirection}} />
+      <ServicePicker services={tripsByServiceDay} {...{service, setService}} />
+      <h3>There are {filteredTrips.length} trips in that direction of travel on that day.</h3>
+      {filteredTrips.map(trip => (
+        <div>
+          {trip.tripId}
+        </div>
       ))}
-      <hr />
-      <p>This route has {trips.length} trips.</p>
-      {Object.keys(tripsByServiceDay).map(day => (
-        <>
-          <p key={day}>There are {tripsByServiceDay[day].length} trips on {day}</p>
-          {Object.keys(headsignsByDirectionId).map(dir => (
-            <p>{tripsByServiceAndDirection[day][dir].length} go in direction {dir}: {headsignsByDirectionId[dir].join(", ")}</p>
-          ))}
-        </>
-      ))}
-
     </div>
   )
 }
 
 export const query = graphql`
-  query RouteQuery($feedIndex: Int, $routeNo: String) {
+  query RouteTimetableQuery($feedIndex: Int, $routeNo: String) {
     postgres {
       routes: routesList(condition: {feedIndex: $feedIndex, routeShortName: $routeNo}) {
         agencyId
@@ -107,4 +102,4 @@ export const query = graphql`
   }
 `
 
-export default Route;
+export default RouteTimetable;
