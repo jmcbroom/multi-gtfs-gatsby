@@ -2,6 +2,7 @@ import { graphql } from "gatsby";
 import React from "react";
 import AgencyHeader from "../components/AgencyHeader";
 import RouteHeader from "../components/RouteHeader";
+import { Link } from "gatsby";
 
 /**
  * The home page.
@@ -13,12 +14,12 @@ const IndexPage = ({ data }) => {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold mb-2">Public transit agencies</h1>
+      <h2 className="text-2xl font-semibold mb-2">Public transit agencies</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {agencies.map(a => (
-          <section className="bg-gray-100 p-4" key={a.feedIndex}>
+          <section key={a.feedIndex}>
             <AgencyHeader agency={a} />
-            <h3 className="font-semibold text-gray-600 my-1">
+            <h3>
               {a.routes.length} bus routes
             </h3>
             <ul className="max-h-80 overflow-y-scroll">
@@ -26,6 +27,13 @@ const IndexPage = ({ data }) => {
             </ul>
           </section>
         ))}
+        <section>
+          <Link to={`/people-mover`}>
+
+          <h3>People Mover</h3>
+          </Link>
+          <p>The People Mover is not currently operating.</p>
+        </section>
       </div>
     </>
   )
@@ -44,7 +52,7 @@ export const query = graphql`
         agencyEmail
         bikesPolicyUrl
         feedIndex
-        routes: routesByFeedIndexAndAgencyIdList {
+        routes: routesByFeedIndexAndAgencyIdList(orderBy: ROUTE_SORT_ORDER_ASC) {
           feedIndex
           routeShortName
           routeLongName
