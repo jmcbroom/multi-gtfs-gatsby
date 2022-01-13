@@ -20,3 +20,26 @@ select {
   @apply py-3;
   @apply px-4;
 }
+
+section {
+  @apply bg-gray-100;
+  @apply p-4;
+}
+
+h3 {
+  @apply font-semibold;
+  @apply text-gray-600;
+  @apply my-2;
+}
+
+th {
+  @apply bg-gray-200;
+  @apply py-2;
+  @apply px-4;
+  @apply font-semibold;
+}
+
+td {
+  @apply bg-white;
+  @apply text-sm;
+}
