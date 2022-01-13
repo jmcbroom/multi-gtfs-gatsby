@@ -1,34 +1,30 @@
-import React from "react"
-import { graphql, Link } from "gatsby";
-import config from "../config";
+import { graphql } from "gatsby";
+import React from "react";
+import AgencyHeader from "../components/AgencyHeader";
+import RouteHeader from "../components/RouteHeader";
 
-// markup
+/**
+ * The home page.
+ * @param {*} data: GraphQL query 
+ */
 const IndexPage = ({ data }) => {
 
   let { agencies } = data.postgres
 
-  let {feedIndexes} = config
-
   return (
-    <main>
-      <h1>All transit</h1>
-      {agencies.map(a => (
-        <section>
-          <Link to={`/${feedIndexes[a.feedIndex]}/`}>
-            <h2>
-              {a.agencyName}
-            </h2>
-          </Link>
-          <ul>
-            {a.routes.map(r => (
-              <Link to={`/${feedIndexes[a.feedIndex]}/route/${r.routeShortName}`}>
-                <li>{r.routeShortName} -- {r.routeLongName}</li>
-              </Link>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </main>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+    {agencies.map(a => (
+      <section className="bg-gray-100 p-4" key={a.feedIndex}>
+        <AgencyHeader agency={a} />
+        <h3 className="font-semibold text-gray-600">
+          Routes
+        </h3>
+        <ul className="max-h-64 overflow-y-scroll">
+          {a.routes.map(r => r.trips.totalCount > 0 ? <RouteHeader {...r} key={`${a.feedIndex}_${r.routeShortName}`} /> : null)}
+        </ul>
+      </section>
+    ))}
+    </div>
   )
 }
 
@@ -46,8 +42,14 @@ export const query = graphql`
         bikesPolicyUrl
         feedIndex
         routes: routesByFeedIndexAndAgencyIdList {
+          feedIndex
           routeShortName
           routeLongName
+          routeColor
+          routeTextColor
+          trips: tripsByFeedIndexAndRouteId {
+            totalCount
+          }
         }
       }
     }

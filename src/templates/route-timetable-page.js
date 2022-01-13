@@ -1,9 +1,10 @@
-import { graphql, Link } from "gatsby"
+import { graphql } from "gatsby"
 import React, { useState } from "react"
 import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, formatArrivalTime, sortTripsByFrequentTimepoint } from "../util"
-import config from "../config"
 import DirectionPicker from "../components/DirectionPicker"
 import ServicePicker from "../components/ServicePicker"
+import RouteHeader from "../components/RouteHeader"
+import AgencyHeader from "../components/AgencyHeader"
 
 /**
  * Tiny testing component for a new route
@@ -15,11 +16,8 @@ const RouteTimetableTrip = ({ trip }) => {
     <h4 style={{}}>
       Trip #{trip.tripId}: {trip.tripHeadsign}
     </h4>
-      {/* <p>Departs {formatArrivalTime(trip.stopTimes[0].arrivalTime)} from {trip.stopTimes[0].stop.stopName}</p>
-      <p>Arrives {formatArrivalTime(trip.stopTimes[trip.stopTimes.length - 1].arrivalTime)} at {trip.stopTimes[trip.stopTimes.length - 1].stop.stopName}</p> */}
       <table>
         <tbody>
-
           {trip.stopTimes.map(st => (
             <tr key={st.stop.stopId}>
               <td>{st.stop.stopName}</td>
@@ -35,17 +33,11 @@ const RouteTimetableTrip = ({ trip }) => {
 
 const RouteTimetable = ({ data, pageContext }) => {
 
-  let { routeShortName, routeLongName, routeColor, feedIndex, trips } = data.postgres.routes[0]
+  let route = data.postgres.routes[0]
+
+  let { trips } = route
 
   let { serviceCalendars } = data.postgres.agencies[0].feedInfo
-
-  let style = {
-    borderBottomStyle: `solid`,
-    borderBottomWidth: 3,
-    borderBottomColor: `#${routeColor}`
-  }
-
-  let { feedIndexes } = config
 
   let serviceDays = getServiceDays(serviceCalendars)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
@@ -63,13 +55,9 @@ const RouteTimetable = ({ data, pageContext }) => {
 
 
   return (
-    <div>
-      <Link to={`/`}>Home</Link>
-      <Link to={`/${feedIndexes[feedIndex]}/route/${routeShortName}`}>
-        <h1 style={style}>
-          {routeShortName} -- {routeLongName}
-        </h1>
-      </Link>
+    <div className="mt-4">
+      <AgencyHeader agency={data.postgres.agencies[0]} />
+      <RouteHeader {...route} />
       <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
       <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
       {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>}
@@ -118,6 +106,7 @@ export const query = graphql`
       }
       agencies: agenciesList(condition: {feedIndex: $feedIndex}) {
         feedIndex
+        agencyName
         feedInfo: feedInfoByFeedIndex {
           serviceCalendars: calendarsByFeedIndexList {
             sunday
