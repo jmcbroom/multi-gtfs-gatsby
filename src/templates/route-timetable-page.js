@@ -17,9 +17,9 @@ const views = ['List of trips', 'Timetable']
 const RouteViewPicker = ({ view, setView }) => {
   return (
     <div className="flex items-center justify-start">
-      <h2 className="bg-gray-300 py-3 text-sm px-4">
+      <span className="bg-gray-300 py-3 text-sm px-4">
         View schedule as
-      </h2>
+      </span>
       <select value={view} onChange={(e) => setView(e.target.value)}>
         {views.map(v => (
           <option value={v} key={v}>{v}</option>
@@ -36,19 +36,26 @@ const RouteViewPicker = ({ view, setView }) => {
 const RouteTimetableTrip = ({ trip }) => {
   return (
     <div style={{ padding: 10, margin: 10, background: '#eee' }}>
-    <h4 style={{}}>
-      Trip #{trip.tripId}: {trip.tripHeadsign}
-    </h4>
+      <div className="flex items-center justify-between mb-2">
+
+    <h3 className="m-0">
+    to: {trip.tripHeadsign}
+    </h3>
+    <pre className="block py-1 text-sm m-0 text-gray-500">
+      {trip.tripId}
+      </pre>
+      </div>
       <table>
         <tbody>
           {trip.stopTimes.map(st => (
-            <tr key={st.stop.stopId}>
-              <td>{st.stop.stopName}</td>
-              <td>{formatArrivalTime(st.arrivalTime)}</td>
+            <tr key={st.stop.stopId} clas>
+              <th className="text-sm text-right">{st.stop.stopName}</th>
+              <td className="px-6">{formatArrivalTime(st.arrivalTime)}</td>
             </tr>
           ))}
         </tbody>
       </table>
+
     </div>
   )
 }

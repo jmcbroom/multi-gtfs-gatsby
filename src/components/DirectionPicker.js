@@ -10,9 +10,9 @@ import React from "react";
 const DirectionPicker = ({ directions, direction, setDirection }) => {
   return (
     <div className="flex items-center justify-start">
-      <h2 className="bg-gray-300 py-3 text-sm px-4">
+      <span className="bg-gray-300 py-3 text-sm px-4">
         Choose a direction
-      </h2>
+      </span>
       <select onChange={(e) => setDirection(e.target.value)}>
         {Object.keys(directions).map(dir => (
           <option value={dir} key={dir}>{directions[dir][0]}</option>
