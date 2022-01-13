@@ -17,19 +17,19 @@ const Route = ({ data, pageContext }) => {
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips)
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
 
-  let pages = {
+  const pages = {
     "Overview": `./`,
     "Route timetable": `./timetable`,
     "Stops": `./stops`,
   }
 
   return (
-    <div className="mt-4">
+    <div>
       <AgencyHeader agency={agency} />
       <RouteHeader {...route} />
-      <section className="grid grid-cols-2 md:grid-cols-3">
+      <section className="flex items-center justify-start gap-2 my-2">
         {Object.keys(pages).map(p => (
-          <div key={p} className="bg-gray-300 py-2 text-center text-semibold">
+          <div key={p} className="bg-gray-300 py-2 px-6 text-center text-semibold">
             <Link to={pages[p]}>
               <h2>{p}</h2>
             </Link>

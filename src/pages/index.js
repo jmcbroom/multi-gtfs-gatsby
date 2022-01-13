@@ -12,19 +12,22 @@ const IndexPage = ({ data }) => {
   let { agencies } = data.postgres
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-    {agencies.map(a => (
-      <section className="bg-gray-100 p-4" key={a.feedIndex}>
-        <AgencyHeader agency={a} />
-        <h3 className="font-semibold text-gray-600">
-          Routes
-        </h3>
-        <ul className="max-h-64 overflow-y-scroll">
-          {a.routes.map(r => r.trips.totalCount > 0 ? <RouteHeader {...r} key={`${a.feedIndex}_${r.routeShortName}`} /> : null)}
-        </ul>
-      </section>
-    ))}
-    </div>
+    <>
+      <h1 className="text-2xl font-semibold mb-2">Public transit agencies</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {agencies.map(a => (
+          <section className="bg-gray-100 p-4" key={a.feedIndex}>
+            <AgencyHeader agency={a} />
+            <h3 className="font-semibold text-gray-600 my-1">
+              {a.routes.length} bus routes
+            </h3>
+            <ul className="max-h-80 overflow-y-scroll">
+              {a.routes.map(r => r.trips.totalCount > 0 ? <RouteHeader {...r} key={`${a.feedIndex}_${r.routeShortName}`} /> : null)}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </>
   )
 }
 

@@ -14,3 +14,9 @@ a {
 a:hover {
   text-decoration: underline dotted;
 }
+
+select {
+  @apply bg-gray-200;
+  @apply py-3;
+  @apply px-4;
+}
