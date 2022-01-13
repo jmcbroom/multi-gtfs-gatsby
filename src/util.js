@@ -87,10 +87,10 @@ export const getServiceDays = ( serviceCalendars ) => {
 
   serviceCalendars.forEach(sc => {
     // evaluate all weekdays of the service calendar
-    let weekdayMatches = weekdays.map(day => sc[day] === 1)
+    let weekdayMatches = weekdays.map(day => sc[day] === 1) 
 
     // all weekdayMatches are true => assign weekday
-    if (weekdayMatches.every(e => e)) {
+    if (weekdayMatches.every(e => e) && sc.saturday === 0 && sc.sunday === 0) {
       serviceDays.weekday = sc.serviceId
     }
     // all weekdayMatches are false + match only Sat or Sun
