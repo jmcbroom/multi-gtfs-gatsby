@@ -8,8 +8,7 @@ const config = {
     8: `ddot`,
     9: `smart`,
     10: `the-ride`,
-    11: `mta`,
-    12: `transit-windsor`
+    11: `mta`
   }
 }
 

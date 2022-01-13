@@ -7,7 +7,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     9: `smart`,
     10: `the-ride`,
     11: `mta`,
-    // 12: `transit-windsor`
+    // 12: `transit-windsor`,
+    // 13: `smart-2022`
   }
 
   const result = await graphql(`

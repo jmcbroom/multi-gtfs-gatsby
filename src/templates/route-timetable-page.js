@@ -1,9 +1,33 @@
-import { graphql, Link } from "gatsby"
+import { graphql } from "gatsby"
 import React, { useState } from "react"
 import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, formatArrivalTime, sortTripsByFrequentTimepoint } from "../util"
-import config from "../config"
 import DirectionPicker from "../components/DirectionPicker"
 import ServicePicker from "../components/ServicePicker"
+import RouteHeader from "../components/RouteHeader"
+import AgencyHeader from "../components/AgencyHeader"
+
+const views = ['List of trips', 'Timetable']
+
+/**
+ * Let the user choose how they want to view the timetable.
+ * @param {*} view: current value from useState hook 
+ * @param {*} setView: setter from useState hook 
+ * @returns 
+ */
+const RouteViewPicker = ({ view, setView }) => {
+  return (
+    <div className="flex items-center justify-start">
+      <span className="bg-gray-300 py-3 text-sm px-4">
+        View schedule as
+      </span>
+      <select value={view} onChange={(e) => setView(e.target.value)}>
+        {views.map(v => (
+          <option value={v} key={v}>{v}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
 
 /**
  * Tiny testing component for a new route
@@ -12,18 +36,21 @@ import ServicePicker from "../components/ServicePicker"
 const RouteTimetableTrip = ({ trip }) => {
   return (
     <div style={{ padding: 10, margin: 10, background: '#eee' }}>
-    <h4 style={{}}>
-      Trip #{trip.tripId}: {trip.tripHeadsign}
-    </h4>
-      {/* <p>Departs {formatArrivalTime(trip.stopTimes[0].arrivalTime)} from {trip.stopTimes[0].stop.stopName}</p>
-      <p>Arrives {formatArrivalTime(trip.stopTimes[trip.stopTimes.length - 1].arrivalTime)} at {trip.stopTimes[trip.stopTimes.length - 1].stop.stopName}</p> */}
+      <div className="flex items-center justify-between mb-2">
+
+    <h3 className="m-0">
+    to: {trip.tripHeadsign}
+    </h3>
+    <pre className="block py-1 text-sm m-0 text-gray-500">
+      {trip.tripId}
+      </pre>
+      </div>
       <table>
         <tbody>
-
           {trip.stopTimes.map(st => (
-            <tr key={st.stop.stopId}>
-              <td>{st.stop.stopName}</td>
-              <td>{formatArrivalTime(st.arrivalTime)}</td>
+            <tr key={st.stop.stopId} clas>
+              <th className="text-sm text-right">{st.stop.stopName}</th>
+              <td className="px-6">{formatArrivalTime(st.arrivalTime)}</td>
             </tr>
           ))}
         </tbody>
@@ -35,17 +62,11 @@ const RouteTimetableTrip = ({ trip }) => {
 
 const RouteTimetable = ({ data, pageContext }) => {
 
-  let { routeShortName, routeLongName, routeColor, feedIndex, trips } = data.postgres.routes[0]
+  let route = data.postgres.routes[0]
+
+  let { trips } = route
 
   let { serviceCalendars } = data.postgres.agencies[0].feedInfo
-
-  let style = {
-    borderBottomStyle: `solid`,
-    borderBottomWidth: 3,
-    borderBottomColor: `#${routeColor}`
-  }
-
-  let { feedIndexes } = config
 
   let serviceDays = getServiceDays(serviceCalendars)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
@@ -54,6 +75,7 @@ const RouteTimetable = ({ data, pageContext }) => {
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
+  const [view, setView] = useState(views[0])
 
   let selectedTrips = tripsByServiceAndDirection[service][direction]
   let sortedTrips = []
@@ -61,17 +83,15 @@ const RouteTimetable = ({ data, pageContext }) => {
     sortedTrips = sortTripsByFrequentTimepoint(selectedTrips)
   }
 
-
   return (
     <div>
-      <Link to={`/`}>Home</Link>
-      <Link to={`/${feedIndexes[feedIndex]}/route/${routeShortName}`}>
-        <h1 style={style}>
-          {routeShortName} -- {routeLongName}
-        </h1>
-      </Link>
-      <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
-      <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
+      <AgencyHeader agency={data.postgres.agencies[0]} />
+      <RouteHeader {...route} />
+      <div className="flex items-center justify-start gap-2 my-2">
+        <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
+        <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
+        <RouteViewPicker {...{view, setView}} />
+      </div>
       {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>}
       {sortedTrips.length > 0 && sortedTrips.map(trip => (
         <RouteTimetableTrip trip={trip} key={trip.tripId} />
@@ -118,6 +138,7 @@ export const query = graphql`
       }
       agencies: agenciesList(condition: {feedIndex: $feedIndex}) {
         feedIndex
+        agencyName
         feedInfo: feedInfoByFeedIndex {
           serviceCalendars: calendarsByFeedIndexList {
             sunday
