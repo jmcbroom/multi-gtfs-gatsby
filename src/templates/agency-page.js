@@ -1,14 +1,15 @@
 import React from "react"
 import { graphql, Link } from "gatsby";
 import FeedInfo from "../components/FeedInfo";
-import config from "../config";
+import RouteHeader from '../components/RouteHeader';
 
 const Agency = ({ data, pageContext }) => {
 
-  let {feedIndexes} = config
-
   let agency = data.postgres.agencies[0]
-  let { agencyName, agencyUrl, routes, feedIndex } = agency
+  let { agencyName, agencyUrl, routes } = agency
+
+  // let's not display any routes that don't have scheduled trips.
+  routes = routes.filter(r => r.trips.totalCount > 0)
 
   return (
     <div>
@@ -16,13 +17,9 @@ const Agency = ({ data, pageContext }) => {
       <h1>Agency: {agencyName}</h1>
       <a href={agencyUrl}>Website</a>
       <FeedInfo agency={agency} />
-      <ul>
-        {routes.map(r => (
-          <Link to={`/${feedIndexes[feedIndex]}/route/${r.routeShortName}`}>
-            <li>{r.routeShortName} -- {r.routeLongName}</li>
-          </Link>
-        ))}
-      </ul>
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
+        {routes.map(r => <RouteHeader key={r.routeId} {...r} />)}
+      </div>
     </div>
   )
 }
@@ -42,8 +39,14 @@ export const query = graphql`
         feedIndex
         agencyId
         routes: routesByFeedIndexAndAgencyIdList {
+          feedIndex
           routeShortName
           routeLongName
+          routeColor
+          routeTextColor
+          trips: tripsByFeedIndexAndRouteId {
+            totalCount
+          }
         }
         feedInfo: feedInfoByFeedIndex {
           serviceCalendars: calendarsByFeedIndexList {

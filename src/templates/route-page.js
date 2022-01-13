@@ -1,38 +1,41 @@
-import { graphql, Link } from "gatsby"
-import React from "react"
-import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId } from "../util"
-import config from "../config"
+import { graphql, Link } from "gatsby";
+import React from "react";
+import AgencyHeader from '../components/AgencyHeader';
+import RouteHeader from '../components/RouteHeader';
+import { getHeadsignsByDirectionId, getServiceDays, getTripsByServiceAndDirection, getTripsByServiceDay } from "../util";
 
 const Route = ({ data, pageContext }) => {
 
-  let { routeShortName, routeLongName, routeColor, feedIndex, trips } = data.postgres.routes[0]
+  let route = data.postgres.routes[0]
+  let agency = data.postgres.agencies[0]
+  let { trips } = route
 
-  let { serviceCalendars } = data.postgres.agencies[0].feedInfo
-
-  let style = {
-    borderBottomStyle: `solid`,
-    borderBottomWidth: 3,
-    borderBottomColor: `#${routeColor}`
-  }
-
-  let { feedIndexes } = config
+  let { serviceCalendars } = agency.feedInfo
 
   let serviceDays = getServiceDays(serviceCalendars)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips)
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
 
+  let pages = {
+    "Overview": `./`,
+    "Route timetable": `./timetable`,
+    "Stops": `./stops`,
+  }
+
   return (
-    <div>
-      <Link to={`/`}>Home</Link>
-      <Link to={`/${feedIndexes[feedIndex]}/route/${routeShortName}`}>
-        <h1 style={style}>
-          {routeShortName} -- {routeLongName}
-        </h1>
-      </Link>
-      <Link to={`./timetable`}>
-        <h2>Route timetable</h2>
-      </Link>
+    <div className="mt-4">
+      <AgencyHeader agency={agency} />
+      <RouteHeader {...route} />
+      <section className="grid grid-cols-2 md:grid-cols-3">
+        {Object.keys(pages).map(p => (
+          <div key={p} className="bg-gray-300 py-2 text-center text-semibold">
+            <Link to={pages[p]}>
+              <h2>{p}</h2>
+            </Link>
+          </div>
+        ))}
+      </section>
       <p>
         This route has {Object.keys(headsignsByDirectionId).length} directions.
       </p>
@@ -42,14 +45,13 @@ const Route = ({ data, pageContext }) => {
       <hr />
       <p>This route has {trips.length} trips.</p>
       {Object.keys(tripsByServiceDay).map(day => (
-        <>
+        <div key={day}>
           <p key={day}>There are {tripsByServiceDay[day].length} trips on {day}</p>
           {Object.keys(headsignsByDirectionId).map(dir => (
-            <p>{tripsByServiceAndDirection[day][dir].length} go in direction {dir}: {headsignsByDirectionId[dir].join(", ")}</p>
+            <p key={dir}>{tripsByServiceAndDirection[day][dir].length} go in direction {dir}: {headsignsByDirectionId[dir].join(", ")}</p>
           ))}
-        </>
+        </div>
       ))}
-
     </div>
   )
 }
