@@ -8,6 +8,7 @@ module.exports = {
     title: "multi-agency-transit",
   },
   plugins: [
+    "gatsby-plugin-postcss",
     "gatsby-plugin-image",
     // {
     //   resolve: "gatsby-plugin-google-analytics",
@@ -22,6 +23,12 @@ module.exports = {
       options: {
         icon: "src/images/icon.png",
       },
+    },
+    {
+      resolve: `gatsby-plugin-layout`,
+      options: {
+        component: require.resolve(`./src/components/layout.js`)
+      }
     },
     "gatsby-plugin-mdx",
     "gatsby-plugin-sharp",
