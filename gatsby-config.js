@@ -8,6 +8,7 @@ module.exports = {
     title: "multi-agency-transit",
   },
   plugins: [
+    "gatsby-plugin-postcss",
     "gatsby-plugin-image",
     // {
     //   resolve: "gatsby-plugin-google-analytics",
