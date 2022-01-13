@@ -10,9 +10,9 @@ import React from "react";
 const ServicePicker = ({ services, service, setService }) => {
   return (
     <div className="flex items-center justify-start">
-      <h2 className="bg-gray-300 py-3 text-sm px-4">
+      <span className="bg-gray-300 py-3 text-sm px-4">
         Choose a day
-      </h2>
+      </span>
     <select onChange={(e) => setService(e.target.value)}>
       {Object.keys(services).map(serviceDay => (
         <option value={serviceDay} key={serviceDay}>{serviceDay}</option>

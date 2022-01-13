@@ -32,7 +32,7 @@ const Route = ({ data, pageContext }) => {
         {Object.keys(pages).map(p => (
           <div key={p} className="bg-gray-300 py-2 px-6 text-center text-semibold">
             <Link to={pages[p]}>
-              <h2>{p}</h2>
+              <span>{p}</span>
             </Link>
           </div>
         ))}

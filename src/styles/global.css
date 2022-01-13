@@ -26,10 +26,16 @@ section {
   @apply p-4;
 }
 
+h2 {
+  @apply text-2xl;
+  @apply font-semibold;
+  @apply mb-2;
+}
+
 h3 {
   @apply font-semibold;
   @apply text-gray-600;
-  @apply my-2;
+  @apply mb-2;
 }
 
 th {
@@ -42,4 +48,5 @@ th {
 td {
   @apply bg-white;
   @apply text-sm;
+  @apply p-2;
 }
