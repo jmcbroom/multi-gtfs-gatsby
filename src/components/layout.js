@@ -10,7 +10,7 @@ import React from "react"
 export default function Layout({ children }) {
   return (
     <div style={{ margin: `0 auto`, maxWidth: 1200, padding: `0 1rem` }}>
-      <div className="bg-blue-100">
+      <div className="bg-blue-100 mb-4">
         <Link to={`/`}>
           <h1 className="py-4 text-3xl font-light text-center" style={{fontFamily: `Shippori Antique`}}>detroit transit guide</h1>
         </Link>

@@ -1,22 +1,20 @@
 import React from "react"
-import { graphql, Link } from "gatsby";
-import FeedInfo from "../components/FeedInfo";
+import { graphql } from "gatsby";
 import RouteHeader from '../components/RouteHeader';
+import AgencyHeader from '../components/AgencyHeader';
 
 const Agency = ({ data, pageContext }) => {
 
   let agency = data.postgres.agencies[0]
-  let { agencyName, agencyUrl, routes } = agency
+  let { agencyUrl, routes } = agency
 
   // let's not display any routes that don't have scheduled trips.
   routes = routes.filter(r => r.trips.totalCount > 0)
 
   return (
-    <div>
-      <Link to={`/`}>Home</Link>
-      <h1>Agency: {agencyName}</h1>
+    <div class>
+      <AgencyHeader agency={agency} />
       <a href={agencyUrl}>Website</a>
-      <FeedInfo agency={agency} />
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
         {routes.map(r => <RouteHeader key={r.routeId} {...r} />)}
       </div>
