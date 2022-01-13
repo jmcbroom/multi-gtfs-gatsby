@@ -36,12 +36,13 @@ export const query = graphql`
         bikesPolicyUrl
         feedIndex
         agencyId
-        routes: routesByFeedIndexAndAgencyIdList {
+        routes: routesByFeedIndexAndAgencyIdList(orderBy: ROUTE_SORT_ORDER_ASC) {
           feedIndex
           routeShortName
           routeLongName
           routeColor
           routeTextColor
+          routeSortOrder
           trips: tripsByFeedIndexAndRouteId {
             totalCount
           }
