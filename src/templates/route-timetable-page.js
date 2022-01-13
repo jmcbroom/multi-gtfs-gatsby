@@ -6,6 +6,29 @@ import ServicePicker from "../components/ServicePicker"
 import RouteHeader from "../components/RouteHeader"
 import AgencyHeader from "../components/AgencyHeader"
 
+const views = ['List of trips', 'Timetable']
+
+/**
+ * Let the user choose how they want to view the timetable.
+ * @param {*} view: current value from useState hook 
+ * @param {*} setView: setter from useState hook 
+ * @returns 
+ */
+const RouteViewPicker = ({ view, setView }) => {
+  return (
+    <div className="flex items-center justify-start">
+      <h2 className="bg-gray-300 py-3 text-sm px-4">
+        View schedule as
+      </h2>
+      <select value={view} onChange={(e) => setView(e.target.value)}>
+        {views.map(v => (
+          <option value={v} key={v}>{v}</option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 /**
  * Tiny testing component for a new route
  * @param {Object} trip: trip element from GraphQL response 
@@ -26,7 +49,6 @@ const RouteTimetableTrip = ({ trip }) => {
           ))}
         </tbody>
       </table>
-
     </div>
   )
 }
@@ -46,6 +68,7 @@ const RouteTimetable = ({ data, pageContext }) => {
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
+  const [view, setView] = useState(views[0])
 
   let selectedTrips = tripsByServiceAndDirection[service][direction]
   let sortedTrips = []
@@ -53,13 +76,15 @@ const RouteTimetable = ({ data, pageContext }) => {
     sortedTrips = sortTripsByFrequentTimepoint(selectedTrips)
   }
 
-
   return (
-    <div className="mt-4">
+    <div>
       <AgencyHeader agency={data.postgres.agencies[0]} />
       <RouteHeader {...route} />
-      <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
-      <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
+      <div className="flex items-center justify-start gap-2 my-2">
+        <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
+        <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
+        <RouteViewPicker {...{view, setView}} />
+      </div>
       {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>}
       {sortedTrips.length > 0 && sortedTrips.map(trip => (
         <RouteTimetableTrip trip={trip} key={trip.tripId} />
