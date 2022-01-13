@@ -1,6 +1,7 @@
 import { graphql, Link } from "gatsby";
 import React from "react";
 import AgencyHeader from '../components/AgencyHeader';
+import RouteDirectionsTable from "../components/RouteDirectionsTable";
 import RouteHeader from '../components/RouteHeader';
 import { getHeadsignsByDirectionId, getServiceDays, getTripsByServiceAndDirection, getTripsByServiceDay } from "../util";
 
@@ -27,7 +28,7 @@ const Route = ({ data, pageContext }) => {
     <div>
       <AgencyHeader agency={agency} />
       <RouteHeader {...route} />
-      <section className="flex items-center justify-start gap-2 my-2">
+      <div className="flex items-center justify-start gap-2 my-2">
         {Object.keys(pages).map(p => (
           <div key={p} className="bg-gray-300 py-2 px-6 text-center text-semibold">
             <Link to={pages[p]}>
@@ -35,23 +36,8 @@ const Route = ({ data, pageContext }) => {
             </Link>
           </div>
         ))}
-      </section>
-      <p>
-        This route has {Object.keys(headsignsByDirectionId).length} directions.
-      </p>
-      {Object.keys(headsignsByDirectionId).map(dir => (
-        <p key={dir}>Direction {dir} goes to {headsignsByDirectionId[dir].join(", ")}</p>
-      ))}
-      <hr />
-      <p>This route has {trips.length} trips.</p>
-      {Object.keys(tripsByServiceDay).map(day => (
-        <div key={day}>
-          <p key={day}>There are {tripsByServiceDay[day].length} trips on {day}</p>
-          {Object.keys(headsignsByDirectionId).map(dir => (
-            <p key={dir}>{tripsByServiceAndDirection[day][dir].length} go in direction {dir}: {headsignsByDirectionId[dir].join(", ")}</p>
-          ))}
-        </div>
-      ))}
+      </div>
+      <RouteDirectionsTable trips={tripsByServiceAndDirection} headsigns={headsignsByDirectionId} />
     </div>
   )
 }
