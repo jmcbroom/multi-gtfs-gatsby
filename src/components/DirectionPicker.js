@@ -7,18 +7,18 @@ import React from "react";
  * @param {Function} setDirection: from useState, the setter function
  * @returns 
  */
-const DirectionPicker = ( {directions, direction, setDirection} ) => {
+const DirectionPicker = ({ directions, direction, setDirection }) => {
   return (
-    <>
-    <h2>
-      Direction picker
-    </h2>
-    <select onChange={(e) => setDirection(e.target.value)}>
-      {Object.keys(directions).map(dir => (
-        <option value={dir} key={dir}>{dir}: {directions[dir].join(", ")}</option>
-      ))}
-    </select>
-    </>
+    <div className="flex items-center justify-start">
+      <h2 className="bg-gray-300 py-3 text-sm px-4">
+        Choose a direction
+      </h2>
+      <select onChange={(e) => setDirection(e.target.value)}>
+        {Object.keys(directions).map(dir => (
+          <option value={dir} key={dir}>{directions[dir][0]}</option>
+        ))}
+      </select>
+    </div>
   )
 }
 
