@@ -13,7 +13,7 @@ const IndexPage = ({ data }) => {
     <main>
       <h1>All transit</h1>
       {agencies.map(a => (
-        <>
+        <section>
           <Link to={`/${feedIndexes[a.feedIndex]}/`}>
             <h2>
               {a.agencyName}
@@ -26,7 +26,7 @@ const IndexPage = ({ data }) => {
               </Link>
             ))}
           </ul>
-        </>
+        </section>
       ))}
     </main>
   )
