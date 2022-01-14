@@ -21,8 +21,6 @@ const RouteStops = ({ data, pageContext }) => {
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
 
-  console.log(tripsByServiceAndDirection.weekday[direction][0])
-
   let times = tripsByServiceAndDirection.weekday[direction][0].stopTimes
 
   return (
