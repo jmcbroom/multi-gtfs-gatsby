@@ -12,7 +12,7 @@ const Agency = ({ data, pageContext }) => {
   routes = routes.filter(r => r.trips.totalCount > 0)
 
   return (
-    <div class>
+    <div>
       <AgencyHeader agency={agency} />
       <a href={agencyUrl}>Website</a>
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">

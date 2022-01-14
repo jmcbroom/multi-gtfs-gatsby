@@ -50,3 +50,10 @@ td {
   @apply text-sm;
   @apply p-2;
 }
+
+.timetable-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-width: 6rem;
+}
