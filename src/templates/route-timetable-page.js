@@ -5,6 +5,7 @@ import DirectionPicker from "../components/DirectionPicker"
 import ServicePicker from "../components/ServicePicker"
 import RouteHeader from "../components/RouteHeader"
 import AgencyHeader from "../components/AgencyHeader"
+import RouteTimeTable from "../components/RouteTimeTable"
 
 const views = ['List of trips', 'Timetable']
 
@@ -16,9 +17,9 @@ const views = ['List of trips', 'Timetable']
  */
 const RouteViewPicker = ({ view, setView }) => {
   return (
-    <div className="flex items-center justify-start">
-      <span className="bg-gray-300 py-3 text-sm px-4">
-        View schedule as
+    <div className="flex items-center justify-start w-full md:w-auto">
+      <span className="bg-gray-300 py-3 text-sm px-12 md:px-4">
+        View
       </span>
       <select value={view} onChange={(e) => setView(e.target.value)}>
         {views.map(v => (
@@ -79,23 +80,28 @@ const RouteTimetable = ({ data, pageContext }) => {
 
   let selectedTrips = tripsByServiceAndDirection[service][direction]
   let sortedTrips = []
+  let timepoints = null
   if (selectedTrips !== undefined && selectedTrips.length > 0) {
-    sortedTrips = sortTripsByFrequentTimepoint(selectedTrips)
+    sortedTrips = sortTripsByFrequentTimepoint(selectedTrips).trips
+    timepoints = sortTripsByFrequentTimepoint(selectedTrips).timepoints
   }
 
   return (
     <div>
       <AgencyHeader agency={data.postgres.agencies[0]} />
       <RouteHeader {...route} />
-      <div className="flex items-center justify-start gap-2 my-2">
+      <div className="flex flex-col w-full md:flex-row items-center justify-start gap-2 my-2">
         <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
         <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
         <RouteViewPicker {...{view, setView}} />
       </div>
-      {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>}
-      {sortedTrips.length > 0 && sortedTrips.map(trip => (
+      {/* {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>} */}
+      {view === 'List of trips' && sortedTrips.length > 0 && sortedTrips.map(trip => (
         <RouteTimetableTrip trip={trip} key={trip.tripId} />
       ))}
+      {view === 'Timetable' && sortedTrips.length > 0 &&
+        <RouteTimeTable trips={sortedTrips} timepoints={timepoints} route={route}  />
+      }
     </div>
   )
 }

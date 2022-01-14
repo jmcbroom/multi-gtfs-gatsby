@@ -10,7 +10,6 @@ const Route = ({ data, pageContext }) => {
   let route = data.postgres.routes[0]
   let agency = data.postgres.agencies[0]
   let { trips } = route
-
   let { serviceCalendars } = agency.feedInfo
 
   let serviceDays = getServiceDays(serviceCalendars)
@@ -61,6 +60,21 @@ export const query = graphql`
           directionId
           tripId
           tripHeadsign
+          stopTimes: stopTimesByFeedIndexAndTripIdList(
+            condition: {timepoint: 1}
+            orderBy: STOP_SEQUENCE_ASC
+          ) {
+            arrivalTime {
+              hours
+              minutes
+              seconds
+            }
+            stop: stopByFeedIndexAndStopId {
+              stopCode
+              stopId
+              stopName
+            }
+          }
         }
       }
       agencies: agenciesList(condition: {feedIndex: $feedIndex}) {
