@@ -14,7 +14,7 @@ const IndexPage = ({ data }) => {
 
   return (
     <>
-      <h2 className="text-2xl font-semibold mb-2">Public transit agencies</h2>
+      <h1 className="text-2xl font-semibold mb-2">Public transit agencies</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {agencies.map(a => (
           <section key={a.feedIndex}>
@@ -29,12 +29,24 @@ const IndexPage = ({ data }) => {
         ))}
         <section>
           <Link to={`/people-mover`}>
-
-          <h3>People Mover</h3>
+            <h3>People Mover</h3>
           </Link>
           <p>The People Mover is not currently operating.</p>
         </section>
+        <section>
+          <Link to={`/d2a2`}>
+            <h3>Detroit-Ann Arbor (D2A2) bus</h3>
+          </Link>
+          <p>The D2A2 bus travels between Blake Transit Center and Grand Circus Park.</p>
+        </section>
       </div>
+      <section className="mt-4">
+      <h2>Getting to other cities</h2>
+        <ul>
+          <li><Link to={`/destinations/toronto`}>Toronto</Link></li>
+          <li><Link to={`/destinations/chicago`}>Chicago</Link></li>
+        </ul>
+      </section>
     </>
   )
 }
