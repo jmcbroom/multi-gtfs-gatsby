@@ -10,7 +10,7 @@ import React from "react";
 const DirectionPicker = ({ directions, direction, setDirection }) => {
   return (
     <div className="flex items-center justify-start w-full md:w-auto">
-      <span className="bg-gray-300 py-3 text-sm w-1/3 text-right px-4 md:text-center">
+      <span className="bg-gray-300 py-3 text-sm w-1/3 md:w-auto text-right px-4 md:text-center">
         Direction
       </span>
       <select className="w-2/3 md:w-auto" onChange={(e) => setDirection(e.target.value)}>
