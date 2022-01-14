@@ -1,10 +1,19 @@
 import React from "react";
 import { formatArrivalTime } from "../util";
 import { Link } from "gatsby";
+import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import config from "../config";
 
 const RouteTimeTable = ({ trips, timepoints, route }) => {
 
-  let {routeColor} = route;
+  let {feedIndexes} = config
+  let {routeColor, feedIndex} = route;
+
+  // white routeColor needs to be gray
+  if(routeColor === 'ffffff'){
+    routeColor = 'eee'
+  }
 
   let borderedRowStyle = {
     borderBottom: `2px solid #${routeColor}`
@@ -14,17 +23,17 @@ const RouteTimeTable = ({ trips, timepoints, route }) => {
     <div style={{width: '100%', overflow: 'auto', maxHeight: 'calc(100vh - 94px)'}}>
     <table className="tabular" style={{tableLayout: 'fixed'}}>
       <thead className="z-10 mt-2" style={{ position: 'sticky' }}>
-        <tr style={{ position: 'sticky' }}>
+        <tr className="bg-gray-100" style={{ position: 'sticky' }}>
           {timepoints.map((s, k) => (
-            <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 p-0 bg-white">
-              <div className="flex flex-col items-center justify-end h-20 bg-white">
-                <Link to={`/stop/${s.stop.stopCode}`} className="leading-tight text-sm font-bold bg-white mb-2 px-2">
+            <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white">
+              <div className="flex flex-col items-center justify-end h-32 bg-white">
+                <Link to={`/${feedIndexes[feedIndex]}/stop/${s.stop.stopCode}`} className="leading-tight text-sm font-bold bg-white mb-2 px-2">
                   {s.stop.stopName
                     .replace(" - Deboarding", "")
                     .replace("Transit Center", "TC")
                     .replace("Martin Luther King", "MLK")}
                 </Link>
-                {/* <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white text-gray-700" /> */}
+                <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white text-gray-700" />
               </div>
               <div style={{
                 position: 'absolute',
@@ -54,7 +63,7 @@ const RouteTimeTable = ({ trips, timepoints, route }) => {
               if (filtered.length === 0) {
                 return (
                   <td key={`${t.id}-${i}-${j}`}
-                    className={`text-center timetable-entry bg-gray-100 text-gray-600`}>
+                    className={`text-center timetable-entry bg-gray-100 text-gray-600 border-r-2 border-dotted`}>
                     -
                   </td>
                 )
@@ -71,7 +80,18 @@ const RouteTimeTable = ({ trips, timepoints, route }) => {
               }
               return (
                 <td key={`${t.id}-${i}-${j}`}
-                  className={`text-center text-sm  border-r-2 border-opacity-25 border-dotted border-gray-700 z-0 timetable-entry ${filtered.length === 0 && `bg-gray-100`} ${formatArrivalTime(filtered[0].arrivalTime).indexOf("p") > -1 ? `font-semibold` : `font-base`}`}>
+                  className={j < timepoints.length - 1 ?
+                    `
+                    text-center text-sm border-r-2 border-opacity-25 border-dotted border-gray-700 z-0 timetable-entry 
+                    ${filtered.length === 0 && `bg-gray-100`} 
+                    ${formatArrivalTime(filtered[0].arrivalTime).indexOf("p") > -1 ? `font-semibold` : `font-base`}
+                    ` :
+                    `
+                    text-center text-sm z-0 timetable-entry 
+                    ${filtered.length === 0 && `bg-gray-100`} 
+                    ${formatArrivalTime(filtered[0].arrivalTime).indexOf("p") > -1 ? `font-semibold` : `font-base`}
+                    `
+                    }>
                   {filtered.length > 0 ?
                     formatArrivalTime(filtered[0].arrivalTime).slice(0, -3) :
                     `-`

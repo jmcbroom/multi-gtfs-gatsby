@@ -13,7 +13,7 @@ const RouteDirectionsTable = ({ trips, headsigns }) => {
 
   return (
     <section>
-      {/* <h3>Route directions</h3> */}
+      <h3>When does this route run?</h3>
       <table className="w-auto border-collapse">
         <tbody>
           <tr className="">
@@ -22,7 +22,7 @@ const RouteDirectionsTable = ({ trips, headsigns }) => {
           </tr>
           {directions.map(d => (
             <tr className="pl-4">
-              <th className="text-left"><ul className="ml-4">{headsigns[d].map(h => <li className="list-disc">{h}</li>)}</ul></th>
+              <th className="text-right"><ul className="ml-4">{headsigns[d].map(h => <li className="">{h}</li>)}</ul></th>
               {services.map(s => {
 
                 let sortedTrips = trips[s][d]
@@ -35,8 +35,8 @@ const RouteDirectionsTable = ({ trips, headsigns }) => {
 
                   return (
                     <td className="text-center px-6">
-                      {/* {trips[s][d].length} trips */}
-                      <p>from {formatArrivalTime(firstTripStartTime)} to {formatArrivalTime(lastTripEndTime)}</p>
+                      <p>{formatArrivalTime(firstTripStartTime)} to {formatArrivalTime(lastTripEndTime)}</p>
+                      <p className="text-xs text-center mt-1 text-gray-500">{trips[s][d].length} trips</p>
                     </td>
                   )
                 }
