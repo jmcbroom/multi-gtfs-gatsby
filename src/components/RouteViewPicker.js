@@ -1,5 +1,9 @@
 import React from "react";
-import { views } from "../templates/route-timetable-page";
+
+export const views = [
+  'Timetable',
+  'List of trips',
+]
 
 /**
  * Let the user choose how they want to view the timetable.

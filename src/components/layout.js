@@ -17,7 +17,7 @@ export default function Layout({ children }) {
       </header>
       {children}
       <footer className="h-32 mt-8 bg-blue-100 p-4 text-center">
-        It is the year {new Date().getFullYear()}
+        {new Date().getFullYear()}
       </footer>
     </div>
   )

@@ -7,14 +7,14 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     9: `smart`,
     10: `the-ride`,
     11: `mta`,
-    // 12: `transit-windsor`,
+    12: `transit-windsor`,
     // 13: `smart-2022`
   }
 
   const result = await graphql(`
     {
       postgres {
-        agencies: agenciesList(filter: {feedIndex: {greaterThan: 7, lessThan: 12}}) {
+        agencies: agenciesList(filter: {feedIndex: {greaterThan: 7 }}) {
           agencyName
           agencyUrl
           agencyTimezone
@@ -25,7 +25,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           bikesPolicyUrl
           feedIndex
         }
-        routes: routesList(filter: {feedIndex: {greaterThan: 7, lessThan: 12}}) {
+        routes: routesList(filter: {feedIndex: {greaterThan: 7 }}) {
           agencyId
           routeShortName
           routeLongName
@@ -68,6 +68,16 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     createPage({
       path: `/${agencyFeedIndexes[r.feedIndex]}/route/${r.routeShortName}/timetable`,
       component: path.resolve("./src/templates/route-timetable-page.js"),
+      context: {
+        routeNo: r.routeShortName,
+        feedIndex: r.feedIndex
+      }
+    });
+
+    // stops page
+    createPage({
+      path: `/${agencyFeedIndexes[r.feedIndex]}/route/${r.routeShortName}/stops`,
+      component: path.resolve("./src/templates/route-stops-page.js"),
       context: {
         routeNo: r.routeShortName,
         feedIndex: r.feedIndex
