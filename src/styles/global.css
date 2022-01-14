@@ -26,16 +26,35 @@ section {
   @apply p-4;
 }
 
-h2 {
+h1 {
+  font-family: "Shippori Antique";
   @apply text-2xl;
+  @apply font-bold;
+  @apply mb-2;
+}
+
+h2 {
+  @apply text-xl;
   @apply font-semibold;
   @apply mb-2;
 }
 
 h3 {
+  @apply text-lg;
   @apply font-semibold;
   @apply text-gray-600;
-  @apply mb-2;
+  @apply mb-1;
+}
+
+h4 {
+  @apply text-base;
+  @apply font-semibold;
+  @apply text-gray-600;
+  @apply mb-1;
+}
+
+p {
+  @apply my-2;
 }
 
 th {
@@ -56,4 +75,14 @@ td {
   top: 0;
   z-index: 1;
   min-width: 6rem;
+}
+
+.tabular {
+  font-family: "Inter";
+  font-feature-settings: "tnum" 1;
+}
+
+header, footer {
+  font-family: "Shippori Antique";
+  @apply font-light;
 }
