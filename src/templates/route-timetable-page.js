@@ -6,58 +6,40 @@ import ServicePicker from "../components/ServicePicker"
 import RouteHeader from "../components/RouteHeader"
 import AgencyHeader from "../components/AgencyHeader"
 import RouteTimeTable from "../components/RouteTimeTable"
+import { RouteViewPicker } from "../components/RouteViewPicker"
 
-const views = ['List of trips', 'Timetable']
-
-/**
- * Let the user choose how they want to view the timetable.
- * @param {*} view: current value from useState hook 
- * @param {*} setView: setter from useState hook 
- * @returns 
- */
-const RouteViewPicker = ({ view, setView }) => {
-  return (
-    <div className="flex items-center justify-start w-full md:w-auto">
-      <span className="bg-gray-300 py-3 text-sm px-12 md:px-4">
-        View
-      </span>
-      <select value={view} onChange={(e) => setView(e.target.value)}>
-        {views.map(v => (
-          <option value={v} key={v}>{v}</option>
-        ))}
-      </select>
-    </div>
-  )
-}
+export const views = [
+  'Timetable',
+  'List of trips',
+]
 
 /**
  * Tiny testing component for a new route
  * @param {Object} trip: trip element from GraphQL response 
+ * @param {Number} index: trip number
  */
-const RouteTimetableTrip = ({ trip }) => {
+const RouteTimetableTrip = ({ trip, index }) => {
   return (
-    <div style={{ padding: 10, margin: 10, background: '#eee' }}>
+    <section>
       <div className="flex items-center justify-between mb-2">
-
-    <h3 className="m-0">
-    to: {trip.tripHeadsign}
-    </h3>
-    <pre className="block py-1 text-sm m-0 text-gray-500">
-      {trip.tripId}
-      </pre>
+        <h3 className="m-0">
+          {index + 1}. {trip.tripHeadsign}
+        </h3>
+        <pre className="block py-1 text-sm m-0 text-gray-500">
+          {trip.tripId}
+        </pre>
       </div>
-      <table>
+      <table className="w-full">
         <tbody>
-          {trip.stopTimes.map(st => (
-            <tr key={st.stop.stopId} clas>
+          {trip.stopTimes.map((st, i) => (
+            <tr key={st.stop.stopId} className="w-full">
               <th className="text-sm text-right">{st.stop.stopName}</th>
-              <td className="px-6">{formatArrivalTime(st.arrivalTime)}</td>
+              <td className="px-2">{formatArrivalTime(st.arrivalTime)}</td>
             </tr>
           ))}
         </tbody>
       </table>
-
-    </div>
+    </section>
   )
 }
 
@@ -93,14 +75,18 @@ const RouteTimetable = ({ data, pageContext }) => {
       <div className="flex flex-col w-full md:flex-row items-center justify-start gap-2 my-2">
         <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
         <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
-        <RouteViewPicker {...{view, setView}} />
+        <RouteViewPicker {...{ view, setView }} />
       </div>
       {/* {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>} */}
-      {view === 'List of trips' && sortedTrips.length > 0 && sortedTrips.map(trip => (
-        <RouteTimetableTrip trip={trip} key={trip.tripId} />
-      ))}
+      {view === 'List of trips' &&
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+          {sortedTrips.length > 0 && sortedTrips.map((trip, index) => (
+            <RouteTimetableTrip trip={trip} key={trip.tripId} index={index} />
+          ))}
+        </div>
+      }
       {view === 'Timetable' && sortedTrips.length > 0 &&
-        <RouteTimeTable trips={sortedTrips} timepoints={timepoints} route={route}  />
+        <RouteTimeTable trips={sortedTrips} timepoints={timepoints} route={route} />
       }
     </div>
   )
