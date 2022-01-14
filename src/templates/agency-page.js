@@ -11,7 +11,7 @@ const Agency = ({ data, pageContext }) => {
   let { agencyUrl, agencyPhone, routes } = agency
 
   // let's not display any routes that don't have scheduled trips.
-  routes = routes.filter(r => r.trips.totalCount > 0)
+  routes = routes.filter(r => r.trips.totalCount > 0).sort((a, b) => a.implicitSort - b.implicitSort)
 
   return (
     <div>
@@ -61,6 +61,7 @@ export const query = graphql`
           routeColor
           routeTextColor
           routeSortOrder
+          implicitSort
           trips: tripsByFeedIndexAndRouteId {
             totalCount
           }

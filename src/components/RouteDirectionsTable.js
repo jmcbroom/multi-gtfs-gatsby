@@ -14,7 +14,7 @@ const RouteDirectionsTable = ({ trips, headsigns }) => {
   return (
     <section>
       <h3>When does this route run?</h3>
-      <table className="w-auto border-collapse">
+      <table className="w-auto border-collapse mt-4">
         <tbody>
           <tr className="">
             <th className="bg-gray-100"></th>

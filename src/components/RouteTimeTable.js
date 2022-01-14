@@ -28,10 +28,7 @@ const RouteTimeTable = ({ trips, timepoints, route }) => {
             <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white">
               <div className="flex flex-col items-center justify-end h-32 bg-white">
                 <Link to={`/${feedIndexes[feedIndex]}/stop/${s.stop.stopCode}`} className="leading-tight text-sm font-bold bg-white mb-2 px-2">
-                  {s.stop.stopName
-                    .replace(" - Deboarding", "")
-                    .replace("Transit Center", "TC")
-                    .replace("Martin Luther King", "MLK")}
+                  {s.stop.stopName}
                 </Link>
                 <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white text-gray-700" />
               </div>

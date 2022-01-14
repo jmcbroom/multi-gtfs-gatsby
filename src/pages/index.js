@@ -14,7 +14,6 @@ const IndexPage = ({ data }) => {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold mb-2">Public transit agencies</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {agencies.map(a => (
           <section key={a.feedIndex}>
@@ -23,25 +22,31 @@ const IndexPage = ({ data }) => {
               {a.routes.length} bus routes
             </h3>
             <ul className="max-h-80 overflow-y-scroll">
-              {a.routes.map(r => r.trips.totalCount > 0 ? <RouteHeader {...r} key={`${a.feedIndex}_${r.routeShortName}`} /> : null)}
+              {a.routes.sort((a, b) => a.implicitSort - b.implicitSort).map(r => r.trips.totalCount > 0 ? <RouteHeader {...r} key={`${a.feedIndex}_${r.routeShortName}`} /> : null)}
             </ul>
           </section>
         ))}
-        <section>
-          <Link to={`/people-mover`}>
-            <h3>People Mover</h3>
-          </Link>
-          <p>The People Mover is not currently operating.</p>
-        </section>
         <section>
           <Link to={`/d2a2`}>
             <h3>Detroit-Ann Arbor (D2A2) bus</h3>
           </Link>
           <p>The D2A2 bus travels between Blake Transit Center and Grand Circus Park.</p>
         </section>
+        <section>
+          <Link to={`/qline`}>
+            <h3>QLine</h3>
+          </Link>
+          <p>The QLine streetcar runs between Congress St and Grand Boulevard along Woodward.</p>
+        </section>
+        <section>
+          <Link to={`/people-mover`}>
+            <h3>People Mover</h3>
+          </Link>
+          <p>The People Mover is not currently operating.</p>
+        </section>
       </div>
       <section className="mt-4">
-      <h2>Getting to other cities</h2>
+      <h1>Getting other places</h1>
         <ul>
           <li><Link to={`/destinations/toronto`}>Toronto</Link></li>
           <li><Link to={`/destinations/chicago`}>Chicago</Link></li>
@@ -70,6 +75,7 @@ export const query = graphql`
           routeLongName
           routeColor
           routeTextColor
+          implicitSort
           trips: tripsByFeedIndexAndRouteId {
             totalCount
           }

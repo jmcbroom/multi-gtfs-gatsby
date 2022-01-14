@@ -82,7 +82,6 @@ td {
   font-feature-settings: "tnum" 1;
 }
 
-header, footer {
-  font-family: "Shippori Antique";
+footer {
   @apply font-light;
 }
