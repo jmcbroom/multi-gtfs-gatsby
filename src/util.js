@@ -67,7 +67,10 @@ export const sortTripsByFrequentTimepoint = (trips) => {
     return aStopTime.hours * 60 + aStopTime.minutes - (bStopTime.hours * 60 + bStopTime.minutes);
   });
 
-  return sorted;
+  return {
+    trips: sorted,
+    timepoints: timepoints
+  };
 }
 
 /**
@@ -142,7 +145,12 @@ export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDir
     tripsByServiceAndDirection[day] = {}
     Object.keys(headsignsByDirectionId).forEach(dir => {
       let filteredTrips = trips.filter(trip => (trip.serviceId) === serviceDays[day] && trip.directionId === parseInt(dir))
-      tripsByServiceAndDirection[day][dir] = filteredTrips
+      if (filteredTrips.length > 0) {
+        tripsByServiceAndDirection[day][dir] = sortTripsByFrequentTimepoint(filteredTrips).trips
+      }
+      else {
+        tripsByServiceAndDirection[day][dir] = []
+      }
     })
   })
 

@@ -14,7 +14,7 @@ const AgencyHeader = ({ agency }) => {
 
   return (
     <Link to={`/${feedIndexes[feedIndex]}/`}>
-      <h2>
+      <h2 className="text-lg md:text-xl">
         {agencyName}
       </h2>
     </Link>
