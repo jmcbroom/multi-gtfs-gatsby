@@ -1,6 +1,6 @@
 import { graphql } from "gatsby"
 import React, { useState } from "react"
-import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, formatArrivalTime, sortTripsByFrequentTimepoint } from "../util"
+import { getServiceDays, getTripsByServiceAndDirection, getHeadsignsByDirectionId } from "../util"
 import DirectionPicker from "../components/DirectionPicker"
 import RouteHeader from "../components/RouteHeader"
 import AgencyHeader from "../components/AgencyHeader"
@@ -15,7 +15,6 @@ const RouteStops = ({ data, pageContext }) => {
   let { serviceCalendars } = data.postgres.agencies[0].feedInfo
 
   let serviceDays = getServiceDays(serviceCalendars)
-  let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips)
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
 
