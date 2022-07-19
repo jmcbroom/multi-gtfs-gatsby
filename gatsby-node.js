@@ -1,19 +1,29 @@
-const path = require(`path`)
+const path = require(`path`);
 
 exports.createPages = async ({ graphql, actions: { createPage } }) => {
+  const allAgencies = await graphql(`
+    {
+      allSanityAgency {
+        edges {
+          node {
+            currentFeedIndex
+            name
+            slug {
+              current
+            }
+          }
+        }
+      }
+    }
+  `);
 
-  let agencyFeedIndexes = {
-    8: `ddot`,
-    9: `smart`,
-    10: `the-ride`,
-    11: `mta`,
-    // 13: `smart-2022`
-  }
+  let agencies = allAgencies.data.allSanityAgency.edges.map((e) => e.node);
 
-  const result = await graphql(`
+  for (let a of agencies) {
+    const result = await graphql(`
     {
       postgres {
-        agencies: agenciesList(filter: {feedIndex: {greaterThan: 7, lessThan: 12 }}) {
+        agencies: agenciesList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}}) {
           agencyName
           agencyUrl
           agencyTimezone
@@ -24,7 +34,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           bikesPolicyUrl
           feedIndex
         }
-        routes: routesList(filter: {feedIndex: {greaterThan: 7, lessThan: 12 }}) {
+        routes: routesList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}}) {
           agencyId
           routeShortName
           routeLongName
@@ -43,47 +53,53 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     }
   `);
 
-  result.data.postgres.agencies.forEach(a => {
-    createPage({
-      path: `/${agencyFeedIndexes[a.feedIndex]}`,
-      component: path.resolve("./src/templates/agency-page.js"),
-      context: {
-        id: a.agencyId,
-        feedIndex: a.feedIndex
-      }
-    });
-  });
-
-  result.data.postgres.routes.filter(r => r.trips.totalCount > 0).forEach(r => {
-
-    // main route page
-    createPage({
-      path: `/${agencyFeedIndexes[r.feedIndex]}/route/${r.routeShortName}`,
-      component: path.resolve("./src/templates/route-page.js"),
-      context: {
-        routeNo: r.routeShortName,
-        feedIndex: r.feedIndex
-      }
+    result.data.postgres.agencies.forEach((agency) => {
+      createPage({
+        path: `/${a.slug.current}`,
+        component: path.resolve("./src/templates/agency-page.js"),
+        context: {
+          id: agency.agencyId,
+          feedIndex: agency.feedIndex,
+          agencySlug: a.slug.current
+        },
+      });
     });
 
-    // timetable page
-    createPage({
-      path: `/${agencyFeedIndexes[r.feedIndex]}/route/${r.routeShortName}/timetable`,
-      component: path.resolve("./src/templates/route-timetable-page.js"),
-      context: {
-        routeNo: r.routeShortName,
-        feedIndex: r.feedIndex
-      }
-    });
+    result.data.postgres.routes
+      .filter((r) => r.trips.totalCount > 0)
+      .forEach((r) => {
+        // main route page
+        createPage({
+          path: `/${a.slug.current}/route/${r.routeShortName}`,
+          component: path.resolve("./src/templates/route-page.js"),
+          context: {
+            routeNo: r.routeShortName,
+            feedIndex: r.feedIndex,
+            agencySlug: a.slug.current
+          },
+        });
 
-    // stops page
-    createPage({
-      path: `/${agencyFeedIndexes[r.feedIndex]}/route/${r.routeShortName}/stops`,
-      component: path.resolve("./src/templates/route-stops-page.js"),
-      context: {
-        routeNo: r.routeShortName,
-        feedIndex: r.feedIndex
-      }
-    });
-  });
+        // timetable page
+        createPage({
+          path: `/${a.slug.current}/route/${r.routeShortName}/timetable`,
+          component: path.resolve("./src/templates/route-timetable-page.js"),
+          context: {
+            routeNo: r.routeShortName,
+            feedIndex: r.feedIndex,
+            agencySlug: a.slug.current
+          },
+        });
+
+        // stops page
+        createPage({
+          path: `/${a.slug.current}/route/${r.routeShortName}/stops`,
+          component: path.resolve("./src/templates/route-stops-page.js"),
+          context: {
+            routeNo: r.routeShortName,
+            feedIndex: r.feedIndex,
+            agencySlug: a.slug.current
+          },
+        });
+      });
+  }
 };

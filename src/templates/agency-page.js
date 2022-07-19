@@ -4,10 +4,17 @@ import RouteHeader from '../components/RouteHeader';
 import AgencyHeader from '../components/AgencyHeader';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLink, faPhone } from "@fortawesome/free-solid-svg-icons";
+import PortableText from "react-portable-text";
 
 const Agency = ({ data, pageContext }) => {
 
   let agency = data.postgres.agencies[0]
+  let sanityAgency = data.sanity.edges[0].node
+
+  let { content } = sanityAgency
+
+  console.log(content)
+
   let { agencyUrl, agencyPhone, routes } = agency
 
   // let's not display any routes that don't have scheduled trips.
@@ -16,6 +23,7 @@ const Agency = ({ data, pageContext }) => {
   return (
     <div>
       <AgencyHeader agency={agency} />
+      <PortableText content={content} />
       <section className="flex flex-col sm:flex-row items-center justify-start gap-4 mb-4">
         <div className="flex items-center justify-between">
           <Link to={agencyUrl}>
@@ -41,7 +49,7 @@ const Agency = ({ data, pageContext }) => {
 }
 
 export const query = graphql`
-  query AgencyQuery($feedIndex: Int) {
+  query AgencyQuery($feedIndex: Int, $agencySlug: String) {
     postgres {
       agencies: agenciesList(condition: {feedIndex: $feedIndex}) {
         agencyName
@@ -77,6 +85,13 @@ export const query = graphql`
             saturday
             serviceId
           }
+        }
+      }
+    }
+    sanity: allSanityAgency(filter: {slug: {current: {eq: $agencySlug}}}) {
+      edges {
+        node {
+          content: _rawContent
         }
       }
     }
