@@ -66,42 +66,7 @@ export default {
       title: "Extended route directions",
       description: "Additional information about directions for this route",
       type: "array",
-      of: [
-        {
-          name: "extRouteDirection",
-          title: "Route direction info",
-          type: "document",
-          fields: [
-            {
-              name: "directionId",
-              title: "Direction ID",
-              description: "A direction_id from the GTFS data",
-              type: "number",
-            },
-            {
-              name: "directionName",
-              title: "Direction Name",
-              description: "The name of this direction",
-              type: "string",
-              options: {
-
-                list: [
-                  "northbound",
-                  "southbound",
-                  "eastbound",
-                  "westbound",
-                  "clockwise",
-                  "counterclockwise",
-                  "inbound",
-                  "outbound",
-                  "uptown",
-                  "downtown",
-                ],
-              }
-            },
-          ],
-        },
-      ],
+      of: [{ type: "extRouteDirection" }],
     },
   ],
   preview: {
