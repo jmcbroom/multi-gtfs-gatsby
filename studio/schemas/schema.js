@@ -10,6 +10,8 @@ import agency from "./agency";
 import route from "./route";
 // non-GTFS models
 import destination from './destination'
+import destinationRoute from "./destinationRoute";
+import extRouteDirection from "./extRouteDirection";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -25,6 +27,8 @@ export default createSchema({
     route,
   
     // additional non-GTFS models
-    destination
+    destination,
+    destinationRoute,
+    extRouteDirection
   ]),
 });
