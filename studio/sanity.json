@@ -11,6 +11,7 @@
     "@sanity/base",
     "@sanity/default-layout",
     "@sanity/default-login",
+    "@sanity/color-input",
     "@sanity/desk-tool"
   ],
   "env": {

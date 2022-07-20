@@ -10,14 +10,29 @@ import { Link } from "gatsby";
  */
 const IndexPage = ({ data }) => {
   let { agencies } = data.postgres;
-  console.log(agencies)
   let sanityAgencies = data.allSanityAgency.edges.map((e) => e.node);
-  console.log(sanityAgencies)
 
   let merged = sanityAgencies.map(sa => {
     let filtered = agencies.filter(ag => ag.feedIndex === sa.currentFeedIndex)[0]
     return {...sa, ...filtered}
   })
+
+  let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
+  // loop thru agencies
+  agencies.forEach(a => {
+    // loop thru those agencies' routes
+    a.routes.forEach(r => {
+
+      // find the matching sanityRoute
+      let matching = sanityRoutes.filter(sr => sr.agency.currentFeedIndex == r.feedIndex && sr.shortName == r.routeShortName)
+
+      if (matching.length == 1) {
+        r.routeLongName = matching[0].longName
+      }
+
+    })
+  })
+
 
   return (
     <>
@@ -84,6 +99,17 @@ export const query = graphql`
           name
           slug {
             current
+          }
+        }
+      }
+    }
+    allSanityRoute {
+      edges {
+        node {
+          longName
+          shortName
+          agency {
+            currentFeedIndex
           }
         }
       }
