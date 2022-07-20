@@ -17,7 +17,9 @@ const Route = ({ data, pageContext }) => {
   let sanityRoute = data.route;
   let sanityAgency = data.agency;
   
-  gtfsRoute['routeLongName'] = sanityRoute.longName
+  if(sanityRoute) {
+    gtfsRoute['routeLongName'] = sanityRoute.longName
+  }
 
   let { trips } = gtfsRoute;
   let { serviceCalendars } = gtfsAgency.feedInfo;
