@@ -55,6 +55,12 @@ export default {
       to: [{ type: "agency" }],
       validation: Rule => Rule.required()
     },
+    {
+      name: "content",
+      title: "Extended content",
+      description: "Extended content for the route page",
+      type: "blockContent"
+    },
   ],
   preview: {
     select: {
