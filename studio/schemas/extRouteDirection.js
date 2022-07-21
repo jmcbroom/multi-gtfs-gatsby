@@ -1,3 +1,5 @@
+import ShapeInput from "../components/ShapeInput";
+
 export default {
   name: "extRouteDirection",
   title: "Route direction info",
@@ -16,9 +18,9 @@ export default {
       type: "string",
     },
     {
-      name: "directionName",
-      title: "Direction Name",
-      description: "The name of this direction",
+      name: "directionDescription",
+      title: "Direction description",
+      description: "A way to describe the general direction for the given GTFS direction",
       type: "string",
       options: {
         list: [
@@ -34,6 +36,20 @@ export default {
           "downtown",
         ],
       },
+    },
+    {
+      name: "directionTimepoints",
+      title: "Direction timepoints",
+      description: "An array of stop IDs that represent timepoints in this direction",
+      type: "array",
+      of: [{ type: "number"}, {type: "string" }],
+    },
+    {
+      name: "directionShape",
+      title: "Direction shape",
+      description: "Draw this direction's route shape using the line string button",
+      type: "string",
+      inputComponent: ShapeInput,
     },
   ],
 };
