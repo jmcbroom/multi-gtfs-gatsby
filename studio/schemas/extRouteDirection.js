@@ -42,7 +42,7 @@ export default {
       title: "Direction timepoints",
       description: "An array of stop IDs that represent timepoints in this direction",
       type: "array",
-      of: [{ type: "number"}, {type: "string" }],
+      of: [{type: "string" }],
     },
     {
       name: "directionShape",
