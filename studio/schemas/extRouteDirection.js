@@ -1,4 +1,5 @@
 import ShapeInput from "../components/ShapeInput";
+import React from "react";
 
 export default {
   name: "extRouteDirection",
@@ -52,4 +53,16 @@ export default {
       inputComponent: ShapeInput,
     },
   ],
+  preview: {
+    select: {
+      directionId: "directionId",
+      directionDescription: "directionDescription",
+    },
+    prepare({ directionDescription, directionId }) {
+      return {
+        title: directionDescription.charAt(0).toUpperCase() + directionDescription.slice(1),
+        subtitle: `direction_id: ${directionId}`,
+      };
+    },
+  },
 };
