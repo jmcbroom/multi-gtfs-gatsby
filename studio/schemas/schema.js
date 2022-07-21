@@ -8,6 +8,10 @@ import blockContent from "./blockContent";
 // GTFS models
 import agency from "./agency";
 import route from "./route";
+// non-GTFS models
+import destination from './destination'
+import destinationRoute from "./destinationRoute";
+import extRouteDirection from "./extRouteDirection";
 
 // Then we give our schema to the builder and provide the result to Sanity
 export default createSchema({
@@ -21,5 +25,10 @@ export default createSchema({
     // we add our GTFS models to this array
     agency,
     route,
+  
+    // additional non-GTFS models
+    destination,
+    destinationRoute,
+    extRouteDirection
   ]),
 });

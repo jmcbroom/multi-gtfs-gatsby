@@ -33,7 +33,7 @@ export default {
       name: "routeType",
       title: "Route type",
       description: "The type of route. This will vary according to agency.",
-      type: "string"
+      type: "string",
     },
     {
       name: "color",
@@ -53,7 +53,20 @@ export default {
       description: "The agency that runs this route",
       type: "reference",
       to: [{ type: "agency" }],
-      validation: Rule => Rule.required()
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: "content",
+      title: "Extended content",
+      description: "Extended content for the route page",
+      type: "blockContent",
+    },
+    {
+      name: "extRouteDirections",
+      title: "Extended route directions",
+      description: "Additional information about directions for this route",
+      type: "array",
+      of: [{ type: "extRouteDirection" }],
     },
   ],
   preview: {
@@ -62,21 +75,35 @@ export default {
       longName: "longName",
       color: "color",
       textColor: "textColor",
-      agency: "agency.name"
+      agency: "agency.name",
     },
     prepare({ shortName, longName, agency, color, textColor }) {
       return {
         title: longName,
         subtitle: agency,
         media: (
-          <div style={{ width: `100%`, height: `100%`, backgroundColor: color.hex, color: textColor.hex, display: "flex", alignItems: "center", justifyContent: "center"}}>
-
-            <span style={{display: "inline-block", fontWeight: "700", fontSize: shortName.length == 3 ? '0.8em' : '1em'}}>
+          <div
+            style={{
+              width: `100%`,
+              height: `100%`,
+              backgroundColor: color.hex,
+              color: textColor.hex,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                fontWeight: "700",
+                fontSize: shortName.length == 3 ? "0.8em" : "1em",
+              }}
+            >
               {shortName}
             </span>
           </div>
-          )
-          ,
+        ),
       };
     },
   },
