@@ -58,5 +58,14 @@ module.exports = {
         appendPlugins: [require("@graphile-contrib/pg-simplify-inflector"), require("postgraphile-plugin-connection-filter")],
       },
     },
+    {
+      resolve: "gatsby-source-sanity",
+      options: {
+        projectId: process.env.SANITY_PROJECT_ID,
+        dataset: process.env.SANITY_DATASET,
+        token: process.env.SANITY_TOKEN,
+        watchMode: true,
+      }
+    }
   ],
 };

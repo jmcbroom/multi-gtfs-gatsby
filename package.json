@@ -35,12 +35,14 @@
     "gatsby-plugin-sitemap": "^5.4.0",
     "gatsby-source-filesystem": "^4.4.0",
     "gatsby-source-pg": "^1.0.0-rc.0",
+    "gatsby-source-sanity": "^7.4.2",
     "gatsby-transformer-sharp": "^4.4.0",
     "postcss": "^8.4.5",
     "postgraphile-plugin-connection-filter": "^2.2.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-helmet": "^6.1.0",
+    "react-portable-text": "^0.4.3",
     "tailwindcss": "^3.0.13"
   }
 }

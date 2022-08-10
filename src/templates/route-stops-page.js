@@ -8,9 +8,16 @@ import StopListItem from "../components/StopListItem"
 
 const RouteStops = ({ data, pageContext }) => {
 
-  let route = data.postgres.routes[0]
+  let gtfsRoute = data.postgres.routes[0]
+  let sanityRoute = data.route;
+  let sanityAgency = data.agency;
+  if(sanityRoute) {
+    gtfsRoute.routeLongName = sanityRoute.longName
+    gtfsRoute.routeColor = sanityRoute.color.hex
+    gtfsRoute.routeTextColor = sanityRoute.textColor.hex
+  }
 
-  let { trips, routeColor, feedIndex } = route
+  let { trips, routeColor, feedIndex } = gtfsRoute
 
   let { serviceCalendars } = data.postgres.agencies[0].feedInfo
 
@@ -25,7 +32,7 @@ const RouteStops = ({ data, pageContext }) => {
   return (
     <div>
       <AgencyHeader agency={data.postgres.agencies[0]} />
-      <RouteHeader {...route} />
+      <RouteHeader {...gtfsRoute} />
       <div className="flex flex-col w-full md:flex-row items-center justify-start gap-2 my-2">
         <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
       </div>
@@ -40,7 +47,31 @@ const RouteStops = ({ data, pageContext }) => {
 }
 
 export const query = graphql`
-  query RouteStopQuery($feedIndex: Int, $routeNo: String) {
+  query RouteStopQuery($feedIndex: Int, $routeNo: String, $agencySlug: String) {
+    route: sanityRoute(
+      shortName: { eq: $routeNo }
+      agency: { slug: { current: { eq: $agencySlug } } }
+    ) {
+      color {
+        hex
+      }
+      longName
+      routeType
+      shortName
+      slug {
+        current
+      }
+      textColor {
+        hex
+      }
+    }
+    agency: sanityAgency(slug: { current: { eq: $agencySlug } }) {
+      name
+      currentFeedIndex
+      slug {
+        current
+      }
+    }
     postgres {
       routes: routesList(condition: {feedIndex: $feedIndex, routeShortName: $routeNo}) {
         agencyId
