@@ -60,6 +60,7 @@ export default {
     },
     prepare({ directionDescription, directionId }) {
       return {
+        // hacking together and 
         title: directionDescription.charAt(0).toUpperCase() + directionDescription.slice(1),
         subtitle: `direction_id: ${directionId}`,
       };
