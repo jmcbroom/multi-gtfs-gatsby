@@ -2,17 +2,21 @@
 
 building a web site that can display ddot.info-like timetables for many agencies at once
 
-## developing
+## developing the main site
 
 1. clone the repo
 
 2. run `npm install` or `yarn`
 
-3. populate your `.env.development` with a `PG_CONN` connection string
+3. populate your `.env.development` with: `PG_CONN`, `SANITY_TOKEN`, `SANITY_PROJECT_ID`, `SANITY_DATASET`
 
 4. run `gatsby develop`
 
 You'll see the main site at localhost:8000 and the GraphQL Explorer at localhost:8000/___graphql
+
+## developing the custom CMS
+
+See the [README](./studio/README.md) for instructions on creating a local version of the CMS.
 
 ## database
 
