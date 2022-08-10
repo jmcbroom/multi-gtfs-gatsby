@@ -26,8 +26,11 @@ const IndexPage = ({ data }) => {
       // find the matching sanityRoute
       let matching = sanityRoutes.filter(sr => sr.agency.currentFeedIndex == r.feedIndex && sr.shortName == r.routeShortName)
 
+      // let's override the route attributes with those from Sanity
       if (matching.length == 1) {
         r.routeLongName = matching[0].longName
+        r.routeColor = matching[0].routeColor.hex
+        r.routeTextColor = matching[0].routeTextColor.hex
       }
 
     })
@@ -108,6 +111,12 @@ export const query = graphql`
         node {
           longName
           shortName
+          routeColor: color {
+            hex
+          }
+          routeTextColor: textColor {
+            hex
+          }
           agency {
             currentFeedIndex
           }

@@ -39,9 +39,16 @@ const RouteTimetableTrip = ({ trip, index }) => {
 
 const RouteTimetable = ({ data, pageContext }) => {
 
-  let route = data.postgres.routes[0]
+  let gtfsRoute = data.postgres.routes[0]
+  let sanityRoute = data.route;
+  let sanityAgency = data.agency;
+  if(sanityRoute) {
+    gtfsRoute.routeLongName = sanityRoute.longName
+    gtfsRoute.routeColor = sanityRoute.color.hex
+    gtfsRoute.routeTextColor = sanityRoute.textColor.hex
+  }
 
-  let { trips } = route
+  let { trips } = gtfsRoute
 
   let { serviceCalendars } = data.postgres.agencies[0].feedInfo
 
@@ -65,7 +72,7 @@ const RouteTimetable = ({ data, pageContext }) => {
   return (
     <div>
       <AgencyHeader agency={data.postgres.agencies[0]} />
-      <RouteHeader {...route} />
+      <RouteHeader {...gtfsRoute} />
       <div className="flex flex-col w-full md:flex-row items-center justify-start gap-2 my-2">
         <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
         <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
@@ -80,14 +87,38 @@ const RouteTimetable = ({ data, pageContext }) => {
         </div>
       }
       {view === 'Timetable' && sortedTrips.length > 0 &&
-        <RouteTimeTable trips={sortedTrips} timepoints={timepoints} route={route} />
+        <RouteTimeTable trips={sortedTrips} timepoints={timepoints} route={gtfsRoute} />
       }
     </div>
   )
 }
 
 export const query = graphql`
-  query RouteTimetableQuery($feedIndex: Int, $routeNo: String) {
+  query RouteTimetableQuery($feedIndex: Int, $routeNo: String, $agencySlug: String) {
+    route: sanityRoute(
+      shortName: { eq: $routeNo }
+      agency: { slug: { current: { eq: $agencySlug } } }
+    ) {
+      color {
+        hex
+      }
+      longName
+      routeType
+      shortName
+      slug {
+        current
+      }
+      textColor {
+        hex
+      }
+    }
+    agency: sanityAgency(slug: { current: { eq: $agencySlug } }) {
+      name
+      currentFeedIndex
+      slug {
+        current
+      }
+    }
     postgres {
       routes: routesList(condition: {feedIndex: $feedIndex, routeShortName: $routeNo}) {
         agencyId

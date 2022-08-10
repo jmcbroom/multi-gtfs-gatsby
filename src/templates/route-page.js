@@ -18,7 +18,9 @@ const Route = ({ data, pageContext }) => {
   let sanityAgency = data.agency;
   
   if(sanityRoute) {
-    gtfsRoute['routeLongName'] = sanityRoute.longName
+    gtfsRoute.routeLongName = sanityRoute.longName
+    gtfsRoute.routeColor = sanityRoute.color.hex
+    gtfsRoute.routeTextColor = sanityRoute.textColor.hex
   }
 
   let { trips } = gtfsRoute;

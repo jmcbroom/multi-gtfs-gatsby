@@ -17,7 +17,7 @@ const RouteHeader = ({ feedIndex, routeShortName, routeLongName, routeColor='#00
       <li className="flex items-center justify-start py-2 bg-gray-200">
         <span 
           className="w-10 font-bold text-center py-2 bg-white mx-2" 
-          style={{background: `#${routeColor}`, color: `#${routeTextColor}`}}
+          style={{background: `${routeColor}`, color: `${routeTextColor}`}}
         >
           {routeShortName}
         </span>
