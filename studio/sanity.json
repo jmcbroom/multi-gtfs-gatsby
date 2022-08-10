@@ -13,7 +13,8 @@
     "@sanity/default-login",
     "@sanity/color-input",
     "@sanity/desk-tool",
-    "table"
+    "table",
+    "@sanity/rich-date-input"
   ],
   "env": {
     "development": {
