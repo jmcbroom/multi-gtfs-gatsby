@@ -39,7 +39,7 @@ const IndexPage = ({ data }) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-100">
         {merged.map((a) => (
           <section key={a.feedIndex}>
             <AgencyHeader agency={a} />

@@ -46,6 +46,7 @@ const RouteTimetable = ({ data, pageContext }) => {
     gtfsRoute.routeLongName = sanityRoute.longName
     gtfsRoute.routeColor = sanityRoute.color.hex
     gtfsRoute.routeTextColor = sanityRoute.textColor.hex
+    gtfsRoute.slug = sanityAgency.slug.current
   }
 
   let { trips } = gtfsRoute
@@ -55,11 +56,25 @@ const RouteTimetable = ({ data, pageContext }) => {
   let serviceDays = getServiceDays(serviceCalendars)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips)
-  let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
 
+  console.log(headsignsByDirectionId)
+  
+  sanityRoute.directions.forEach((dir, idx) => {
+    if(dir.directionHeadsign) {
+      headsignsByDirectionId[idx][0] = dir.directionHeadsign
+    }
+  })
+  
+  
+  
+  let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
   const [view, setView] = useState(views[0])
+
+  console.log(sanityRoute.directions)
+
+  
 
   let selectedTrips = tripsByServiceAndDirection[service][direction]
   let sortedTrips = []
@@ -110,6 +125,12 @@ export const query = graphql`
       }
       textColor {
         hex
+      }
+      directions: extRouteDirections {
+        directionHeadsign
+        directionDescription
+        directionId
+        directionTimepoints
       }
     }
     agency: sanityAgency(slug: { current: { eq: $agencySlug } }) {

@@ -1,11 +1,11 @@
 {
   "root": true,
-  "project": {
-    "name": "multi-gtfs-gatsby"
-  },
   "api": {
     "projectId": "lvgeynh2",
     "dataset": "production"
+  },
+  "project": {
+    "name": "multi-gtfs-gatsby"
   },
   "plugins": [
     "@sanity/base",
