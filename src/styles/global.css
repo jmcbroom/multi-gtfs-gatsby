@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600;700;900&family=Shippori+Antique&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 * {
-  font-family: "Inter";
+  font-family: "Archivo";
 }
 
 a {
@@ -22,12 +22,11 @@ select {
 }
 
 section {
-  @apply bg-gray-100;
   @apply p-4;
 }
 
 h1 {
-  font-family: "Shippori Antique";
+  font-family: "IBM Plex Sans";
   @apply text-2xl;
   @apply font-bold;
   @apply mb-2;

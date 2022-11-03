@@ -10,13 +10,15 @@ const RouteTimeTable = ({ trips, timepoints, route }) => {
   let {feedIndexes} = config
   let {routeColor, feedIndex} = route;
 
+  console.log(routeColor)
+
   // white routeColor needs to be gray
   if(routeColor === 'ffffff'){
     routeColor = 'eee'
   }
 
   let borderedRowStyle = {
-    borderBottom: `2px solid #${routeColor}`
+    borderBottom: `2px solid ${routeColor}`
   }
 
   return (
@@ -39,7 +41,7 @@ const RouteTimeTable = ({ trips, timepoints, route }) => {
                 bottom: ".5em",
                 zIndex: 1,
                 width: (k === 0 || k + 1 === timepoints.length) ? "55%" : "100%",
-                backgroundColor: `#${routeColor === 'FFFFFF' ? '5f6369' : routeColor}`,
+                backgroundColor: `${routeColor === 'FFFFFF' ? '5f6369' : routeColor}`,
                 verticalAlign: "center"
               }} />
             </th>
@@ -52,7 +54,7 @@ const RouteTimeTable = ({ trips, timepoints, route }) => {
 
 
         {trips.map((t, i) => (
-          <tr key={t.id} style={(i + 1) % 5 === 0 ? borderedRowStyle : {}}>
+          <tr key={t.tripId} style={(i + 1) % 5 === 0 ? borderedRowStyle : {}}>
             {timepoints.map((tp, j) => {
               let filtered = t.stopTimes.filter(st => {
                 return st.stop.stopId === tp.stop.stopId;

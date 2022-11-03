@@ -42,7 +42,7 @@ const Route = ({ data, pageContext }) => {
   };
 
   return (
-    <div>
+    <div className="max-w-3xl mx-auto">
       <AgencyHeader agency={gtfsAgency} />
       <RouteHeader {...gtfsRoute} />
       <div className="flex items-center justify-start gap-2 my-2">
@@ -54,6 +54,7 @@ const Route = ({ data, pageContext }) => {
           </div>
         ))}
       </div>
+      {/* <RouteMap /> */}
       <RouteDirectionsTable trips={tripsByServiceAndDirection} headsigns={headsignsByDirectionId} />
     </div>
   );
@@ -76,6 +77,13 @@ export const query = graphql`
       }
       textColor {
         hex
+      }
+      directions: extRouteDirections {
+        directionHeadsign
+        directionDescription
+        directionId
+        directionTimepoints
+        directionShape
       }
     }
     agency: sanityAgency(slug: { current: { eq: $agencySlug } }) {

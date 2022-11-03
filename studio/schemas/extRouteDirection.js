@@ -57,12 +57,13 @@ export default {
     select: {
       directionId: "directionId",
       directionDescription: "directionDescription",
+      directionHeadsign: "directionHeadsign"
     },
-    prepare({ directionDescription, directionId }) {
+    prepare({ directionDescription, directionId, directionHeadsign }) {
       return {
         // hacking together and 
         title: directionDescription.charAt(0).toUpperCase() + directionDescription.slice(1),
-        subtitle: `direction_id: ${directionId}`,
+        subtitle: `${directionHeadsign} [${directionId}]`,
       };
     },
   },
