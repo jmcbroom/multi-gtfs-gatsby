@@ -3,7 +3,11 @@ import React from "react";
 import AgencyHeader from "../components/AgencyHeader";
 import RouteDirectionsTable from "../components/RouteDirectionsTable";
 import RouteHeader from "../components/RouteHeader";
+import RouteMap from '../components/RouteMap'
 import {
+  createAgencyData,
+  createRouteFc,
+  createTimepointsFc,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
@@ -12,11 +16,13 @@ import {
 
 const Route = ({ data, pageContext }) => {
 
-  let gtfsRoute = data.postgres.routes[0];
   let gtfsAgency = data.postgres.agencies[0];
-  let sanityRoute = data.route;
   let sanityAgency = data.agency;
-  
+  let agencyData = createAgencyData(gtfsAgency, sanityAgency)
+
+  let gtfsRoute = data.postgres.routes[0];
+  let sanityRoute = data.route;
+
   if(sanityRoute) {
     gtfsRoute.routeLongName = sanityRoute.longName
     gtfsRoute.routeColor = sanityRoute.color.hex
@@ -24,11 +30,11 @@ const Route = ({ data, pageContext }) => {
   }
 
   let { trips } = gtfsRoute;
-  let { serviceCalendars } = gtfsAgency.feedInfo;
+  let { serviceCalendars } = agencyData.feedInfo;
 
   let serviceDays = getServiceDays(serviceCalendars);
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
-  let headsignsByDirectionId = getHeadsignsByDirectionId(trips);
+  let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(
     trips,
     serviceDays,
@@ -42,9 +48,9 @@ const Route = ({ data, pageContext }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <AgencyHeader agency={gtfsAgency} />
-      <RouteHeader {...gtfsRoute} />
+    <div>
+      <AgencyHeader agency={agencyData} />
+      <RouteHeader {...gtfsRoute} agency={agencyData} />
       <div className="flex items-center justify-start gap-2 my-2">
         {Object.keys(pages).map((p) => (
           <div key={p} className="bg-gray-300 py-2 px-6 text-center text-semibold">
@@ -54,7 +60,7 @@ const Route = ({ data, pageContext }) => {
           </div>
         ))}
       </div>
-      {/* <RouteMap /> */}
+      <RouteMap routeFc={createRouteFc(sanityRoute, gtfsRoute)} timepointsFc={createTimepointsFc(sanityRoute, tripsByServiceAndDirection)} />
       <RouteDirectionsTable trips={tripsByServiceAndDirection} headsigns={headsignsByDirectionId} />
     </div>
   );
@@ -123,6 +129,8 @@ export const query = graphql`
               stopCode
               stopId
               stopName
+              stopLon
+              stopLat
             }
           }
         }

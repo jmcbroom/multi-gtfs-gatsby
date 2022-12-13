@@ -1,3 +1,6 @@
+import { faCalendarWeek } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import React from "react";
 
 /**
@@ -5,21 +8,41 @@ import React from "react";
  * @param {Object} services: tripsByServiceDay returned value; keys are services
  * @param {String} service: from useState, the current service value
  * @param {Function} setService: from useState, the setter function
- * @returns 
+ * @returns
  */
 const ServicePicker = ({ services, service, setService }) => {
+  let display = {
+    weekday: `Weekday`,
+    saturday: `Saturday`,
+    sunday: `Sunday`,
+  };
+
   return (
-    <div className="flex items-center justify-start w-full md:w-auto">
-      <span className="bg-gray-300 py-3 text-sm w-1/3 text-right px-4 md:text-center">
-        Day
-      </span>
-    <select className="w-2/3 md:w-auto" onChange={(e) => setService(e.target.value)}>
-      {Object.keys(services).map(serviceDay => (
-        <option value={serviceDay} key={serviceDay}>{serviceDay}</option>
+    <RadioGroup.Root
+      className="radioGroupRoot"
+      defaultValue={Object.keys(services)[0]}
+      onValueChange={(e) => setService(e)}
+    >
+      <div className="w-12 flex flex-shrink-0 items-center justify-around">
+        <FontAwesomeIcon icon={faCalendarWeek} className="radioGroupIcon" />
+      </div>
+      {Object.keys(services).map((serviceDay) => (
+        <div className="flex items-center" key={serviceDay}>
+          <RadioGroup.Item
+            className="radioGroupItem"
+            value={serviceDay}
+            id={serviceDay}
+            
+          >
+            <RadioGroup.Indicator className="radioGroupIndicator" />
+          </RadioGroup.Item>
+          <label className="radioGroupLabel" htmlFor={serviceDay}>
+            {display[serviceDay]}
+          </label>
+        </div>
       ))}
-    </select>
-    </div>
-  )
-}
+    </RadioGroup.Root>
+  );
+};
 
 export default ServicePicker;

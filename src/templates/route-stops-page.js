@@ -1,6 +1,6 @@
 import { graphql } from "gatsby"
 import React, { useState } from "react"
-import { getServiceDays, getTripsByServiceAndDirection, getHeadsignsByDirectionId } from "../util"
+import { getServiceDays, getTripsByServiceAndDirection, getHeadsignsByDirectionId, createAgencyData } from "../util"
 import DirectionPicker from "../components/DirectionPicker"
 import RouteHeader from "../components/RouteHeader"
 import AgencyHeader from "../components/AgencyHeader"
@@ -8,9 +8,13 @@ import StopListItem from "../components/StopListItem"
 
 const RouteStops = ({ data, pageContext }) => {
 
+  let gtfsAgency = data.postgres.agencies[0]
+  let sanityAgency = data.agency;
+  let agencyData = createAgencyData(gtfsAgency, sanityAgency)
+
   let gtfsRoute = data.postgres.routes[0]
   let sanityRoute = data.route;
-  let sanityAgency = data.agency;
+
   if(sanityRoute) {
     gtfsRoute.routeLongName = sanityRoute.longName
     gtfsRoute.routeColor = sanityRoute.color.hex
@@ -19,10 +23,10 @@ const RouteStops = ({ data, pageContext }) => {
 
   let { trips, routeColor, feedIndex } = gtfsRoute
 
-  let { serviceCalendars } = data.postgres.agencies[0].feedInfo
+  let { serviceCalendars } = agencyData.feedInfo
 
   let serviceDays = getServiceDays(serviceCalendars)
-  let headsignsByDirectionId = getHeadsignsByDirectionId(trips)
+  let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute)
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
@@ -31,14 +35,14 @@ const RouteStops = ({ data, pageContext }) => {
 
   return (
     <div>
-      <AgencyHeader agency={data.postgres.agencies[0]} />
-      <RouteHeader {...gtfsRoute} />
+      <AgencyHeader agency={agencyData} />
+      <RouteHeader {...gtfsRoute} agency={agencyData} />
       <div className="flex flex-col w-full md:flex-row items-center justify-start gap-2 my-2">
         <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
       </div>
       <section>
       {times.map((stopTime, i) => (
-        <StopListItem key={stopTime.stop.stopCode || stopTime.stop.stopId} {...{ stopTime, feedIndex, routeColor }} />
+        <StopListItem key={stopTime.stop.stopCode || stopTime.stop.stopId} {...{ stopTime, feedIndex, routeColor }} agency={agencyData} />
       ))}
     </section>
       {/* <RouteStopsList /> */}
@@ -63,6 +67,12 @@ export const query = graphql`
       }
       textColor {
         hex
+      }
+      directions: extRouteDirections {
+        directionHeadsign
+        directionDescription
+        directionId
+        directionTimepoints
       }
     }
     agency: sanityAgency(slug: { current: { eq: $agencySlug } }) {

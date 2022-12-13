@@ -3,14 +3,10 @@ import { formatArrivalTime } from "../util";
 import { Link } from "gatsby";
 import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import config from "../config";
 
-const RouteTimeTable = ({ trips, timepoints, route }) => {
+const RouteTimeTable = ({ trips, timepoints, route, agency }) => {
 
-  let {feedIndexes} = config
   let {routeColor, feedIndex} = route;
-
-  console.log(routeColor)
 
   // white routeColor needs to be gray
   if(routeColor === 'ffffff'){
@@ -22,21 +18,21 @@ const RouteTimeTable = ({ trips, timepoints, route }) => {
   }
 
   return (
-    <div style={{width: '100%', overflow: 'auto', maxHeight: 'calc(100vh - 94px)'}}>
-    <table className="tabular" style={{tableLayout: 'fixed'}}>
+    <div className="mx-auto" style={{width: '100%', overflow: 'auto', maxHeight: 'calc(100vh - 94px)'}}>
+    <table className="tabular mx-auto" style={{tableLayout: 'fixed'}}>
       <thead className="z-10 mt-2" style={{ position: 'sticky' }}>
         <tr className="bg-gray-100" style={{ position: 'sticky' }}>
           {timepoints.map((s, k) => (
             <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white">
-              <div className="flex flex-col items-center justify-end h-32 bg-white">
-                <Link to={`/${feedIndexes[feedIndex]}/stop/${s.stop.stopCode}`} className="leading-tight text-sm font-bold bg-white mb-2 px-2">
+              <div className="flex flex-col items-center justify-end h-24 bg-white">
+                <Link to={`/${agency.slug.current}/stop/${s.stop.stopCode}`} className="leading-tight text-sm font-bold bg-white mb-2 px-2">
                   {s.stop.stopName}
                 </Link>
                 <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white text-gray-700" />
               </div>
               <div style={{
                 position: 'absolute',
-                right: k === 0 ? -5 : null,
+                right: k === 0 ? -10 : null,
                 height: ".5em",
                 bottom: ".5em",
                 zIndex: 1,

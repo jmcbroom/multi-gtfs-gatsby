@@ -1,15 +1,17 @@
-import { graphql } from "gatsby"
-import React, { useState } from "react"
-import { getServiceDays, getTripsByServiceDay, getTripsByServiceAndDirection, getHeadsignsByDirectionId, formatArrivalTime, sortTripsByFrequentTimepoint } from "../util"
-import DirectionPicker from "../components/DirectionPicker"
-import ServicePicker from "../components/ServicePicker"
-import RouteHeader from "../components/RouteHeader"
-import AgencyHeader from "../components/AgencyHeader"
-import RouteTimeTable from "../components/RouteTimeTable"
-import { RouteViewPicker, views } from "../components/RouteViewPicker"
+import { graphql } from "gatsby";
+import React, { useState } from "react";
+import AgencyHeader from "../components/AgencyHeader";
+import DirectionPicker from "../components/DirectionPicker";
+import RouteHeader from "../components/RouteHeader";
+import RouteTimeTable from "../components/RouteTimeTable";
+import { views } from "../components/RouteViewPicker";
+import ServicePicker from "../components/ServicePicker";
+import {
+  createAgencyData, formatArrivalTime, getHeadsignsByDirectionId, getServiceDays, getTripsByServiceAndDirection, getTripsByServiceDay, sortTripsByFrequentTimepoint
+} from "../util";
 /**
  * Tiny testing component for a new route
- * @param {Object} trip: trip element from GraphQL response 
+ * @param {Object} trip: trip element from GraphQL response
  * @param {Number} index: trip number
  */
 const RouteTimetableTrip = ({ trip, index }) => {
@@ -19,9 +21,7 @@ const RouteTimetableTrip = ({ trip, index }) => {
         <h3 className="m-0">
           {index + 1}. {trip.tripHeadsign}
         </h3>
-        <pre className="block py-1 text-sm m-0 text-gray-500">
-          {trip.tripId}
-        </pre>
+        <pre className="block py-1 text-sm m-0 text-gray-500">{trip.tripId}</pre>
       </div>
       <table className="w-full">
         <tbody>
@@ -34,79 +34,83 @@ const RouteTimetableTrip = ({ trip, index }) => {
         </tbody>
       </table>
     </section>
-  )
-}
+  );
+};
 
 const RouteTimetable = ({ data, pageContext }) => {
 
-  let gtfsRoute = data.postgres.routes[0]
-  let sanityRoute = data.route;
+  // agencyData
+  let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.agency;
-  if(sanityRoute) {
-    gtfsRoute.routeLongName = sanityRoute.longName
-    gtfsRoute.routeColor = sanityRoute.color.hex
-    gtfsRoute.routeTextColor = sanityRoute.textColor.hex
-    gtfsRoute.slug = sanityAgency.slug.current
+  let agencyData = createAgencyData(gtfsAgency, sanityAgency)
+
+  // routeData
+  let gtfsRoute = data.postgres.routes[0];
+  let sanityRoute = data.route;
+  if (sanityRoute) {
+    gtfsRoute.routeLongName = sanityRoute.longName;
+    gtfsRoute.routeColor = sanityRoute.color.hex;
+    gtfsRoute.routeTextColor = sanityRoute.textColor.hex;
+    gtfsRoute.slug = sanityAgency.slug.current;
   }
 
-  let { trips } = gtfsRoute
+  let { trips } = gtfsRoute;
 
-  let { serviceCalendars } = data.postgres.agencies[0].feedInfo
+  let { serviceCalendars } = data.postgres.agencies[0].feedInfo;
 
-  let serviceDays = getServiceDays(serviceCalendars)
-  let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays)
-  let headsignsByDirectionId = getHeadsignsByDirectionId(trips)
+  let serviceDays = getServiceDays(serviceCalendars);
+  let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
+  let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
 
-  console.log(headsignsByDirectionId)
-  
   sanityRoute.directions.forEach((dir, idx) => {
-    if(dir.directionHeadsign) {
-      headsignsByDirectionId[idx][0] = dir.directionHeadsign
+    if (dir.directionHeadsign) {
+      headsignsByDirectionId[idx][0] = dir.directionHeadsign;
     }
-  })
-  
-  
-  
-  let tripsByServiceAndDirection = getTripsByServiceAndDirection(trips, serviceDays, headsignsByDirectionId)
-  const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0])
-  const [service, setService] = useState(Object.keys(tripsByServiceDay)[0])
-  const [view, setView] = useState(views[0])
+  });
 
-  console.log(sanityRoute.directions)
+  let tripsByServiceAndDirection = getTripsByServiceAndDirection(
+    trips,
+    serviceDays,
+    headsignsByDirectionId
+  );
+  const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0]);
+  const [service, setService] = useState(Object.keys(tripsByServiceDay)[0]);
+  const [view, setView] = useState(views[0]);
 
-  
-
-  let selectedTrips = tripsByServiceAndDirection[service][direction]
-  let sortedTrips = []
-  let timepoints = null
+  let selectedTrips = tripsByServiceAndDirection[service][direction];
+  let sortedTrips = [];
+  let timepoints = null;
   if (selectedTrips !== undefined && selectedTrips.length > 0) {
-    sortedTrips = sortTripsByFrequentTimepoint(selectedTrips).trips
-    timepoints = sortTripsByFrequentTimepoint(selectedTrips).timepoints
+    sortedTrips = sortTripsByFrequentTimepoint(selectedTrips).trips;
+    timepoints = sortTripsByFrequentTimepoint(selectedTrips).timepoints;
   }
 
   return (
     <div>
-      <AgencyHeader agency={data.postgres.agencies[0]} />
-      <RouteHeader {...gtfsRoute} />
-      <div className="flex flex-col w-full md:flex-row items-center justify-start gap-2 my-2">
-        <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
-        <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
-        <RouteViewPicker {...{ view, setView }} />
+      <div>
+        <AgencyHeader agency={agencyData} />
+        <RouteHeader {...gtfsRoute} agency={agencyData} />
+        <div className="bg-gray-100 p-4 md:py-6 flex flex-col gap-4 md:gap-8">
+          <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />
+          <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
+          {/* <RouteViewPicker {...{ view, setView }} /> */}
+        </div>
       </div>
       {/* {sortedTrips && <h3>There are {sortedTrips.length} trips in that direction of travel on that day.</h3>} */}
-      {view === 'List of trips' &&
+      {view === "List of trips" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
-          {sortedTrips.length > 0 && sortedTrips.map((trip, index) => (
-            <RouteTimetableTrip trip={trip} key={trip.tripId} index={index} />
-          ))}
+          {sortedTrips.length > 0 &&
+            sortedTrips.map((trip, index) => (
+              <RouteTimetableTrip trip={trip} key={trip.tripId} index={index}  />
+            ))}
         </div>
-      }
-      {view === 'Timetable' && sortedTrips.length > 0 &&
-        <RouteTimeTable trips={sortedTrips} timepoints={timepoints} route={gtfsRoute} />
-      }
+      )}
+      {view === "Timetable" && sortedTrips.length > 0 && (
+        <RouteTimeTable trips={sortedTrips} timepoints={timepoints} route={gtfsRoute} agency={agencyData} />
+      )}
     </div>
-  )
-}
+  );
+};
 
 export const query = graphql`
   query RouteTimetableQuery($feedIndex: Int, $routeNo: String, $agencySlug: String) {
@@ -141,7 +145,7 @@ export const query = graphql`
       }
     }
     postgres {
-      routes: routesList(condition: {feedIndex: $feedIndex, routeShortName: $routeNo}) {
+      routes: routesList(condition: { feedIndex: $feedIndex, routeShortName: $routeNo }) {
         agencyId
         routeShortName
         routeLongName
@@ -159,7 +163,7 @@ export const query = graphql`
           tripHeadsign
           stopTimes: stopTimesByFeedIndexAndTripIdList(
             orderBy: STOP_SEQUENCE_ASC
-            condition: {timepoint: 1}
+            condition: { timepoint: 1 }
           ) {
             stop: stopByFeedIndexAndStopId {
               stopName
@@ -174,7 +178,7 @@ export const query = graphql`
           }
         }
       }
-      agencies: agenciesList(condition: {feedIndex: $feedIndex}) {
+      agencies: agenciesList(condition: { feedIndex: $feedIndex }) {
         feedIndex
         agencyName
         feedInfo: feedInfoByFeedIndex {
@@ -192,6 +196,6 @@ export const query = graphql`
       }
     }
   }
-`
+`;
 
 export default RouteTimetable;
