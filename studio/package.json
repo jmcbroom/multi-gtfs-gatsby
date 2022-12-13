@@ -29,6 +29,7 @@
     "@turf/bbox": "^6.5.0",
     "eslint": "^8.6.0",
     "mapbox-gl": "^2.9.2",
+    "mapbox-gl-draw-snap-mode": "^0.1.11",
     "prop-types": "^15.7",
     "react": "^17.0",
     "react-dom": "^17.0",

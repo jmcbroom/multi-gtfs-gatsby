@@ -10,18 +10,18 @@ import {Link} from 'gatsby';
  * @param {Number} routeColor 
  * @param {Number} routeTextColor 
  */
-const RouteHeader = ({ feedIndex, routeShortName, routeLongName, routeColor='#000', routeTextColor='#fff', slug }) => {
+const RouteHeader = ({ routeShortName, routeLongName, routeColor='#000', routeTextColor='#fff', agency }) => {
 
   return (
-    <Link to={`/${slug}/route/${routeShortName}`}>
-      <li className="flex items-center justify-start py-2 bg-gray-200">
+    <Link to={`/${agency.slug.current}/route/${routeShortName}`}>
+      <li className="flex items-center justify-start py-2 md:px-2 bg-gray-200">
         <span 
           className="w-10 font-bold text-center py-2 bg-white mx-2" 
           style={{background: `${routeColor}`, color: `${routeTextColor}`}}
         >
           {routeShortName}
         </span>
-        <span>
+        <span className="">
           {routeLongName}
         </span>
       </li>

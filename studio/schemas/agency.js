@@ -10,6 +10,12 @@ export default {
       type: "string"
     },
     {
+      name: "fullName",
+      title: "Agency full name",
+      description: "The full name of the transit agency",
+      type: "string"
+    },
+    {
       name: "slug",
       title: "Agency slug",
       description: "A URL slug for the transit agency",
@@ -24,6 +30,12 @@ export default {
       title: "Feed index",
       description: "The currently valid GTFS feed index #",
       type: "number"
+    },
+    {
+      name: "description",
+      title: "Description",
+      description: "A short description of the agency",
+      type: "blockContent"
     },
     {
       name: "content",
