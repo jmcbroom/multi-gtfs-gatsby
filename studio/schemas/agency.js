@@ -32,6 +32,18 @@ export default {
       type: "number"
     },
     {
+      name: "color",
+      title: "Color",
+      description: "A color for the agency",
+      type: "color"
+    },
+    {
+      name: "textColor",
+      title: "Color",
+      description: "A text color for the agency. Should contrast with the color above.",
+      type: "color"
+    },
+    {
       name: "description",
       title: "Description",
       description: "A short description of the agency",

@@ -14,14 +14,14 @@ const RouteHeader = ({ routeShortName, routeLongName, routeColor='#000', routeTe
 
   return (
     <Link to={`/${agency.slug.current}/route/${routeShortName}`}>
-      <li className="flex items-center justify-start py-2 md:px-2 bg-gray-200">
+      <li className="flex items-center justify-start gap-2">
         <span 
-          className="w-10 font-bold text-center py-2 bg-white mx-2" 
+          className="w-10 font-extrabold text-center py-2 bg-white" 
           style={{background: `${routeColor}`, color: `${routeTextColor}`}}
         >
           {routeShortName}
         </span>
-        <span className="">
+        <span>
           {routeLongName}
         </span>
       </li>

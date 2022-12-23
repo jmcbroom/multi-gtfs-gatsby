@@ -12,6 +12,7 @@ import route from "./route";
 // non-GTFS models
 import destination from './destination'
 import destinationRoute from "./destinationRoute";
+import indexPage from "./indexPage";
 import extRouteDirection from "./extRouteDirection";
 import journeyPart from "./journeyPart";
 import journey from "./journey";
@@ -26,6 +27,9 @@ export default createSchema({
   types: schemaTypes.concat([
     blockContent,
     richDate,
+
+    // content pages
+    indexPage,
 
     // we add our GTFS models to this array
     agency,

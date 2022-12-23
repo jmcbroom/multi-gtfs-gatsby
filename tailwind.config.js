@@ -1,11 +1,11 @@
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: "#eee",
+      },
+    },
   },
-  plugins: [
-    'gatsby-plugin-postcss'
-  ],
-}
+  plugins: ["gatsby-plugin-postcss"],
+};

@@ -51,6 +51,11 @@
       "url": "mapbox://mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7,jmcbroom.a1nynqkj",
       "type": "vector"
     },
+    "mapbox://mapbox.satellite": {
+      "url": "mapbox://mapbox.satellite",
+      "type": "raster",
+      "tileSize": 256
+  },
     "routes": {
       "type": "geojson",
       "data": {
@@ -88,6 +93,20 @@
       "type": "background",
       "layout": {},
       "paint": { "background-color": "hsl(0, 0%, 100%)" }
+    },
+    {
+      "id": "satellite",
+      "type": "raster",
+      "metadata": {
+          "mapbox:featureComponent": "satellite",
+          "mapbox:group": "Satellite imagery, land"
+      },
+      "source": "mapbox://mapbox.satellite",
+      "layout": {
+      },
+      "paint": {
+        "raster-opacity": 0.5
+      }
     },
     {
       "id": "landcover_snow",

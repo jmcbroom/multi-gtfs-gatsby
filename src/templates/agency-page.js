@@ -1,44 +1,80 @@
-import React from "react"
+import React from "react";
 import { graphql, Link } from "gatsby";
-import RouteHeader from '../components/RouteHeader';
-import AgencyHeader from '../components/AgencyHeader';
+import RouteHeader from "../components/RouteHeader";
+import AgencyHeader from "../components/AgencyHeader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLink, faPhone } from "@fortawesome/free-solid-svg-icons";
 import PortableText from "react-portable-text";
-import {createAgencyData} from '../util'
+import { createAgencyData } from "../util";
+import AgencySlimHeader from "../components/AgencySlimHeader";
+import * as Tabs from "@radix-ui/react-tabs";
 
 const Agency = ({ data, pageContext }) => {
+  let gtfsAgency = data.postgres.agencies[0];
+  let sanityAgency = data.allSanityAgency.edges[0].node;
+  let agencyData = createAgencyData(gtfsAgency, sanityAgency);
 
-  let gtfsAgency = data.postgres.agencies[0]
-  let sanityAgency = data.allSanityAgency.edges[0].node
-  console.log(sanityAgency)
-  let agencyData = createAgencyData(gtfsAgency, sanityAgency)
-  console.log(agencyData)
-
-  let { agencyUrl, agencyPhone, routes, description } = agencyData
+  let { agencyUrl, agencyPhone, routes, description, name, agencyFareContent } = agencyData;
 
   // let's not display any routes that don't have scheduled trips.
-  let sanityRoutes = data.allSanityRoute.edges.map(e => e.node)
-  routes = routes.filter(r => r.trips.totalCount > 0).sort((a, b) => a.implicitSort - b.implicitSort)
+  let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
+  routes = routes
+    .filter((r) => r.trips.totalCount > 0)
+    .sort((a, b) => a.implicitSort - b.implicitSort);
 
-  routes.forEach(r => {
-
+  routes.forEach((r) => {
     // find the matching sanityRoute
-    let matching = sanityRoutes.filter(sr => sr.agency.currentFeedIndex == r.feedIndex && sr.shortName == r.routeShortName)
+    let matching = sanityRoutes.filter(
+      (sr) => sr.agency.currentFeedIndex === r.feedIndex && sr.shortName === r.routeShortName
+    );
 
     // let's override the route attributes with those from Sanity
-    if (matching.length == 1) {
-      r.routeLongName = matching[0].longName
-      r.routeColor = matching[0].routeColor.hex
-      r.routeTextColor = matching[0].routeTextColor.hex
+    if (matching.length === 1) {
+      r.routeLongName = matching[0].longName;
+      r.routeColor = matching[0].routeColor.hex;
+      r.routeTextColor = matching[0].routeTextColor.hex;
     }
-
-  })
+  });
 
   return (
     <div>
-      <AgencyHeader agency={agencyData} />
-      <PortableText content={description} />
+      <AgencySlimHeader agency={agencyData} />
+      <Tabs.Root className="tabRoot" defaultValue="home">
+        <Tabs.List className="tabList" aria-label="Manage your account">
+          <Tabs.Trigger className="tabTrigger" value="home">
+            Home
+          </Tabs.Trigger>
+          <Tabs.Trigger className="tabTrigger" value="routes">
+            Routes
+          </Tabs.Trigger>
+          <Tabs.Trigger className="tabTrigger" value="map">
+            Map
+          </Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content className="tabContent py-4" value="home">
+          <AgencyHeader agency={agencyData} />
+          <PortableText content={description} />
+
+          <h4>Fares</h4>
+          {agencyFareContent && <PortableText content={agencyFareContent} />}
+
+          <h4>Contact information</h4>
+          <p>You can find {name}'s website at <Link to={agencyUrl}>{agencyUrl}</Link>.</p>
+          <p>{name}'s customer service number is <Link to={agencyUrl}>{agencyPhone}</Link>.</p>
+
+        </Tabs.Content>
+        <Tabs.Content className="tabContent py-4" value="routes">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
+            {routes.map((r) => (
+              <RouteHeader key={r.routeId} {...r} agency={agencyData} />
+            ))}
+          </div>
+        </Tabs.Content>
+        <Tabs.Content className="tabContent" value="map">
+          <h3>System map</h3>
+        </Tabs.Content>
+      </Tabs.Root>
+      {/* 
       <section className="flex flex-col sm:flex-row items-center justify-start gap-4 mb-4">
         <div className="flex items-center justify-between">
           <Link to={agencyUrl}>
@@ -56,17 +92,15 @@ const Agency = ({ data, pageContext }) => {
       <h3>Fare information</h3>
       <p>...</p>
       <h3>Bus routes</h3>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {routes.map(r => <RouteHeader key={r.routeId} {...r} agency={agencyData} />)}
-      </div>
+      */}
     </div>
-  )
-}
+  );
+};
 
 export const query = graphql`
   query AgencyQuery($feedIndex: Int, $agencySlug: String) {
     postgres {
-      agencies: agenciesList(condition: {feedIndex: $feedIndex}) {
+      agencies: agenciesList(condition: { feedIndex: $feedIndex }) {
         agencyName
         agencyUrl
         agencyTimezone
@@ -103,7 +137,7 @@ export const query = graphql`
         }
       }
     }
-    allSanityRoute(filter: {agency: {slug: {current: {eq: $agencySlug}}}}) {
+    allSanityRoute(filter: { agency: { slug: { current: { eq: $agencySlug } } } }) {
       edges {
         node {
           longName
@@ -123,11 +157,17 @@ export const query = graphql`
         }
       }
     }
-    allSanityAgency(filter: {slug: {current: {eq: $agencySlug}}}) {
+    allSanityAgency(filter: { slug: { current: { eq: $agencySlug } } }) {
       edges {
         node {
           name
           currentFeedIndex
+          color {
+            hex
+          }
+          textColor {
+            hex
+          }
           slug {
             current
           }
@@ -136,6 +176,6 @@ export const query = graphql`
       }
     }
   }
-`
+`;
 
 export default Agency;

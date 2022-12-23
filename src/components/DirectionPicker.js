@@ -21,10 +21,10 @@ const DirectionPicker = ({ directions, direction, setDirection }) => {
 
   return (
     <>
-      <RadioGroup.Root className="radioGroupRoot" defaultValue={Object.keys(directions)[0]} onValueChange={(e) => setDirection(e)}>
-        <div className="w-12 flex flex-shrink-0 items-center justify-around">
+      <RadioGroup.Root className="radioGroupRoot" defaultValue={direction ? direction : Object.keys(directions)[0]} onValueChange={(e) => setDirection(e)}>
+        {/* <div className="w-12 flex flex-shrink-0 items-center justify-around">
           <FontAwesomeIcon icon={faExchangeAlt} className="radioGroupIcon" />
-        </div>
+        </div> */}
         {Object.keys(directions).map((dir) => (
           <div className="flex items-center" key={dir}>
             <RadioGroup.Item
