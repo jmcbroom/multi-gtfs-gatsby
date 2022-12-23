@@ -1,6 +1,7 @@
 import { graphql } from "gatsby";
 import React from "react";
 import AgencyHeader from "../components/AgencyHeader";
+import AgencySlimHeader from "../components/AgencySlimHeader";
 import RouteHeader from "../components/RouteHeader";
 import { Link } from "gatsby";
 import PortableText from "react-portable-text";
@@ -12,6 +13,7 @@ import PortableText from "react-portable-text";
 const IndexPage = ({ data }) => {
   let { agencies } = data.postgres;
   let sanityAgencies = data.allSanityAgency.edges.map((e) => e.node);
+  let { indexPageContent } = data.indexPage;
 
   let merged = sanityAgencies.map((sa) => {
     let filtered = agencies.filter((ag) => ag.feedIndex === sa.currentFeedIndex)[0];
@@ -27,11 +29,11 @@ const IndexPage = ({ data }) => {
 
       // find the matching sanityRoute
       let matching = sanityRoutes.filter(
-        (sr) => sr.agency.currentFeedIndex == r.feedIndex && sr.shortName == r.routeShortName
+        (sr) => sr.agency.currentFeedIndex === r.feedIndex && sr.shortName === r.routeShortName
       );
 
       // let's override the route attributes with those from Sanity
-      if (matching.length == 1) {
+      if (matching.length === 1) {
         r.routeLongName = matching[0].longName;
         r.routeColor = matching[0].routeColor.hex;
         r.routeTextColor = matching[0].routeTextColor.hex;
@@ -39,46 +41,42 @@ const IndexPage = ({ data }) => {
     });
   });
 
-  console.log(merged)
   return (
-    <>
-      <h2>Local bus systems</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6 mb-2 md:mb-6">
+    <div className="">
+      <PortableText content={indexPageContent} className="my-4 md:my-6 px-2 md:px-0" />
+      <h2 className="px-2 md:px-0">Local bus systems</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-2 md:mb-6">
         {merged.map((a) => (
-          <section className="bg-gray-100" key={a.feedIndex}>
-            <AgencyHeader agency={a} />
-            {a.description && <PortableText content={a.description} />}
-            {/* <ul className="max-h-80 overflow-y-scroll">
-              {a.routes
-                .sort((a, b) => a.implicitSort - b.implicitSort)
-                .map((r) =>
-                  r.trips.totalCount > 0 ? (
-                    <RouteHeader
-                      {...r}
-                      agency={r.agencyData}
-                      key={`${a.feedIndex}_${r.routeShortName}`}
-                    />
-                  ) : null
-                )}
-            </ul> */}
-          </section>
+          <div className="bg-gray-100 border-b-2 border-gray-500" key={a.feedIndex}>
+            <AgencySlimHeader agency={a} />
+            <div className="px-4 pb-4 md:pb-8 pt-2">
+              <AgencyHeader agency={a} />
+              {a.description && <PortableText content={a.description} />}
+            </div>
+          </div>
         ))}
       </div>
-      <h2>
-        Other transportation services
-      </h2>
-    </>
+    </div>
   );
 };
 
 export const query = graphql`
   {
-    allSanityAgency {
+    indexPage: sanityIndexPage(_id: { eq: "index-page-content" }) {
+      indexPageContent: _rawHomepageContent
+    }
+    allSanityAgency(sort: { fields: name }) {
       edges {
         node {
           currentFeedIndex
           name
           fullName
+          color {
+            hex
+          }
+          textColor {
+            hex
+          }
           description: _rawDescription
           slug {
             current

@@ -1,0 +1,55 @@
+.tabRoot {
+  display: flex;
+  flex-direction: column;
+  @apply shadow-sm;
+}
+
+.tabList {
+  flex-shrink: 1;
+  flex-grow: 0;
+  display: flex;
+  @apply border-b-2;
+  @apply border-b-primary;
+  @apply bg-gray-200;
+}
+
+.tabTrigger {
+  font-family: inherit;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @apply text-sm;
+  @apply md:text-base;
+  @apply px-4;
+  @apply md:px-6;
+  @apply py-4;
+  line-height: 1;
+  color: var(--mauve11);
+  user-select: none;
+}
+
+.tabTrigger:hover {
+  @apply text-gray-600;
+}
+.tabTrigger[data-state='active'] {
+  @apply text-gray-600;
+  @apply font-semibold;
+  @apply bg-gray-300;
+  box-shadow: inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor;
+}
+.tabTrigger:focus {
+  position: relative;
+  @apply shadow-sm;
+}
+
+.tabContent {
+  flex-grow: 1;
+  background-color: white;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  outline: none;
+}
+.tabContent:focus {
+  box-shadow: 0 0 0 2px black;
+}

@@ -173,14 +173,16 @@ export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
     headsignsByDirectionId[dir] = { headsigns: headsigns }
   })
 
-  sanityRoute.directions.forEach((dir, idx) => {
-    if (dir.directionHeadsign) {
-      headsignsByDirectionId[idx].headsigns = [dir.directionHeadsign];
-    }
-    if (dir.directionDescription) {
-      headsignsByDirectionId[idx].description = dir.directionDescription;
-    }
-  });
+  if(sanityRoute) {
+    sanityRoute.directions.forEach((dir, idx) => {
+      if (dir.directionHeadsign) {
+        headsignsByDirectionId[idx].headsigns = [dir.directionHeadsign];
+      }
+      if (dir.directionDescription) {
+        headsignsByDirectionId[idx].description = dir.directionDescription;
+      }
+    });
+  }
   return headsignsByDirectionId
 }
 
@@ -272,7 +274,9 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
   gtfsAgency.slug = sanityAgency.slug
   gtfsAgency.content = sanityAgency.content
   gtfsAgency.description = sanityAgency.description
-
+  gtfsAgency.name = sanityAgency.name
+  gtfsAgency.color = sanityAgency.color
+  gtfsAgency.textColor = sanityAgency.textColor
   return gtfsAgency
 
 }

@@ -26,4 +26,8 @@ export default () =>
         .title("Journey Parts")
         .icon(FaLongArrowAltRight)
         .child(S.documentTypeList("journeyPart")),
+      S.divider(),
+      S.listItem().title("Homepage content").child(
+        S.editor().id("indexPage").schemaType("indexPage").title("Site content").documentId("index-page-content")
+      ),
     ]);

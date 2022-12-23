@@ -12,22 +12,23 @@ import React from "react";
 export default function Layout({ children }) {
   return (
     <div>
-      <header className="bg-blue-100 mb-4 px-4">
-        <div className="max-w-4xl py-2 mx-auto flex items-center">
-          <div>
-            <Link to={`/`}>
-              <h1 className="header font-bold text-gray-600 text-xl">
-                transit<span className="text-gray-400">.det.city</span>
-              </h1>
-            </Link>
-            <p className="m-0 text-sm text-gray-600">A Detroit-area transit rider's manual</p>
-          </div>
+      <header className="bg-primary bg-opacity-80 px-4">
+        <div className="max-w-4xl py-2 mx-auto flex items-center justify-between">
+          <Link to={`/`}>
+            <h1 className="header font-bold text-gray-700 text-xl">
+              transit<span className="text-gray-500">.det.city</span>
+            </h1>
+          </Link>
         </div>
       </header>
-      <div className="max-w-4xl mx-auto pl-2 md:pl-0 pr-3 md:pr-0">
-        {children}
+      <div className="px-0f md:px-4">
+        <div className="max-w-4xl mx-auto">{children}</div>
       </div>
-      <footer className="h-32 mt-8 bg-blue-100 p-4 text-center">{new Date().getFullYear()}</footer>
+      <footer className="h-32 mt-8 bg-primary px-2 md:px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto">
+          <p>It's {new Date().getFullYear()} -- time to get on the bus!</p>
+        </div>
+      </footer>
     </div>
   );
 }

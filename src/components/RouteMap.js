@@ -9,13 +9,15 @@ const RouteMap = ({ routeFc, timepointsFc }) => {
   const routeFeatureCollection = routeFc
   const timepointsFeatureCollection = timepointsFc
 
+  let mapInitialBbox = routeFeatureCollection.features.length > 0 ? bbox(routeFeatureCollection) : bbox(timepointsFeatureCollection)
+
   useEffect(() => {
     const accessToken = process.env.MAPBOX_ACCESS_TOKEN;
 
     let map = new Map({
       container: "map",
       style: mapboxStyle,
-      bounds: bbox(routeFeatureCollection),
+      bounds: mapInitialBbox,
       fitBoundsOptions: {
         padding: 50,
         maxZoom: 17,
@@ -28,13 +30,16 @@ const RouteMap = ({ routeFc, timepointsFc }) => {
 
     map.on("load", () => {
       map.resize();
-      map.getSource("routes").setData(routeFeatureCollection);
-      map.getSource("timepoints").setData(timepointsFeatureCollection)
+      if(routeFeatureCollection.features.length > 0) {
+        map.getSource("routes").setData(routeFeatureCollection);
+      }
+      if(timepointsFeatureCollection.features.length > 0) {
+        map.getSource("timepoints").setData(timepointsFeatureCollection)
+      }
     });
 
     map.on("click", (e) => {
       const features = map.queryRenderedFeatures(e.point);
-      console.log(features);
     });
   }, []);
 

@@ -97,7 +97,7 @@ export default {
               style={{
                 display: "inline-block",
                 fontWeight: "700",
-                fontSize: shortName.length == 3 ? "0.8em" : "1em",
+                fontSize: shortName.length === 3 ? "0.8em" : "1em",
               }}
             >
               {shortName}

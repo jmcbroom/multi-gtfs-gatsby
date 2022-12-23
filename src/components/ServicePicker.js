@@ -2,6 +2,7 @@ import { faCalendarWeek } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import React from "react";
+import '../styles/picker.css'
 
 /**
  * Let the user choose the current service day.
@@ -20,23 +21,24 @@ const ServicePicker = ({ services, service, setService }) => {
   return (
     <RadioGroup.Root
       className="radioGroupRoot"
-      defaultValue={Object.keys(services)[0]}
+      defaultValue={service ? service : Object.keys(services)[0]}
       onValueChange={(e) => setService(e)}
     >
-      <div className="w-12 flex flex-shrink-0 items-center justify-around">
+      {/* <div className="w-12 flex flex-shrink-0 items-center justify-around">
         <FontAwesomeIcon icon={faCalendarWeek} className="radioGroupIcon" />
-      </div>
+      </div> */}
       {Object.keys(services).map((serviceDay) => (
         <div className="flex items-center" key={serviceDay}>
           <RadioGroup.Item
             className="radioGroupItem"
             value={serviceDay}
             id={serviceDay}
+            disabled={services[serviceDay].length === 0}
             
           >
             <RadioGroup.Indicator className="radioGroupIndicator" />
           </RadioGroup.Item>
-          <label className="radioGroupLabel" htmlFor={serviceDay}>
+          <label className="radioGroupLabel" data-disabled={services[serviceDay].length === 0} htmlFor={serviceDay}>
             {display[serviceDay]}
           </label>
         </div>
