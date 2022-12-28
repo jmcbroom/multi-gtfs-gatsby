@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
+import StopTimeLabel from "./StopTimeLabel";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import classNames from "classnames";
 import _ from "lodash";
@@ -7,7 +8,6 @@ import "../styles/accordion.css";
 import {
   createAgencyData,
   createRouteData,
-  formatArrivalTime,
   getServiceDays,
   getTripsByServiceDay,
 } from "../util";
@@ -76,8 +76,8 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
                 <ul className="columns-4 sm:columns-5">
                   {timesByRoute[route.routeShortName][service].map((trip) => (
-                    <li className={`${formatArrivalTime(trip.arrivalTime).indexOf("p") > -1 ? `font-semibold` : `font-base`}`}>
-                      {formatArrivalTime(trip.arrivalTime).slice(0, -3)}
+                    <li>
+                      <StopTimeLabel arrivalTime={trip.arrivalTime} />
                     </li>
                   ))}
                 </ul>
