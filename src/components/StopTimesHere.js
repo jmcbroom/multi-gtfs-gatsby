@@ -74,9 +74,9 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                   here at:
                 </p>
 
-                <ul className="columns-4 sm:columns-5">
+                <ul className="columns-4 sm:columns-5 gap-0 border-l-2 border-dotted border-grey-700 text-center">
                   {timesByRoute[route.routeShortName][service].map((trip) => (
-                    <li>
+                    <li className="border-r-2 border-dotted border-grey-700">
                       <StopTimeLabel arrivalTime={trip.arrivalTime} />
                     </li>
                   ))}
