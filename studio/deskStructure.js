@@ -1,7 +1,6 @@
-import S from "@sanity/desk-tool/structure-builder";
 import { FaBus, FaCity, FaLongArrowAltRight, FaMap } from "react-icons/fa";
 
-export default () =>
+export default S =>
   S.list()
     .title("Document types")
     .items([
