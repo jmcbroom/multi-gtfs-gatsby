@@ -50,7 +50,9 @@ export default {
       title: "Direction shape",
       description: "Draw this direction's route shape using the line string button",
       type: "string",
-      inputComponent: ShapeInput,
+      components: {
+        input: ShapeInput
+      }
     },
   ],
   preview: {

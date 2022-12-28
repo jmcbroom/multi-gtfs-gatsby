@@ -1,4 +1,4 @@
-import React from "react";
+import RouteIcon from "../components/RouteIcon";
 
 export default {
   title: "Route",
@@ -81,29 +81,7 @@ export default {
       return {
         title: longName,
         subtitle: agency,
-        media: (
-          <div
-            style={{
-              width: `100%`,
-              height: `100%`,
-              backgroundColor: color.hex,
-              color: textColor.hex,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                fontWeight: "700",
-                fontSize: shortName.length === 3 ? "0.8em" : "1em",
-              }}
-            >
-              {shortName}
-            </span>
-          </div>
-        ),
+        media: RouteIcon({ shortName, color, textColor }),
       };
     },
   },
