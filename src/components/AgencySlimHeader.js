@@ -7,8 +7,8 @@ import { Link } from "gatsby";
  * @returns
  */
 const AgencySlimHeader = ({ agency }) => {
-  console.log(agency);
 
+  console.log(agency)
   const { slug, agencyName, name, fullName, color, textColor } = agency;
 
   return (

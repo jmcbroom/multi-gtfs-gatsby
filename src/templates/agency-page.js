@@ -5,7 +5,7 @@ import AgencyHeader from "../components/AgencyHeader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLink, faPhone } from "@fortawesome/free-solid-svg-icons";
 import PortableText from "react-portable-text";
-import { createAgencyData } from "../util";
+import { createAgencyData, createRouteData } from "../util";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import * as Tabs from "@radix-ui/react-tabs";
 
@@ -25,14 +25,12 @@ const Agency = ({ data, pageContext }) => {
   routes.forEach((r) => {
     // find the matching sanityRoute
     let matching = sanityRoutes.filter(
-      (sr) => sr.agency.currentFeedIndex === r.feedIndex && sr.shortName === r.routeShortName
+      (sr) => sr.shortName === r.routeShortName
     );
 
     // let's override the route attributes with those from Sanity
     if (matching.length === 1) {
-      r.routeLongName = matching[0].longName;
-      r.routeColor = matching[0].routeColor.hex;
-      r.routeTextColor = matching[0].routeTextColor.hex;
+      r = createRouteData(r, matching[0])
     }
   });
 
@@ -147,12 +145,6 @@ export const query = graphql`
           }
           routeTextColor: textColor {
             hex
-          }
-          agency {
-            currentFeedIndex
-            slug {
-              current
-            }
           }
         }
       }

@@ -1,3 +1,4 @@
+import { head } from "lodash";
 
 /**
  * Convert the GraphQL arrivalTime to a human-readable string.
@@ -26,7 +27,7 @@ export const formatArrivalTime = (time, showAp=true) => {
     ap = "am";
   }
 
-  return `${hour}:${minutes} ${ap}`;
+  return `${hour}:${minutes}${showAp ? ` ${ap}` : ``}`;
 };
 
 /**
@@ -165,7 +166,7 @@ export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDir
 export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
   let headsignsByDirectionId = {}
   const directions = [...new Set(trips.map(trip => trip.directionId))].sort()
-
+  console.log(directions)
   directions.forEach(dir => {
     let tripsThisDirection = trips.filter(trip => trip.directionId === dir)
     // get th unique tripHeadsigns
@@ -175,11 +176,14 @@ export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
 
   if(sanityRoute) {
     sanityRoute.directions.forEach((dir, idx) => {
+      console.log(dir)
+      let directionId = dir.directionId
+      console.log(directionId, headsignsByDirectionId)
       if (dir.directionHeadsign) {
-        headsignsByDirectionId[idx].headsigns = [dir.directionHeadsign];
+        headsignsByDirectionId[directionId].headsigns = [dir.directionHeadsign];
       }
       if (dir.directionDescription) {
-        headsignsByDirectionId[idx].description = dir.directionDescription;
+        headsignsByDirectionId[directionId].description = dir.directionDescription;
       }
     });
   }
@@ -279,4 +283,11 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
   gtfsAgency.textColor = sanityAgency.textColor
   return gtfsAgency
 
+}
+
+export const createRouteData = (gtfsRoute, sanityRoute) => {
+  gtfsRoute.routeLongName = sanityRoute.longName
+  gtfsRoute.routeColor = sanityRoute.routeColor.hex
+  gtfsRoute.routeTextColor = sanityRoute.routeTextColor.hex
+  return gtfsRoute
 }

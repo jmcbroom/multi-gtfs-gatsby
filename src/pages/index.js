@@ -5,6 +5,7 @@ import AgencySlimHeader from "../components/AgencySlimHeader";
 import RouteHeader from "../components/RouteHeader";
 import { Link } from "gatsby";
 import PortableText from "react-portable-text";
+import { createRouteData } from "../util";
 
 /**
  * The home page.
@@ -34,9 +35,7 @@ const IndexPage = ({ data }) => {
 
       // let's override the route attributes with those from Sanity
       if (matching.length === 1) {
-        r.routeLongName = matching[0].longName;
-        r.routeColor = matching[0].routeColor.hex;
-        r.routeTextColor = matching[0].routeTextColor.hex;
+        r = createRouteData(r, matching[0])
       }
     });
   });

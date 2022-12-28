@@ -26,9 +26,10 @@ export default function Layout({ children }) {
       </div>
       <footer className="h-32 mt-8 bg-primary px-2 md:px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto">
-          <p>It's {new Date().getFullYear()} -- time to get on the bus!</p>
+          <p>It's {new Date().getFullYear()}!</p>
         </div>
       </footer>
     </div>
   );
 }
+  
