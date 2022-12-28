@@ -12,3 +12,5 @@ studio/dist/static/js/vendor.bundle.js
 jupyter/
 # Local Netlify folder
 .netlify
+
+yarn-error.log
