@@ -50,19 +50,22 @@ export default {
       title: "Direction shape",
       description: "Draw this direction's route shape using the line string button",
       type: "string",
-      inputComponent: ShapeInput,
+      components: {
+        input: ShapeInput
+      }
     },
   ],
   preview: {
     select: {
       directionId: "directionId",
       directionDescription: "directionDescription",
+      directionHeadsign: "directionHeadsign"
     },
-    prepare({ directionDescription, directionId }) {
+    prepare({ directionDescription, directionId, directionHeadsign }) {
       return {
         // hacking together and 
         title: directionDescription.charAt(0).toUpperCase() + directionDescription.slice(1),
-        subtitle: `direction_id: ${directionId}`,
+        subtitle: `${directionHeadsign} [${directionId}]`,
       };
     },
   },

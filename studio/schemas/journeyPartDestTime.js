@@ -1,3 +1,5 @@
+import TimeInput from "../components/TimeInput";
+
 export default {
   name: "journeyPartDestTime",
   title: "Journey Part Destination Time",
@@ -15,10 +17,9 @@ export default {
     {
       name: "journeyPartTime",
       title: "The time of arrival at the destination",
-      type: "richDate",
-      options: {
-        inputDate: false,
-        timeStep: 1,
+      type: "string",
+      components: {
+        input: TimeInput
       }
     }
   ],

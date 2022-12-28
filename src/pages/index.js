@@ -1,8 +1,10 @@
 import { graphql } from "gatsby";
 import React from "react";
 import AgencyHeader from "../components/AgencyHeader";
+import AgencySlimHeader from "../components/AgencySlimHeader";
 import RouteHeader from "../components/RouteHeader";
 import { Link } from "gatsby";
+import PortableText from "react-portable-text";
 
 /**
  * The home page.
@@ -11,95 +13,71 @@ import { Link } from "gatsby";
 const IndexPage = ({ data }) => {
   let { agencies } = data.postgres;
   let sanityAgencies = data.allSanityAgency.edges.map((e) => e.node);
+  let { indexPageContent } = data.indexPage;
 
-  let merged = sanityAgencies.map(sa => {
-    let filtered = agencies.filter(ag => ag.feedIndex === sa.currentFeedIndex)[0]
-    return {...sa, ...filtered}
-  })
+  let merged = sanityAgencies.map((sa) => {
+    let filtered = agencies.filter((ag) => ag.feedIndex === sa.currentFeedIndex)[0];
+    return { ...sa, ...filtered };
+  });
 
   let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
   // loop thru agencies
-  agencies.forEach(a => {
+  merged.forEach((a) => {
     // loop thru those agencies' routes
-    a.routes.forEach(r => {
+    a.routes.forEach((r) => {
+      r.agencyData = a;
 
       // find the matching sanityRoute
-      let matching = sanityRoutes.filter(sr => sr.agency.currentFeedIndex == r.feedIndex && sr.shortName == r.routeShortName)
+      let matching = sanityRoutes.filter(
+        (sr) => sr.agency.currentFeedIndex === r.feedIndex && sr.shortName === r.routeShortName
+      );
 
       // let's override the route attributes with those from Sanity
-      if (matching.length == 1) {
-        r.routeLongName = matching[0].longName
-        r.routeColor = matching[0].routeColor.hex
-        r.routeTextColor = matching[0].routeTextColor.hex
+      if (matching.length === 1) {
+        r.routeLongName = matching[0].longName;
+        r.routeColor = matching[0].routeColor.hex;
+        r.routeTextColor = matching[0].routeTextColor.hex;
       }
-
-    })
-  })
-
+    });
+  });
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="">
+      <PortableText content={indexPageContent} className="my-4 md:my-6 px-2 md:px-0" />
+      <h2 className="px-2 md:px-0">Local bus systems</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-2 md:mb-6">
         {merged.map((a) => (
-          <section key={a.feedIndex}>
-            <AgencyHeader agency={a} />
-            <h3>{a.routes.length} bus routes</h3>
-            <ul className="max-h-80 overflow-y-scroll">
-              {a.routes
-                .sort((a, b) => a.implicitSort - b.implicitSort)
-                .map((r) =>
-                  r.trips.totalCount > 0 ? (
-                    <RouteHeader
-                      {...r}
-                      slug={a.slug.current}
-                      key={`${a.feedIndex}_${r.routeShortName}`}
-                    />
-                  ) : null
-                )}
-            </ul>
-          </section>
+          <div className="bg-gray-100 border-b-2 border-gray-500" key={a.feedIndex}>
+            <AgencySlimHeader agency={a} />
+            <div className="px-4 pb-4 md:pb-8 pt-2">
+              <AgencyHeader agency={a} />
+              {a.description && <PortableText content={a.description} />}
+            </div>
+          </div>
         ))}
-        <section>
-          <Link to={`/d2a2`}>
-            <h3>Detroit-Ann Arbor (D2A2) bus</h3>
-          </Link>
-          <p>The D2A2 bus travels between Blake Transit Center and Grand Circus Park.</p>
-        </section>
-        <section>
-          <Link to={`/qline`}>
-            <h3>QLine</h3>
-          </Link>
-          <p>The QLine streetcar runs between Congress St and Grand Boulevard along Woodward.</p>
-        </section>
-        <section>
-          <Link to={`/people-mover`}>
-            <h3>People Mover</h3>
-          </Link>
-          <p>The People Mover is not currently operating.</p>
-        </section>
       </div>
-      <section className="mt-4">
-        <h1>Getting other places</h1>
-        <ul>
-          <li>
-            <Link to={`/destinations/toronto`}>Toronto</Link>
-          </li>
-          <li>
-            <Link to={`/destinations/chicago`}>Chicago</Link>
-          </li>
-        </ul>
-      </section>
-    </>
+    </div>
   );
 };
 
 export const query = graphql`
   {
-    allSanityAgency {
+    indexPage: sanityIndexPage(_id: { eq: "index-page-content" }) {
+      indexPageContent: _rawHomepageContent
+    }
+    allSanityAgency(sort: { fields: name }) {
       edges {
         node {
           currentFeedIndex
           name
+          fullName
+          color {
+            hex
+          }
+          textColor {
+            hex
+          }
+          description: _rawDescription
           slug {
             current
           }
@@ -119,6 +97,9 @@ export const query = graphql`
           }
           agency {
             currentFeedIndex
+            slug {
+              current
+            }
           }
         }
       }

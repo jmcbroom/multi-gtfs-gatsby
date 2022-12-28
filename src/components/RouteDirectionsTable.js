@@ -13,8 +13,7 @@ const RouteDirectionsTable = ({ trips, headsigns }) => {
 
   return (
     <section>
-      <h3>When does this route run?</h3>
-      <table className="w-auto border-collapse mt-4">
+      <table className="w-auto border-collapse mt-4 w-100">
         <tbody>
           <tr className="">
             <th className="bg-gray-100">{' '}</th>
@@ -22,7 +21,7 @@ const RouteDirectionsTable = ({ trips, headsigns }) => {
           </tr>
           {directions.map(d => (
             <tr className="pl-4" key={d}>
-              <th className="text-right"><ul className="ml-4">{headsigns[d].map(h => <li className="" key={h}>{h}</li>)}</ul></th>
+              <th className="text-right"><ul className="ml-4">{headsigns[d].headsigns.map(h => <li className="" key={h}>{h}</li>)}</ul></th>
               {services.map(s => {
 
                 let sortedTrips = trips[s][d]

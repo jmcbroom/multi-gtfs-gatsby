@@ -1,0 +1,61 @@
+.radioGroupRoot {
+  @apply flex;
+  @apply items-center;
+  @apply gap-4;
+}
+
+.radioGroupIcon {
+  @apply text-3xl;
+  @apply text-gray-500;
+}
+
+.radioGroupItem {
+  @apply border-2;
+  @apply border-gray-400;
+  @apply bg-blue-100;
+  @apply w-6;
+  @apply h-6;
+  @apply rounded-full;
+  @apply shadow-slate-700;
+  @apply hover:bg-blue-300;
+  @apply focus:shadow-md;
+  @apply flex-shrink-0;
+}
+
+.radioGroupItem[data-disabled=""] {
+  @apply bg-gray-100;
+  @apply border-gray-200;
+}
+
+.radioGroupIndicator {
+  @apply flex;
+  @apply items-center;
+  @apply justify-center;
+  @apply w-full;
+  @apply h-full;
+  @apply relative;
+  @apply after:block;
+  @apply after:w-3;
+  @apply after:h-3;
+  @apply after:rounded-lg;
+  @apply after:bg-gray-600;
+}
+
+.radioGroupLabel {
+  @apply text-sm;
+  @apply text-black;
+  @apply font-normal;
+  @apply pl-2;
+  @apply mr-4;
+  @apply flex;
+  @apply flex-col;
+}
+
+.radioGroupLabel[data-disabled="true"] {
+  @apply text-gray-400;
+  @apply font-normal;
+  @apply pl-2;
+  @apply mr-4;
+  @apply flex;
+  @apply flex-col;
+}
