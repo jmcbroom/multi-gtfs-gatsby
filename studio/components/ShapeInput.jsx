@@ -1,28 +1,23 @@
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css?raw";
+import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css?raw";
-import { FormField } from "@sanity/base/components";
-import PatchEvent, { set, unset } from "@sanity/form-builder/PatchEvent";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+import { PatchEvent, FormField, set, unset } from "sanity";
 import bbox from "@turf/bbox";
 import { Map, mapboxgl } from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css?raw";
+import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useEffect } from "react";
 
 const detroitBbox = [-83.287803, 42.255192, -82.910451, 42.45023];
 
 const ShapeInput = React.forwardRef((props, ref) => {
   const {
-    type,
-    value,
-    readOnly,
-    placeholder,
-    markers,
-    presence,
-    compareValue,
-    onFocus,
-    onBlur,
     onChange,
+    schemaType,
+    compareValue,
+    value,
+    markers,
+    presence
   } = props;
 
   const writeGeometry = React.useCallback(
@@ -98,8 +93,8 @@ const ShapeInput = React.forwardRef((props, ref) => {
   return (
     <>
       <FormField
-        description={type.description}
-        title={type.title}
+        description={schemaType.description}
+        title={schemaType.title}
         compareValue={compareValue}
         __unstable_markers={markers}
         __unstable_presence={presence}
