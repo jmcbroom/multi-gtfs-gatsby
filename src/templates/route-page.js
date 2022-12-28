@@ -42,7 +42,9 @@ const Route = ({ data, pageContext }) => {
   let { serviceCalendars } = agencyData.feedInfo;
 
   let serviceDays = getServiceDays(serviceCalendars);
+  console.log(trips)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
+  console.log(trips)
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(
     trips,
