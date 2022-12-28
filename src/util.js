@@ -162,17 +162,121 @@ export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDir
  * @param {*} trips: an array of trip objects
  * @returns an object whose keys are directionIds and values an array of distinct tripHeadsigns
  */
-export const getHeadsignsByDirectionId = (trips) => {
+export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
   let headsignsByDirectionId = {}
-
   const directions = [...new Set(trips.map(trip => trip.directionId))].sort()
 
   directions.forEach(dir => {
     let tripsThisDirection = trips.filter(trip => trip.directionId === dir)
-    // get the unique tripHeadsigns
+    // get th unique tripHeadsigns
     let headsigns = [...new Set(tripsThisDirection.map(trip => trip.tripHeadsign))]
-    headsignsByDirectionId[dir] = headsigns
+    headsignsByDirectionId[dir] = { headsigns: headsigns }
   })
 
+  if(sanityRoute) {
+    sanityRoute.directions.forEach((dir, idx) => {
+      if (dir.directionHeadsign) {
+        headsignsByDirectionId[idx].headsigns = [dir.directionHeadsign];
+      }
+      if (dir.directionDescription) {
+        headsignsByDirectionId[idx].description = dir.directionDescription;
+      }
+    });
+  }
   return headsignsByDirectionId
+}
+
+/**
+ * Create a GeoJSON FeatureCollection from the GTFS and Sanity representations of a route.
+ * @param {*} sanityRoute: the Sanity data about the route. must include the extendedRouteDirs with the GeoJSON feature-as-string
+ * @param {*} gtfsRoute: the Postgres data about the route
+ * @returns GeoJSON feature collection
+ */
+export const createRouteFc = (sanityRoute, gtfsRoute) => { 
+
+  // iterate through the extendedRouteDirections
+  let features = sanityRoute.directions.map(direction => {
+
+    // parse the directionShape GeoJSON feature
+    let feature = JSON.parse(direction.directionShape)[0]
+
+    // attach the GTFS attributes to properties
+    feature.properties = {...gtfsRoute}
+
+    // add two pieces of extendedRouteDir info
+    feature.properties.directionDescription = direction.directionDescription
+    feature.properties.directionId = direction.directionId
+
+    return feature
+  })
+
+  let featureCollection = {
+    type: "FeatureCollection",
+    features: features
+  }
+
+  return featureCollection
+}
+
+/**
+ * Create a GeoJSON FeatureCollection from the GTFS and Sanity representations of a route.
+ * @param {*} sanityRoute: the Sanity route object
+ * @param {*} trips: the returned object from getTripsByServiceAndDirection
+ * @returns GeoJSON feature collection of timepoints
+ */
+export const createTimepointsFc = (sanityRoute, trips, shortFormat=true) => {
+
+  // store GeoJSON features here to include with the featureCollection
+  let features = []
+
+  // iterate through each direction on weekday service
+  Object.keys(trips.weekday).map(key => {
+
+    // get the timepoints from the trip with the most timepoints
+    const mostTimepointsTrip = trips.weekday[key].sort((a, b) => {
+      return b.stopTimes.length - a.stopTimes.length;
+    })[0];
+    let stops = mostTimepointsTrip.stopTimes.map(st => st.stop)
+
+    stops.forEach(stop => {
+
+      // create a new GeoJSON feature
+      let stopFeature = {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [stop.stopLon, stop.stopLat]
+        },
+        properties: {
+          ...stop
+        }
+      }
+
+      // strip out the name of the route, for shorter map labels
+      // ex, on DDOT 39, timepoint `Puritan & Livernois` => `Livernois`
+      if(shortFormat) {
+        stopFeature.properties.stopName = stopFeature.properties.stopName.replace(`${sanityRoute.longName} & `, '')
+      }
+
+      features.push(stopFeature)
+
+    })
+  })
+
+  return {
+    type: "FeatureCollection",
+    features: features
+  }
+}
+
+export const createAgencyData = (gtfsAgency, sanityAgency) => {
+
+  gtfsAgency.slug = sanityAgency.slug
+  gtfsAgency.content = sanityAgency.content
+  gtfsAgency.description = sanityAgency.description
+  gtfsAgency.name = sanityAgency.name
+  gtfsAgency.color = sanityAgency.color
+  gtfsAgency.textColor = sanityAgency.textColor
+  return gtfsAgency
+
 }

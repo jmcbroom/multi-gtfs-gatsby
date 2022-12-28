@@ -1,3 +1,6 @@
+import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import React from "react";
 
 /**
@@ -5,21 +8,42 @@ import React from "react";
  * @param {Array} directions: headsignsByDirectionId; keys are directions, values are distinct headsign array
  * @param {Number} direction: from useState, the current direction value
  * @param {Function} setDirection: from useState, the setter function
- * @returns 
+ * @returns
  */
 const DirectionPicker = ({ directions, direction, setDirection }) => {
+
+  let display = {
+    northbound: `Northbound`,
+    southbound: `Southbound`,
+    eastbound: `Eastbound`,
+    westbound: `Westbound`,
+  };
+
   return (
-    <div className="flex items-center justify-start w-full md:w-auto">
-      <span className="bg-gray-300 py-3 text-sm w-1/3 md:w-auto text-right px-4 md:text-center">
-        Direction
-      </span>
-      <select className="w-2/3 md:w-auto" onChange={(e) => setDirection(e.target.value)}>
-        {Object.keys(directions).map(dir => (
-          <option value={dir} key={dir}>{directions[dir][0]}</option>
+    <>
+      <RadioGroup.Root className="radioGroupRoot" defaultValue={direction ? direction : Object.keys(directions)[0]} onValueChange={(e) => setDirection(e)}>
+        {/* <div className="w-12 flex flex-shrink-0 items-center justify-around">
+          <FontAwesomeIcon icon={faExchangeAlt} className="radioGroupIcon" />
+        </div> */}
+        {Object.keys(directions).map((dir) => (
+          <div className="flex items-center" key={dir}>
+            <RadioGroup.Item
+              className="radioGroupItem"
+              value={dir}
+              id={dir}
+              key={dir}
+              >
+              <RadioGroup.Indicator className="radioGroupIndicator" />
+            </RadioGroup.Item>
+            <label className="radioGroupLabel" htmlFor={dir}>
+              <span className="font-semibold">{display[directions[dir].description]}</span> 
+              <span className="text-sm leading-none text-gray-600">to {directions[dir].headsigns[0]}</span>
+            </label>
+          </div>
         ))}
-      </select>
-    </div>
-  )
-}
+      </RadioGroup.Root>
+        </>
+  );
+};
 
 export default DirectionPicker;

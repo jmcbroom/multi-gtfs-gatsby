@@ -1,7 +1,6 @@
-import S from "@sanity/desk-tool/structure-builder";
 import { FaBus, FaCity, FaLongArrowAltRight, FaMap } from "react-icons/fa";
 
-export default () =>
+export default S =>
   S.list()
     .title("Document types")
     .items([
@@ -26,4 +25,8 @@ export default () =>
         .title("Journey Parts")
         .icon(FaLongArrowAltRight)
         .child(S.documentTypeList("journeyPart")),
+      S.divider(),
+      S.listItem().title("Homepage content").child(
+        S.editor().id("indexPage").schemaType("indexPage").title("Site content").documentId("index-page-content")
+      ),
     ]);

@@ -1,3 +1,4 @@
+const { create } = require("domain");
 const path = require(`path`);
 
 exports.createPages = async ({ graphql, actions: { createPage } }) => {
@@ -49,6 +50,11 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
             totalCount
           }
         }
+        stops: stopsList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}}) {
+          stopId
+          stopCode
+          feedIndex
+        }
       }
     }
   `);
@@ -65,6 +71,20 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
       });
     });
 
+    result.data.postgres.stops
+      .forEach(s => {
+        createPage({
+          path: `/${a.slug.current}/stop/${a.slug.current === 'ddot' ? s.stopCode : s.stopId}`,
+          component: path.resolve("./src/templates/stop-page.js"),
+          context: {
+            feedIndex: s.feedIndex,
+            sanityFeedIndex: s.feedIndex,
+            agencySlug: a.slug.current,
+            stopId: s.stopId
+          }
+        })
+      })
+
     result.data.postgres.routes
       .filter((r) => r.trips.totalCount > 0)
       .forEach((r) => {
@@ -72,28 +92,6 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
         createPage({
           path: `/${a.slug.current}/route/${r.routeShortName}`,
           component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current
-          },
-        });
-
-        // timetable page
-        createPage({
-          path: `/${a.slug.current}/route/${r.routeShortName}/timetable`,
-          component: path.resolve("./src/templates/route-timetable-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current
-          },
-        });
-
-        // stops page
-        createPage({
-          path: `/${a.slug.current}/route/${r.routeShortName}/stops`,
-          component: path.resolve("./src/templates/route-stops-page.js"),
           context: {
             routeNo: r.routeShortName,
             feedIndex: r.feedIndex,

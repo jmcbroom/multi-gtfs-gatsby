@@ -5,7 +5,7 @@ This `/studio` folder represents an instance of the [Sanity Studio].
 ## Developing
 
 1. `cd` into the `studio` directory & either `npm install` or `yarn` to install dependencies
-2. Run `sanity start` to spin up a local instance of the Studio at localhost:3333. Note: even though your Studio is running locally, you are editing the production dataset on Sanity's servers.
+2. Run `npm run develop` to spin up a local instance of the Studio at localhost:3333. Note: even though your Studio is running locally, you are editing the production dataset on Sanity's servers.
 3. Once you've made changes to the studio, run `sanity deploy` to deploy those changes to the live Studio
 4. Please also run `sanity graphql deploy` to push schema changes to the GraphQL endpoint; this is ultimately what is referenced by the `gatsby-source-sanity` plugin.
 

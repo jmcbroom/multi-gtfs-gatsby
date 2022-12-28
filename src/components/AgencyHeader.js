@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "gatsby";
-import config from "../config";
 
 /**
  * 
@@ -9,14 +8,14 @@ import config from "../config";
  */
 const AgencyHeader = ({ agency }) => {
 
-  const {feedIndexes} = config;
-  const { feedIndex, agencyName } = agency;
+  const { slug, agencyName, name, fullName } = agency;
 
   return (
-    <Link to={`/${feedIndexes[feedIndex]}/`}>
-      <h2 className="text-lg md:text-xl">
-        {agencyName}
+    <Link to={`/${slug.current}/`}>
+      <h2 className="text-lg md:text-xl mb-0">
+        {name}
       </h2>
+      <span className="text-sm leading-none text-gray-500">{fullName}</span>
     </Link>
   )
 }
