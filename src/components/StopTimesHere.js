@@ -74,9 +74,11 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                   here at:
                 </p>
 
-                <ul className="grid grid-cols-4 grid-flow-cols">
+                <ul className="columns-4 sm:columns-5">
                   {timesByRoute[route.routeShortName][service].map((trip) => (
-                    <li className="inline">{formatArrivalTime(trip.arrivalTime, false)}</li>
+                    <li className={`${formatArrivalTime(trip.arrivalTime).indexOf("p") > -1 ? `font-semibold` : `font-base`}`}>
+                      {formatArrivalTime(trip.arrivalTime).slice(0, -3)}
+                    </li>
                   ))}
                 </ul>
               </AccordionContent>
@@ -89,5 +91,3 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 };
 
 export default StopTimesHere
-
-
