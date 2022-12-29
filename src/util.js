@@ -6,7 +6,7 @@ import { head } from "lodash";
  * @param {boolean} showAp 
  * @returns 
  */
-export const formatArrivalTime = (time, showAp=true) => {
+export const formatArrivalTime = (time, showAp=true, twentyFourHr=false) => {
   let hour = time.hours;
   let minutes = time.minutes ? time.minutes.toString().padStart(2, "0") : "00";
   let ap = "am";
@@ -17,7 +17,7 @@ export const formatArrivalTime = (time, showAp=true) => {
     hour = time.hours;
     ap = "am";
   } else if (time.hours > 12 && time.hours < 24) {
-    hour = time.hours - 12;
+    if (!twentyFourHr) { hour = time.hours - 12; }
     ap = "pm";
   } else if (time.hours % 12 === 0) {
     hour = 12;
@@ -25,6 +25,10 @@ export const formatArrivalTime = (time, showAp=true) => {
   } else if (time.hours >= 24) {
     hour = time.hours - 24;
     ap = "am";
+  }
+  
+  if (twentyFourHr) {
+    hour = time.hours ? time.hours.toString().padStart(2, "0") : "00";
   }
 
   return `${hour}:${minutes}${showAp ? ` ${ap}` : ``}`;
