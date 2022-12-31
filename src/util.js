@@ -170,7 +170,6 @@ export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDir
 export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
   let headsignsByDirectionId = {}
   const directions = [...new Set(trips.map(trip => trip.directionId))].sort()
-  console.log(directions)
   directions.forEach(dir => {
     let tripsThisDirection = trips.filter(trip => trip.directionId === dir)
     // get th unique tripHeadsigns
@@ -180,9 +179,7 @@ export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
 
   if(sanityRoute) {
     sanityRoute.directions.forEach((dir, idx) => {
-      console.log(dir)
       let directionId = dir.directionId
-      console.log(directionId, headsignsByDirectionId)
       if (dir.directionHeadsign) {
         headsignsByDirectionId[directionId].headsigns = [dir.directionHeadsign];
       }

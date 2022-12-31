@@ -34,7 +34,6 @@ const StopMap = ({ stopFc }) => {
 
     map.on("click", (e) => {
       const features = map.queryRenderedFeatures(e.point);
-      console.log(features);
     });
   }, []);
 
