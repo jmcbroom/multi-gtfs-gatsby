@@ -94,6 +94,7 @@ const Route = ({ data, pageContext }) => {
               routeFc={createRouteFc(sanityRoute, gtfsRoute)}
               stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
               timepointsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection, true)}
+              agency={agencyData}
             />
           )}
         </Tabs.Content>

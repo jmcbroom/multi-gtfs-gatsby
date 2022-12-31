@@ -2,9 +2,10 @@ import bbox from "@turf/bbox";
 import { Map, NavigationControl } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useEffect } from "react";
+import { navigate } from "gatsby";
 import mapboxStyle from "../styles/mapbox.json";
 
-const RouteMap = ({ routeFc, stopsFc, timepointsFc }) => {
+const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
 
   const routeFeatureCollection = routeFc
   const stopsFeatureCollection = stopsFc
@@ -43,8 +44,20 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc }) => {
       }
     });
 
-    map.on("click", (e) => {
-      const features = map.queryRenderedFeatures(e.point);
+    map.on("click", "stops-points", (e) => {
+      let stop = map.queryRenderedFeatures(e.point, {
+        layers: ["stops-points"]
+      })[0];
+      
+      navigate(`/${agency.slug.current}/stop/${stop.properties.stopCode}`)
+    });
+    
+    map.on("mouseover", "stops-points", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    
+    map.on("mouseleave", "stops-points", () => {
+      map.getCanvas().style.cursor = "";
     });
   }, []);
 
