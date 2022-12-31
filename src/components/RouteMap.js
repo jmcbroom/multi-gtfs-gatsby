@@ -4,12 +4,14 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useEffect } from "react";
 import mapboxStyle from "../styles/mapbox.json";
 
-const RouteMap = ({ routeFc, timepointsFc }) => {
+const RouteMap = ({ routeFc, stopsFc, timepointsFc }) => {
 
   const routeFeatureCollection = routeFc
+  const stopsFeatureCollection = stopsFc
   const timepointsFeatureCollection = timepointsFc
 
-  let mapInitialBbox = routeFeatureCollection.features.length > 0 ? bbox(routeFeatureCollection) : bbox(timepointsFeatureCollection)
+  let mapInitialBbox = routeFeatureCollection.features.length > 0 ?
+    bbox(routeFeatureCollection) : bbox(stopsFeatureCollection)
 
   useEffect(() => {
     const accessToken = process.env.MAPBOX_ACCESS_TOKEN;
@@ -32,6 +34,9 @@ const RouteMap = ({ routeFc, timepointsFc }) => {
       map.resize();
       if(routeFeatureCollection.features.length > 0) {
         map.getSource("routes").setData(routeFeatureCollection);
+      }
+      if(stopsFeatureCollection.features.length > 0) {
+        map.getSource("stops").setData(stopsFeatureCollection)
       }
       if(timepointsFeatureCollection.features.length > 0) {
         map.getSource("timepoints").setData(timepointsFeatureCollection)

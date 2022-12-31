@@ -25,7 +25,7 @@ const StopMap = ({ stopFc }) => {
     map.on("load", () => {
       map.resize();
       if(stopFc.features.length > 0) {
-        map.getSource("stops").setData(stopFc);
+        map.getSource("stop").setData(stopFc);
       }
       // if(timepointsFeatureCollection.features.length > 0) {
       //   map.getSource("timepoints").setData(timepointsFeatureCollection)
