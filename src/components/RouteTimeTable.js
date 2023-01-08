@@ -25,6 +25,9 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
     timepoints = sortTripsByFrequentTimepoint(selectedTrips).timepoints;
   }
 
+  // needed to add this filter back in... but it's interesting to think about letting users see all times.
+  timepoints = timepoints.filter(tp => tp.timepoint)
+
   return (
     <div className="mx-auto" style={{width: '100%', overflow: 'auto', maxHeight: '700px'}}>
     <table className="tabular mx-auto" style={{tableLayout: 'fixed'}}>
