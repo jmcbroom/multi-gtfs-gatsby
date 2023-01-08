@@ -14,7 +14,7 @@ import "../styles/tabs.css";
 import {
   createAgencyData,
   createRouteFc,
-  createTimepointsFc,
+  createStopsFc,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
@@ -39,9 +39,7 @@ const Route = ({ data, pageContext }) => {
   let { serviceCalendars } = agencyData.feedInfo;
 
   let serviceDays = getServiceDays(serviceCalendars);
-  console.log(trips)
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
-  console.log(trips)
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(
     trips,
@@ -94,7 +92,9 @@ const Route = ({ data, pageContext }) => {
           {sanityRoute && (
             <RouteMap
               routeFc={createRouteFc(sanityRoute, gtfsRoute)}
-              timepointsFc={createTimepointsFc(sanityRoute, tripsByServiceAndDirection)}
+              stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
+              timepointsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection, true)}
+              agency={agencyData}
             />
           )}
         </Tabs.Content>
@@ -179,7 +179,6 @@ export const query = graphql`
           tripId
           tripHeadsign
           stopTimes: stopTimesByFeedIndexAndTripIdList(
-            condition: { timepoint: 1 }
             orderBy: STOP_SEQUENCE_ASC
           ) {
             arrivalTime {
@@ -193,7 +192,8 @@ export const query = graphql`
               stopName
               stopLon
               stopLat
-            }
+            },
+            timepoint
           }
         }
         longTrips: longestTripsList {

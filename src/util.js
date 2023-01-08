@@ -170,7 +170,6 @@ export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDir
 export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
   let headsignsByDirectionId = {}
   const directions = [...new Set(trips.map(trip => trip.directionId))].sort()
-  console.log(directions)
   directions.forEach(dir => {
     let tripsThisDirection = trips.filter(trip => trip.directionId === dir)
     // get th unique tripHeadsigns
@@ -180,9 +179,7 @@ export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
 
   if(sanityRoute) {
     sanityRoute.directions.forEach((dir, idx) => {
-      console.log(dir)
       let directionId = dir.directionId
-      console.log(directionId, headsignsByDirectionId)
       if (dir.directionHeadsign) {
         headsignsByDirectionId[directionId].headsigns = [dir.directionHeadsign];
       }
@@ -230,21 +227,25 @@ export const createRouteFc = (sanityRoute, gtfsRoute) => {
  * Create a GeoJSON FeatureCollection from the GTFS and Sanity representations of a route.
  * @param {*} sanityRoute: the Sanity route object
  * @param {*} trips: the returned object from getTripsByServiceAndDirection
+ * @param {boolean} timepointsOnly: filter the collection down to timepoints
  * @returns GeoJSON feature collection of timepoints
  */
-export const createTimepointsFc = (sanityRoute, trips, shortFormat=true) => {
+export const createStopsFc = (sanityRoute, trips, timepointsOnly=false, shortFormat=true) => {
 
   // store GeoJSON features here to include with the featureCollection
   let features = []
 
   // iterate through each direction on weekday service
-  Object.keys(trips.weekday).map(key => {
+  Object.keys(trips.weekday).forEach(key => {
 
     // get the timepoints from the trip with the most timepoints
     const mostTimepointsTrip = trips.weekday[key].sort((a, b) => {
       return b.stopTimes.length - a.stopTimes.length;
     })[0];
-    let stops = mostTimepointsTrip.stopTimes.map(st => st.stop)
+    
+    let stops = mostTimepointsTrip.stopTimes
+      .filter(st => !timepointsOnly || st.timepoint == 1)
+      .map(st => st.stop);
 
     stops.forEach(stop => {
 
