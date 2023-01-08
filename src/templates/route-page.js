@@ -3,7 +3,8 @@ import { graphql } from "gatsby";
 import React, { useState } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import DirectionPicker from "../components/DirectionPicker";
-import RouteDirectionsTable from "../components/RouteDirectionsTable";
+import RouteIntroduction from "../components/RouteIntroduction";
+import RouteDirectionsTable from "../components/RouteIntroduction";
 import RouteHeader from "../components/RouteHeader";
 import RouteMap from "../components/RouteMap";
 import RouteStopsList from "../components/RouteStopsList";
@@ -13,6 +14,7 @@ import ServicePicker from "../components/ServicePicker";
 import "../styles/tabs.css";
 import {
   createAgencyData,
+  createRouteData,
   createRouteFc,
   createStopsFc,
   getHeadsignsByDirectionId,
@@ -35,6 +37,7 @@ const Route = ({ data, pageContext }) => {
     gtfsRoute.routeTextColor = sanityRoute.textColor.hex;
   }
 
+
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
@@ -54,6 +57,8 @@ const Route = ({ data, pageContext }) => {
       }
     });
   }
+
+  let routeData = createRouteData(gtfsRoute, sanityRoute)
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0]);
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0]);
@@ -83,7 +88,9 @@ const Route = ({ data, pageContext }) => {
           </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="overview">
-          <RouteDirectionsTable
+          <RouteIntroduction
+            agency={agencyData}
+            route={routeData}
             trips={tripsByServiceAndDirection}
             headsigns={headsignsByDirectionId}
           />

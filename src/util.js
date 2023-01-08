@@ -66,8 +66,8 @@ export const sortTripsByFrequentTimepoint = (trips) => {
     });
 
   let sorted = trips.sort((a, b) => {
-    let aStopTime = a.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0].arrivalTime;
-    let bStopTime = b.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0].arrivalTime;
+    let aStopTime = a.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0]?.arrivalTime || 0;
+    let bStopTime = b.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0]?.arrivalTime || 0;
 
     return aStopTime.hours * 60 + aStopTime.minutes - (bStopTime.hours * 60 + bStopTime.minutes);
   });
@@ -292,7 +292,8 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
 
 export const createRouteData = (gtfsRoute, sanityRoute) => {
   gtfsRoute.routeLongName = sanityRoute.longName
-  gtfsRoute.routeColor = sanityRoute.routeColor.hex
-  gtfsRoute.routeTextColor = sanityRoute.routeTextColor.hex
+  gtfsRoute.routeColor = sanityRoute.routeColor?.hex || sanityRoute.color?.hex
+  gtfsRoute.routeTextColor = sanityRoute.routeTextColor?.hex || sanityRoute.textColor?.hex
+  gtfsRoute.directions = sanityRoute.directions ? sanityRoute.directions : null
   return gtfsRoute
 }
