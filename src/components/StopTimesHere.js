@@ -38,8 +38,6 @@ const AccordionContent = React.forwardRef(({ children, className, ...props }, fo
 ));
 
 const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
-  console.log(routes);
-
   let timesByRoute = _.groupBy(times, "trip.route.routeShortName");
 
   Object.keys(timesByRoute).forEach((key) => {
