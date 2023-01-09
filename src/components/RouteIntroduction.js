@@ -1,11 +1,12 @@
 import React from "react";
 import { formatArrivalTime, sortTripsByFrequentTimepoint } from "../util";
+import RouteStopsList from "./RouteStopsList";
 
 const serviceDisplayText = {
   weekday: `weekdays`,
   saturday: `Saturday`,
   sunday: `Sunday`,
-}
+};
 
 const whenItRuns = (trips) => {
   let tripsByDay = {};
@@ -45,7 +46,7 @@ const whatDirectionItRuns = (route) => {
   return cardinalDirections.sort().join(" and ");
 };
 
-const RouteIntroEndpoints = ({ route, trips, headsigns }) => {
+const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
   let services = Object.keys(trips);
   let directions = Object.keys(headsigns);
 
@@ -53,15 +54,42 @@ const RouteIntroEndpoints = ({ route, trips, headsigns }) => {
     return headsigns[d].headsigns[0];
   });
 
+
+  console.log(endpoints)
+
   return (
-    <ul className="px-3 text-lg list-disc list-inside">
-      {endpoints.map((end, idx) => (
-        <li key={end}>
-          <span className="font-semibold">{headsigns[idx]?.description || `unknown`}</span> to{" "}
-          <span className="font-semibold">{end}</span>
-        </li>
-      ))}
-    </ul>
+    <>
+      <p className="text-lg px-3 pb-2">
+        The bus travels {whatDirectionItRuns(route)} between{" "}
+        {endpoints.map((e, idx) => (
+          <>
+          <span className="font-semibold pl-1">{e}</span>
+          {idx === 0 && <span className="pl-1">{` and `}</span>}
+          </>
+        ))}.
+      </p>
+      <div className="px-3 grid grid-cols-1 md:grid-cols-2 items-start gap-8">
+        {endpoints.map((end, idx) => (
+          <div key={end}>
+            <div className="text-lg inline font-bold">
+              <span className="">{headsigns[idx]?.description || `unknown`}</span> to{" "}
+              <span className="">{end}</span>
+            </div>
+            <p className="m-0 text-gray-600 my-2">
+              Major {headsigns[idx]?.description || `unknown`} stops:
+            </p>
+            <RouteStopsList
+              longTrips={route.longTrips}
+              direction={idx}
+              routeColor={route.routeColor}
+              agency={agency}
+              timepointsOnly
+              small
+            />
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 
@@ -87,8 +115,6 @@ const RouteIntroRunTimes = ({ route, trips, headsigns }) => {
     let reducedTrips = Object.keys(sortedTrips)
       .map((key) => sortedTrips[key])
       .reduce((acc, val) => acc.concat(val));
-
-    console.log(s, reducedTrips)
 
     let sorted = sortTripsByFrequentTimepoint(reducedTrips);
 
@@ -116,13 +142,14 @@ const RouteIntroRunTimes = ({ route, trips, headsigns }) => {
   });
 
   return (
-    <ul className="px-3 text-lg list-disc list-inside">
+    <div className="px-3 text-lg list-disc list-inside">
       {filteredServices.map((s) => (
-        <li key={s}>
-          On {serviceDisplayText[s]}, this bus {serviceTexts[s]}
-        </li>
+        <p key={s}>
+          On <span className="font-semibold">{serviceDisplayText[s]}</span>, this bus{" "}
+          {serviceTexts[s]}
+        </p>
       ))}
-    </ul>
+    </div>
   );
 };
 
@@ -136,17 +163,15 @@ const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
   let directions = Object.keys(headsigns);
 
   return (
-
-    <section className="gap-6 flex flex-col p-0">
+    <section className="gap-6 flex flex-col p-0 my-4">
       <div>
-        <p className="text-sm text-gray-700 bg-gray-300 py-2 px-3">When does this bus run?</p>
+        <p className="text-base text-gray-600 mx-3 border-b-2">When does this bus run?</p>
         <p className="text-lg px-3">This bus route runs {whenItRuns(trips)}.</p>
         <RouteIntroRunTimes route={route} trips={trips} headsigns={headsigns} />
       </div>
       <div>
-        <p className="text-sm text-gray-700 bg-gray-300 py-2 px-3">Where does this bus go?</p>
-        <p className="text-lg px-3">The bus travels {whatDirectionItRuns(route)}:</p>
-        <RouteIntroEndpoints route={route} trips={trips} headsigns={headsigns} />
+        <p className="text-base text-gray-600 mx-3 border-b-2">Where does this bus go?</p>
+        <RouteIntroEndpoints agency={agency} route={route} trips={trips} headsigns={headsigns} />
       </div>
 
       <table className="w-auto border-collapse mt-4 w-100 hidden">

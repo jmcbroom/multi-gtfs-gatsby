@@ -85,9 +85,3 @@ td {
 footer {
   @apply font-light;
 }
-
-ul {
-  @apply list-disc;
-  @apply list-inside;
-  @apply marker:text-gray-400;
-}
