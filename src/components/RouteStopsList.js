@@ -3,8 +3,14 @@ import StopListItem from "./StopListItem";
 
 const RouteStopsList = ({ longTrips, direction, routeColor, agency, className, small = false, timepointsOnly = false }) => {
 
+  console.log(longTrips)
+  console.log(direction)
   let modelTrip = longTrips.filter(lt => lt.directionId === parseInt(direction))[0];
 
+  if (modelTrip === undefined) {
+
+    modelTrip=longTrips[0]
+  }
   let times = modelTrip.stopTimes
   
   if(timepointsOnly) {
@@ -12,11 +18,11 @@ const RouteStopsList = ({ longTrips, direction, routeColor, agency, className, s
   }
 
   return (
-    <section className={small ? "grid w-100 col-span-2 overflow-y-auto px-2 text-sm section-scroll" : "grid w-100 col-span-2 overflow-y-auto px-2 section-scroll"} fullWidth>
+    <div className={small ? "grid w-100 col-span-2 overflow-y-auto px-2 text-sm section-scroll" : "grid w-100 col-span-2 overflow-y-auto px-2 section-scroll"} fullWidth>
       {times.map((stopTime, i) => (
         <StopListItem key={stopTime.stop.stopCode} {...{ stopTime, routeColor }} small={small} agency={agency}/>
       ))}
-    </section>
+    </div>
   );
 };
 
