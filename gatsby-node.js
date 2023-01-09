@@ -65,7 +65,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
             totalCount
           }
         }
-        stops: stopsList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}}, first: 1000) {
+        stops: stopsList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}}) {
           stopId
           stopCode
           feedIndex
