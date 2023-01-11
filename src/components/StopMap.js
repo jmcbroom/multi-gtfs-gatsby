@@ -37,7 +37,7 @@ const StopMap = ({ stopFc }) => {
     });
   }, []);
 
-  return <div id="map" style={{height: 275}}></div>;
+  return <div id="map" style={{height: 350}}></div>;
 };
 
 export default StopMap;

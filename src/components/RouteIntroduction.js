@@ -168,12 +168,12 @@ const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
   return (
     <section className="gap-6 flex flex-col p-0 my-4">
       <div>
-        <p className="text-base text-gray-600 mx-3 border-b-2">When does this bus run?</p>
+        <p className="underline-title mx-3">When does this bus run?</p>
         <p className="text-lg px-3">This bus route runs {whenItRuns(trips)}.</p>
         <RouteIntroRunTimes route={route} trips={trips} headsigns={headsigns} />
       </div>
       <div>
-        <p className="text-base text-gray-600 mx-3 border-b-2">Where does this bus go?</p>
+        <p className="underline-title mx-3">Where does this bus go?</p>
         <RouteIntroEndpoints agency={agency} route={route} trips={trips} headsigns={headsigns} />
       </div>
 

@@ -55,7 +55,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
   return (
     <div>
-      <h4>Scheduled stops here</h4>
+      <p className="underline-title">Routes that stop here</p>
       <Accordion.Root className="AccordionRoot" type="single" defaultValue={defaultRoute} collapsible>
         {routes.map((route, idx) => {
           return (
@@ -69,14 +69,13 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                   service={service}
                   setService={setService}
                 />
-                <p>
-                  {timesByRoute[route.routeShortName][service].length} {service} trips, arriving
-                  here at:
+                <p className="py-1">
+                  Buses arrive here at:
                 </p>
 
                 <ul className="columns-4 sm:columns-5 gap-0 border-l-2 border-dotted border-grey-700 text-center">
                   {timesByRoute[route.routeShortName][service].map((trip) => (
-                    <li className="border-r-2 border-dotted border-grey-700" key={trip.tripId}>
+                    <li className="border-r-2 border-dotted border-grey-700 tabular" key={trip.tripId}>
                       <StopTimeLabel arrivalTime={trip.arrivalTime} />
                     </li>
                   ))}
