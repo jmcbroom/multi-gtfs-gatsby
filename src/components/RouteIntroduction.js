@@ -104,7 +104,9 @@ const RouteIntroRunTimes = ({ route, trips, headsigns }) => {
 
   let serviceTexts = {};
 
-  let filteredServices = services.filter((s) => trips[s][0].length > 0);
+  console.log()
+
+  let filteredServices = services.filter((s) => trips[s][0] && trips[s][0].length > 0);
 
   filteredServices.forEach((s) => {
     let sortedTrips = trips[s];

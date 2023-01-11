@@ -51,10 +51,12 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
   let [service, setService] = useState("weekday");
 
+  let defaultRoute = routes.length > 0 ? routes[0].routeShortName : 'none'
+
   return (
     <div>
       <h4>Scheduled stops here</h4>
-      <Accordion.Root className="AccordionRoot" type="single" defaultValue={routes[0].routeShortName} collapsible>
+      <Accordion.Root className="AccordionRoot" type="single" defaultValue={defaultRoute} collapsible>
         {routes.map((route, idx) => {
           return (
             <Accordion.Item key={route.routeShortName} className="AccordionItem" value={route.routeShortName}>
