@@ -29,6 +29,8 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
   let defaultRoute = routes.length > 0 ? routes[0].routeShortName : "none";
 
 
+  let defaultRoute = routes.length > 0 ? routes[0].routeShortName : 'none'
+
   return (
     <div>
       <div className="underline-title mb-2">Routes that stop here</div>
