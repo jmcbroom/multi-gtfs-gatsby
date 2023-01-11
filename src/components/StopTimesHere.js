@@ -54,10 +54,10 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
   return (
     <div>
       <h4>Scheduled stops here</h4>
-      <Accordion.Root className="AccordionRoot" type="single" defaultValue="item-1" collapsible>
-        {routes.map((route) => {
+      <Accordion.Root className="AccordionRoot" type="single" defaultValue={routes[0].routeShortName} collapsible>
+        {routes.map((route, idx) => {
           return (
-            <Accordion.Item className="AccordionItem" value={route.routeShortName}>
+            <Accordion.Item key={route.routeShortName} className="AccordionItem" value={route.routeShortName}>
               <AccordionTrigger>
                 <RouteListItem {...route} agency={agency} />
               </AccordionTrigger>
@@ -74,7 +74,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
                 <ul className="columns-4 sm:columns-5 gap-0 border-l-2 border-dotted border-grey-700 text-center">
                   {timesByRoute[route.routeShortName][service].map((trip) => (
-                    <li className="border-r-2 border-dotted border-grey-700">
+                    <li className="border-r-2 border-dotted border-grey-700" key={trip.tripId}>
                       <StopTimeLabel arrivalTime={trip.arrivalTime} />
                     </li>
                   ))}

@@ -68,6 +68,7 @@ const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
           </>
         ))}.
       </p>
+      <p className="text-lg px-3 pb-2">Here's a list of the major stops in each travel direction:</p>
       <div className="px-3 grid grid-cols-1 md:grid-cols-2 items-start gap-8">
         {endpoints.map((end, idx) => (
           <div key={end}>
@@ -130,12 +131,12 @@ const RouteIntroRunTimes = ({ route, trips, headsigns }) => {
         (firstTripStartTime.hours * 60 + firstTripStartTime.minutes) >
       1400
     ) {
-      serviceTexts[s] = `runs 24 hours a day`;
+      serviceTexts[s] = `runs 24 hours a day.`;
     } else {
       serviceTexts[s] = (
         <span>
           runs from <span className="font-semibold">{formatArrivalTime(firstTripStartTime)}</span>{" "}
-          to <span className="font-semibold">{formatArrivalTime(lastTripEndTime)}</span>{" "}
+          to <span className="font-semibold">{formatArrivalTime(lastTripEndTime)}</span>{". "}
         </span>
       );
     }

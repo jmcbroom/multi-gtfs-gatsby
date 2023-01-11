@@ -5,17 +5,11 @@ import React, { useEffect } from "react";
 import { navigate } from "gatsby";
 import mapboxStyle from "../styles/mapbox.json";
 
+const AgencyMap = ({ routesFc, agency }) => {
 
-const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
+  const routeFeatureCollection = routesFc
 
-  const routeFeatureCollection = routeFc
-  const stopsFeatureCollection = stopsFc
-  const timepointsFeatureCollection = timepointsFc
-
-  let mapInitialBbox = routeFeatureCollection.features.length > 0 ?
-    bbox(routeFeatureCollection) : bbox(stopsFeatureCollection)
-
-  let stopProperty = ['smart', 'the-ride'].indexOf(agency.slug.current) > -1 ? 'stopId' : 'stopCode'
+  let mapInitialBbox = bbox(routeFeatureCollection)
 
   useEffect(() => {
     const accessToken = process.env.MAPBOX_ACCESS_TOKEN;
@@ -39,12 +33,6 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
       if(routeFeatureCollection.features.length > 0) {
         map.getSource("routes").setData(routeFeatureCollection);
       }
-      if(stopsFeatureCollection.features.length > 0) {
-        map.getSource("stops").setData(stopsFeatureCollection)
-      }
-      if(timepointsFeatureCollection.features.length > 0) {
-        map.getSource("timepoints").setData(timepointsFeatureCollection)
-      }
     });
 
     map.on("click", "stops-points", (e) => {
@@ -52,7 +40,7 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
         layers: ["stops-points"]
       })[0];
       
-      navigate(`/${agency.slug.current}/stop/${stop.properties[stopProperty]}`)
+      navigate(`/${agency.slug.current}/stop/${stop.properties.stopCode}`)
     });
     
     map.on("mouseover", "stops-points", () => {
@@ -67,4 +55,4 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
   return <div id="map" style={{height: 500}}></div>;
 };
 
-export default RouteMap;
+export default AgencyMap;

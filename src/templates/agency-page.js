@@ -4,8 +4,9 @@ import RouteHeader from "../components/RouteHeader";
 import AgencyHeader from "../components/AgencyHeader";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLink, faPhone } from "@fortawesome/free-solid-svg-icons";
+import AgencyMap from "../components/AgencyMap";
 import PortableText from "react-portable-text";
-import { createAgencyData, createRouteData } from "../util";
+import { createAgencyData, createRouteData, createRouteFc } from "../util";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import * as Tabs from "@radix-ui/react-tabs";
 
@@ -22,6 +23,9 @@ const Agency = ({ data, pageContext }) => {
     .filter((r) => r.trips.totalCount > 0)
     .sort((a, b) => a.implicitSort - b.implicitSort);
 
+
+  
+  // match gtfsRoutes with the sanityRoutes
   routes.forEach((r) => {
     // find the matching sanityRoute
     let matching = sanityRoutes.filter(
@@ -33,6 +37,32 @@ const Agency = ({ data, pageContext }) => {
       r = createRouteData(r, matching[0])
     }
   });
+
+  // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
+  let allRouteFeatures = []
+  routes.forEach(route => {
+
+    route.directions.forEach(direction => {
+
+      let feature = JSON.parse(direction.directionShape)[0]
+      
+      feature.properties = {
+          routeColor: route.routeColor,
+          routeLongName: route.routeLongName,
+          routeShortName: route.routeShortName,
+          routeTextColor: route.routeTextColor,
+          direction: direction.directionDescription,
+          directionId: direction.directionId
+      }
+
+      allRouteFeatures.push(feature)
+    })
+  })
+  let allRouteFc = {
+    type: "FeatureCollection",
+    features: allRouteFeatures
+  }
+
 
   return (
     <div>
@@ -57,19 +87,20 @@ const Agency = ({ data, pageContext }) => {
           {agencyFareContent && <PortableText content={agencyFareContent} />}
 
           <h4>Contact information</h4>
-          <p>You can find {name}'s website at <Link to={agencyUrl}>{agencyUrl}</Link>.</p>
-          <p>{name}'s customer service number is <Link to={agencyUrl}>{agencyPhone}</Link>.</p>
+          <p>You can find {name}'s website at <a href={agencyUrl}>{agencyUrl}</a>.</p>
+          <p>{name}'s customer service number is <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.</p>
 
         </Tabs.Content>
         <Tabs.Content className="tabContent py-4" value="routes">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
-              <RouteHeader key={r.routeId} {...r} agency={agencyData} />
+              <RouteHeader key={r.routeShortName} {...r} agency={agencyData} />
             ))}
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="map">
           <h3>System map</h3>
+          <AgencyMap agency={agencyData} routesFc={allRouteFc} />
         </Tabs.Content>
       </Tabs.Root>
       {/* 
@@ -145,6 +176,13 @@ export const query = graphql`
           }
           routeTextColor: textColor {
             hex
+          }
+          directions: extRouteDirections {
+            directionHeadsign
+            directionDescription
+            directionId
+            directionTimepoints
+            directionShape
           }
         }
       }
