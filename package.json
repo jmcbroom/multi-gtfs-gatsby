@@ -54,7 +54,7 @@
     "gatsby-source-sanity": "^7.4.2",
     "gatsby-transformer-sharp": "^4.4.0",
     "lodash": "^4.17.21",
-    "mapbox-gl": "^2.12.0",
+    "mapbox-gl": "^1.13.2",
     "postcss": "^8.4.5",
     "postgraphile-plugin-connection-filter": "^2.2.2",
     "react": "^17.0.1",
