@@ -1,43 +1,33 @@
 import bbox from "@turf/bbox";
-import { Map, NavigationControl } from "mapbox-gl";
+import MapboxGL from "mapbox-gl/dist/mapbox-gl";
+import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useEffect } from "react";
+import React from "react";
 import mapboxStyle from "../styles/mapbox.json";
 
 const StopMap = ({ stopFc }) => {
+  let stop = stopFc.features[0];
 
-  useEffect(() => {
-    const accessToken = process.env.MAPBOX_ACCESS_TOKEN;
-
-    let stop = stopFc.features[0]
-
-    let map = new Map({
-      container: "map",
-      style: mapboxStyle,
-      center: stop.geometry.coordinates,
-      zoom: 17.25,
-      interactive: true,
-      accessToken: accessToken,
-    });
-
-    map.addControl(new NavigationControl({ showCompass: false }));
-
-    map.on("load", () => {
-      map.resize();
-      if(stopFc.features.length > 0) {
-        map.getSource("stop").setData(stopFc);
-      }
-      // if(timepointsFeatureCollection.features.length > 0) {
-      //   map.getSource("timepoints").setData(timepointsFeatureCollection)
-      // }
-    });
-
-    map.on("click", (e) => {
-      const features = map.queryRenderedFeatures(e.point);
-    });
-  }, []);
-
-  return <div id="map" style={{height: 350}}></div>;
+  console.log(mapboxStyle);
+  mapboxStyle.sources.stop.data = stopFc;
+  
+  const initialViewState = {
+    longitude: stop.geometry.coordinates[0],
+    latitude: stop.geometry.coordinates[1],
+    zoom: 17.25
+  };
+  
+  return (
+    <div id="map" style={{height: 350}}>
+      <Mapbox
+        mapLib={MapboxGL}
+        mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
+        mapStyle={mapboxStyle}
+        initialViewState={initialViewState}>
+          <NavigationControl showCompass={false} />
+      </Mapbox>
+    </div>
+  );
 };
 
 export default StopMap;
