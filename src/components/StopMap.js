@@ -15,7 +15,7 @@ const StopMap = ({ stopFc }) => {
       container: "map",
       style: mapboxStyle,
       center: stop.geometry.coordinates,
-      zoom: 18,
+      zoom: 17.25,
       interactive: true,
       accessToken: accessToken,
     });

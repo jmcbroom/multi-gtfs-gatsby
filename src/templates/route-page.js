@@ -122,7 +122,9 @@ const Route = ({ data, pageContext }) => {
           <div className="bg-gray-100 p-4 md:py-6 flex flex-col gap-4 md:gap-8">
             <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
           </div>
+          <div className="px-3 flex flex-col gap-4 md:gap-8">
           <RouteStopsList longTrips={longTrips} direction={direction} routeColor={gtfsRoute.routeColor} agency={agencyData} />
+          </div>
         </Tabs.Content>
       </Tabs.Root>
     </div>
