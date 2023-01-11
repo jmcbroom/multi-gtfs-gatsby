@@ -8,6 +8,7 @@ import mapboxStyle from "../styles/styleFactory";
 import _ from 'lodash'
 
 
+
 const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
 
   const routeFeatureCollection = routeFc
