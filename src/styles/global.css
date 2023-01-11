@@ -85,3 +85,8 @@ td {
 footer {
   @apply font-light;
 }
+
+.underline-title {
+  @apply text-gray-600;
+  @apply border-b-2;
+}

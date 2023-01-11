@@ -64,12 +64,12 @@ const Stop = ({ data, pageContext }) => {
           stop #{pageContext.agencySlug === "ddot" ? stopCode : stopId}
         </span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* <StopRoutePicker {...{ routes, currentRoute, setCurrentRoute, agency: agencyData }} /> */}
         <StopTimesHere times={times} routes={routes} agency={agencyData} serviceDays={serviceDays}/>
         <StopMap stopFc={stopFc} routes={routes} times={times} />
       </div>
-    </div>
+    </div>  
   );
 };
 
