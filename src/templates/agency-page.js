@@ -15,7 +15,7 @@ const Agency = ({ data, pageContext }) => {
   let sanityAgency = data.allSanityAgency.edges[0].node;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
 
-  let { agencyUrl, agencyPhone, routes, description, name, agencyFareContent } = agencyData;
+  let { agencyUrl, agencyPhone, routes, description, name, fareAttributes, fareContent } = agencyData;
 
   // let's not display any routes that don't have scheduled trips.
   let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
@@ -63,6 +63,33 @@ const Agency = ({ data, pageContext }) => {
     features: allRouteFeatures
   }
 
+  // generate human-readable text for fare info
+  fareAttributes = fareAttributes?.map((fare) => {
+    fare.formattedPrice = new Intl.NumberFormat('en-US', {
+      style: 'currency', currency: fare.currencyType
+    }).format(fare.price);
+    
+    if (fare.transfers == 0) {
+      fare.formattedTransfers = 'a single ride';
+    } else {
+      fare.formattedTransfers = (fare.transferDuration <= 60**2 * 24) ?
+        `${Math.floor(fare.transferDuration / 60**2)} hour` :
+        `${Math.floor(fare.transferDuration / 60**2 / 24)} day`;
+        
+      fare.formattedTransfers +=
+        fare.formattedTransfers.startsWith('1 ') ? '' : 's';
+      
+      fare.formattedTransfers += ' with ';
+      
+      fare.formattedTransfers += fare.transfers ?
+        (fare.transfers + ' transfer' + fare.transfers == 1 ? '' : 's' ) :
+        fare.transfers === 0 ?
+        'no transfers' :
+        'unlimited tranfers';
+    }
+    
+    return fare;
+  });
 
   return (
     <div>
@@ -84,7 +111,12 @@ const Agency = ({ data, pageContext }) => {
           <PortableText content={description} />
 
           <h4>Fares</h4>
-          {agencyFareContent && <PortableText content={agencyFareContent} />}
+          {fareAttributes?.map((fare, idx) => (
+            <p key={`${agencyData.agencyId}${idx}`}>
+              The <span className="font-semibold">{fare.formattedPrice}</span> fare is valid for {fare.formattedTransfers}.
+            </p>
+          ))}
+          {fareContent && <PortableText content={fareContent} />}
 
           <h4>Contact information</h4>
           <p>You can find {name}'s website at <a href={agencyUrl}>{agencyUrl}</a>.</p>
@@ -165,6 +197,12 @@ export const query = graphql`
             serviceId
           }
         }
+        fareAttributes: fareAttributesByFeedIndexAndAgencyIdList(orderBy: [ PRICE_ASC, TRANSFER_DURATION_DESC ]) {
+          price
+          transfers
+          transferDuration
+          currencyType
+        }
       }
     }
     allSanityRoute(filter: { agency: { slug: { current: { eq: $agencySlug } } } }) {
@@ -203,6 +241,13 @@ export const query = graphql`
             current
           }
           description: _rawDescription
+          fareAttributes {
+            price
+            transferDuration
+            transfers
+            currencyType
+          }
+          fareContent: _rawFareContent
         }
       }
     }

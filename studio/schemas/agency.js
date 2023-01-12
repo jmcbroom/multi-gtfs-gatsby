@@ -54,6 +54,19 @@ export default {
       title: "Block content",
       description: "Extended information about this agency",
       type: "blockContent"
+    },
+    {
+      name: "fareAttributes",
+      title: "Fares",
+      description: "Details about each type of fare offered",
+      type: "array",
+      of: [{ type: "fareAttribute" }],
+    },
+    {
+      name: "fareContent",
+      title: "Fare content",
+      description: "Extended information about this agency's fare rules",
+      type: "blockContent"
     }
   ]
 }
