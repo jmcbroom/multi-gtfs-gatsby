@@ -92,6 +92,7 @@ const Agency = ({ data, pageContext }) => {
 
         </Tabs.Content>
         <Tabs.Content className="tabContent py-4" value="routes">
+          <p className="underline-title">List of bus routes</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
               <RouteHeader key={r.routeShortName} {...r} agency={agencyData} />
@@ -99,7 +100,7 @@ const Agency = ({ data, pageContext }) => {
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="map">
-          <h3>System map</h3>
+          <p className="underline-title">System map</p>
           <AgencyMap agency={agencyData} routesFc={allRouteFc} />
         </Tabs.Content>
       </Tabs.Root>

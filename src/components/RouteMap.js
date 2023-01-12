@@ -5,6 +5,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef } from "react";
 import { navigate } from "gatsby";
 import mapboxStyle from "../styles/mapbox.json";
+import _ from 'lodash'
 
 
 const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
@@ -20,15 +21,15 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
 
   let stopProperty = ['smart', 'the-ride'].indexOf(agency.slug.current) > -1 ? 'stopId' : 'stopCode'
   
-  console.log(mapboxStyle)
+  let style = _.cloneDeep(mapboxStyle)
   if(routeFeatureCollection.features.length > 0) {
-    mapboxStyle.sources.routes.data = routeFeatureCollection;
+    style.sources.routes.data = routeFeatureCollection;
   }
   if(stopsFeatureCollection.features.length > 0) {
-    mapboxStyle.sources.stops.data = stopsFeatureCollection;
+    style.sources.stops.data = stopsFeatureCollection;
   }
   if(timepointsFeatureCollection.features.length > 0) {
-    mapboxStyle.sources.timepoints.data = timepointsFeatureCollection;
+    style.sources.timepoints.data = timepointsFeatureCollection;
   }
   
   const handleClick = (e) => {
@@ -63,7 +64,7 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
         ref={map}
         mapLib={MapboxGL}
         mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
-        mapStyle={mapboxStyle}
+        mapStyle={style}
         initialViewState={initialViewState}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}

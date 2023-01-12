@@ -54,9 +54,6 @@ const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
     return headsigns[d].headsigns[0];
   });
 
-
-  console.log(endpoints)
-
   return (
     <>
       <p className="text-lg px-3 pb-2">
@@ -103,8 +100,6 @@ const RouteIntroRunTimes = ({ route, trips, headsigns }) => {
   });
 
   let serviceTexts = {};
-
-  console.log()
 
   let filteredServices = services.filter((s) => trips[s][0] && trips[s][0].length > 0);
 
@@ -168,12 +163,12 @@ const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
   return (
     <section className="gap-6 flex flex-col p-0 my-4">
       <div>
-        <p className="underline-title mx-3">When does this bus run?</p>
-        <p className="text-lg px-3">This bus route runs {whenItRuns(trips)}.</p>
+        <div className="underline-title mx-3">When does this bus run?</div>
+        <div className="text-lg px-3">This bus route runs {whenItRuns(trips)}.</div>
         <RouteIntroRunTimes route={route} trips={trips} headsigns={headsigns} />
       </div>
       <div>
-        <p className="underline-title mx-3">Where does this bus go?</p>
+        <div className="underline-title mx-3">Where does this bus go?</div>
         <RouteIntroEndpoints agency={agency} route={route} trips={trips} headsigns={headsigns} />
       </div>
 

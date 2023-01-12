@@ -2,6 +2,7 @@ import { faBusAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "gatsby";
 import React from "react";
+import NavMenu from "./NavMenu";
 
 /**
  * This is the layout component. It wraps everything, according to the gatsby-plugin-layout.
@@ -19,6 +20,7 @@ export default function Layout({ children }) {
               transit<span className="text-gray-500">.det.city</span>
             </h1>
           </Link>
+          <NavMenu />
         </div>
       </header>
       <div className="px-0f md:px-4">

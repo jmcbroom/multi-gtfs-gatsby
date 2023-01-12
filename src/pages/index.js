@@ -43,7 +43,7 @@ const IndexPage = ({ data }) => {
   return (
     <div className="">
       <PortableText content={indexPageContent} className="my-4 md:my-6 px-2 md:px-0" />
-      <h2 className="px-2 md:px-0">Local bus systems</h2>
+      <h2 className="underline-title">Local bus systems</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-2 md:mb-6">
         {merged.map((a) => (
           <div className="bg-gray-100 border-b-2 border-gray-500" key={a.feedIndex}>
