@@ -8,6 +8,7 @@ import destination from './destination'
 import destinationRoute from "./destinationRoute";
 import indexPage from "./indexPage";
 import extRouteDirection from "./extRouteDirection";
+import fareAttribute from "./fareAttribute";
 import journeyPart from "./journeyPart";
 import journey from "./journey";
 import journeyPartDestTime from "./journeyPartDestTime";
@@ -27,5 +28,6 @@ export default [
   journey,
   journeyPart,
   journeyPartDestTime,
-  extRouteDirection
+  extRouteDirection,
+  fareAttribute
 ];

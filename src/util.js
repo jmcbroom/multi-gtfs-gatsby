@@ -286,6 +286,10 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
   gtfsAgency.name = sanityAgency.name
   gtfsAgency.color = sanityAgency.color
   gtfsAgency.textColor = sanityAgency.textColor
+  gtfsAgency.fareAttributes = sanityAgency.fareAttributes?.length ?
+    sanityAgency.fareAttributes : gtfsAgency.fareAttributes
+  gtfsAgency.fareContent = sanityAgency.fareContent
+  
   return gtfsAgency
 
 }
