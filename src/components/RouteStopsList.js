@@ -3,8 +3,6 @@ import StopListItem from "./StopListItem";
 
 const RouteStopsList = ({ longTrips, direction, routeColor, agency, className, small = false, timepointsOnly = false }) => {
 
-  console.log(longTrips)
-  console.log(direction)
   let modelTrip = longTrips.filter(lt => lt.directionId === parseInt(direction))[0];
 
   if (modelTrip === undefined) {

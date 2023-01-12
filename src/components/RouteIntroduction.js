@@ -54,9 +54,6 @@ const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
     return headsigns[d].headsigns[0];
   });
 
-
-  console.log(endpoints)
-
   return (
     <div className="px-2 md:px-0">
       <p className="text-lg">
