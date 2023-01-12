@@ -4,12 +4,13 @@ import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React from "react";
 import mapboxStyle from "../styles/mapbox.json";
+import _ from 'lodash'
 
 const StopMap = ({ stopFc }) => {
   let stop = stopFc.features[0];
 
-  console.log(mapboxStyle);
-  mapboxStyle.sources.stop.data = stopFc;
+  let style = _.cloneDeep(mapboxStyle)
+  style.sources.stop.data = stopFc;
   
   const initialViewState = {
     longitude: stop.geometry.coordinates[0],
@@ -22,7 +23,7 @@ const StopMap = ({ stopFc }) => {
       <Mapbox
         mapLib={MapboxGL}
         mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
-        mapStyle={mapboxStyle}
+        mapStyle={style}
         initialViewState={initialViewState}>
           <NavigationControl showCompass={false} />
       </Mapbox>

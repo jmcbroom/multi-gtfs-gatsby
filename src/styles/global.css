@@ -89,4 +89,6 @@ footer {
 .underline-title {
   @apply text-gray-600;
   @apply border-b-2;
+  @apply px-2;
+  @apply md:px-0;
 }

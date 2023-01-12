@@ -55,7 +55,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
   return (
     <div>
-      <p className="underline-title">Routes that stop here</p>
+      <div className="underline-title mb-2">Routes that stop here</div>
       <Accordion.Root className="AccordionRoot" type="single" defaultValue={defaultRoute} collapsible>
         {routes.map((route, idx) => {
           return (
