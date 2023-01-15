@@ -208,7 +208,7 @@ button,
 .ViewportPosition {
   position: absolute;
   display: flex;
-  justify-content: center;
+  justify-content: right;
   width: 100%;
   top: 100%;
   left: 0;
