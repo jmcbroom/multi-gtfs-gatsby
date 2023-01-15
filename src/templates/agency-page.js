@@ -1,12 +1,10 @@
 import React from "react";
-import { graphql, Link } from "gatsby";
+import { graphql } from "gatsby";
 import RouteHeader from "../components/RouteHeader";
 import AgencyHeader from "../components/AgencyHeader";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLink, faPhone } from "@fortawesome/free-solid-svg-icons";
 import AgencyMap from "../components/AgencyMap";
 import PortableText from "react-portable-text";
-import { createAgencyData, createRouteData, createRouteFc } from "../util";
+import { createAgencyData, createRouteData } from "../util";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import * as Tabs from "@radix-ui/react-tabs";
 
