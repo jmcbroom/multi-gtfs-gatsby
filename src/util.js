@@ -1,5 +1,3 @@
-import { head } from "lodash";
-
 /**
  * Convert the GraphQL arrivalTime to a human-readable string.
  * @param {arrivalTime} time 

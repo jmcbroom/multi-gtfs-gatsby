@@ -1,4 +1,3 @@
-import bbox from "@turf/bbox";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";

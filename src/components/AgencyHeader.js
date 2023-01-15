@@ -8,7 +8,7 @@ import { Link } from "gatsby";
  */
 const AgencyHeader = ({ agency }) => {
 
-  const { slug, agencyName, name, fullName } = agency;
+  const { slug, name, fullName } = agency;
 
   return (
     <Link to={`/${slug.current}/`}>

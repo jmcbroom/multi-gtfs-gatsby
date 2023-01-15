@@ -5,12 +5,7 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import classNames from "classnames";
 import _ from "lodash";
 import "../styles/accordion.css";
-import {
-  createAgencyData,
-  createRouteData,
-  getServiceDays,
-  getTripsByServiceDay,
-} from "../util";
+import { getTripsByServiceDay } from "../util";
 import RouteListItem from "./RouteListItem";
 import ServicePicker from "./ServicePicker";
 
