@@ -4,7 +4,7 @@ import RouteHeader from "../components/RouteHeader";
 import AgencyHeader from "../components/AgencyHeader";
 import AgencyMap from "../components/AgencyMap";
 import PortableText from "react-portable-text";
-import { createAgencyData, createRouteData, createRouteFc } from "../util";
+import { createAgencyData, createRouteData } from "../util";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import * as Tabs from "@radix-ui/react-tabs";
 
