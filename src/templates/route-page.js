@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import DirectionPicker from "../components/DirectionPicker";
 import RouteIntroduction from "../components/RouteIntroduction";
-import RouteDirectionsTable from "../components/RouteIntroduction";
 import RouteHeader from "../components/RouteHeader";
 import RouteMap from "../components/RouteMap";
 import RouteStopsList from "../components/RouteStopsList";

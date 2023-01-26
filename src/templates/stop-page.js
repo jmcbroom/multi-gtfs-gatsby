@@ -2,10 +2,8 @@ import { graphql } from "gatsby";
 import React, { useState } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopMap from "../components/StopMap";
-import StopRoutePicker from "../components/StopRoutePicker";
 import StopTimesHere from "../components/StopTimesHere";
 import { createAgencyData, createRouteData, getServiceDays, getTripsByServiceDay } from "../util";
-import _ from "lodash";
 
 const Stop = ({ data, pageContext }) => {
   let gtfsAgency = data.postgres.agencies[0];

@@ -7,7 +7,7 @@ import { Link } from "gatsby";
  * @returns
  */
 const AgencySlimHeader = ({ agency }) => {
-  const { slug, agencyName, name, fullName, color, textColor } = agency;
+  const { slug, name, color, textColor } = agency;
 
   return (
     <div className="mb-2 px-2 py-1" style={{background: color.hex, opacity: 0.65}}>
