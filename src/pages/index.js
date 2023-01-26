@@ -2,8 +2,6 @@ import { graphql } from "gatsby";
 import React from "react";
 import AgencyHeader from "../components/AgencyHeader";
 import AgencySlimHeader from "../components/AgencySlimHeader";
-import RouteHeader from "../components/RouteHeader";
-import { Link } from "gatsby";
 import PortableText from "react-portable-text";
 import { createRouteData } from "../util";
 

@@ -6,9 +6,9 @@ building a web site that can display ddot.info-like timetables for many agencies
 
 1. clone the repo
 
-2. run `npm install` or `yarn`
+2. run `yarn`
 
-3. populate your `.env.development` with: `PG_CONN`, `SANITY_TOKEN`, `SANITY_PROJECT_ID`, `SANITY_DATASET`
+3. populate your `.env.development` with: `PG_CONN`, `SANITY_TOKEN`, `SANITY_PROJECT_ID`, `SANITY_DATASET`, `MAPBOX_ACCESS_TOKEN`
 
 4. run `gatsby develop`
 
