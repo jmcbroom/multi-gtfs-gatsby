@@ -71,7 +71,7 @@ const Route = ({ data, pageContext }) => {
         <RouteHeader {...gtfsRoute} agency={agencyData} />
       </div>
 
-      <Tabs.Root className="tabRoot" defaultValue="overview">
+      <Tabs.Root className="tabRoot" defaultValue="overview" onValueChange={(v) => console.log(v)}>
         <Tabs.List className="tabList" aria-label="Manage your account">
           <Tabs.Trigger className="tabTrigger" value="overview">
             Home
