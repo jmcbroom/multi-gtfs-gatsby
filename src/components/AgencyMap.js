@@ -45,6 +45,25 @@ const AgencyMap = ({ routesFc, agency }) => {
     map.current.getCanvas().style.cursor = "";
   };
 
+  const zoomToRoutes = () => {
+    if (map.current) {
+      map.current?.easeTo({
+        zoom: 14.01,
+      });
+    }
+  };
+
+  const geolocateOnMap = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((x) => {
+        map.current?.easeTo({
+          center: [x.coords.longitude, x.coords.latitude],
+          zoom: 15
+        })
+      });
+    }
+  }
+
   const handleMoveEnd = () => {
     let routesOnMap = map.current.queryRenderedFeatures({
       layers: ["routes-case"],
@@ -88,15 +107,18 @@ const AgencyMap = ({ routesFc, agency }) => {
         </Mapbox>
       </div>
       <>
-        <div className="underline-title">{`Routes in the map view`}</div>
+      <div className="underline-title my-2">{`${routes.length > 0 ? routes.length : `No`} routes shown on the map`}</div>
         {routes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
               <RouteHeader {...r} agency={agency} />
-            ))}
+              ))}
           </div>
         ) : (
-          <div>Zoom in or press the geolocate button to show more routes.</div>
+          <div>
+            <a className="font-bold" onClick={() => zoomToRoutes()}>Zoom in</a> or <a className="font-bold" onClick={() => geolocateOnMap()}>jump to your location</a> to show more
+            routes.
+          </div>
         )}
       </>
     </>
