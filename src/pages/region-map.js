@@ -10,6 +10,8 @@ import _ from "lodash";
 import RouteHeader from "../components/RouteHeader";
 
 const RegionMapPage = ({ data }) => {
+  let style = _.cloneDeep(mapboxStyle);
+
   let [routes, setRoutes] = useState([]);
 
   let sanityAgencies = data.allSanityAgency.edges.map((edge) => edge.node);
@@ -31,7 +33,6 @@ const RegionMapPage = ({ data }) => {
 
   // iterate through the Sanity routes
   sanityRoutes.forEach((sanityRoute) => {
-
     // match to the corresponding GTFS route
     let matching = gtfsRoutes.filter(
       (gr) =>
@@ -69,7 +70,7 @@ const RegionMapPage = ({ data }) => {
   let mapInitialBbox = bbox(routeFeatureCollection);
 
   if (routeFeatureCollection.features.length > 0) {
-    mapboxStyle.sources.routes.data = routeFeatureCollection;
+    style.sources.routes.data = routeFeatureCollection;
   }
 
   const handleClick = (e) => {
@@ -86,15 +87,35 @@ const RegionMapPage = ({ data }) => {
     map.current.getCanvas().style.cursor = "";
   };
 
+  const zoomToRoutes = () => {
+    if (map.current) {
+      map.current?.easeTo({
+        zoom: 14.01,
+      });
+    }
+  };
+
+  const geolocateOnMap = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((x) => {
+        map.current?.easeTo({
+          center: [x.coords.longitude, x.coords.latitude],
+          zoom: 15
+        })
+      });
+    }
+  }
+
   const handleMoveEnd = () => {
     let routesOnMap = map.current.queryRenderedFeatures({
       layers: ["routes-case"],
     });
 
     if (map.current.getZoom() > 14) {
-      let uniqueRoutes = _.uniqBy(routesOnMap, "properties.routeShortName").map(
-        (r) => r.properties
-      ).sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName)).sort((a, b) => a.feedIndex > b.feedIndex);
+      let uniqueRoutes = _.uniqBy(routesOnMap, "properties.routeShortName")
+        .map((r) => r.properties)
+        .sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName))
+        .sort((a, b) => a.feedIndex > b.feedIndex);
       setRoutes(uniqueRoutes);
     } else {
       setRoutes([]);
@@ -117,7 +138,7 @@ const RegionMapPage = ({ data }) => {
           ref={map}
           mapLib={MapboxGL}
           mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
-          mapStyle={mapboxStyle}
+          mapStyle={style}
           initialViewState={initialViewState}
           onClick={handleClick}
           onMouseEnter={handleMouseEnter}
@@ -130,16 +151,21 @@ const RegionMapPage = ({ data }) => {
         </Mapbox>
       </div>
 
-      {routes.length > 0 && (
-        <>
-          <p className="underline-title">Routes in the map view</p>
+      <>
+        <div className="underline-title my-2">{`${routes.length > 0 ? routes.length : `No`} routes shown on the map`}</div>
+        {routes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
               <RouteHeader {...r} agency={{ slug: { current: r.agencySlug } }} />
             ))}
           </div>
-        </>
-      )}
+        ) : (
+          <div>
+            <a className="font-bold" onClick={() => zoomToRoutes()}>Zoom in</a> or <a className="font-bold" onClick={() => geolocateOnMap()}>jump to your location</a> to show more
+            routes.
+          </div>
+        )}
+      </>
     </div>
   );
 };

@@ -26,6 +26,12 @@ const AgencyMap = ({ routesFc, agency }) => {
       layers: ["stops-points"],
     })[0];
 
+    let route = map.current.queryRenderedFeatures(e.point, {
+      layers: ["routes-case"],
+    })[0];
+
+    console.log(route);
+
     if (stop) {
       navigate(`/${agency.slug.current}/stop/${stop.properties.stopCode}`);
     }
@@ -44,10 +50,10 @@ const AgencyMap = ({ routesFc, agency }) => {
       layers: ["routes-case"],
     });
 
-    if (map.current.getZoom() > 14) {
-      let uniqueRoutes = _.uniqBy(routesOnMap, "properties.routeShortName").map(
-        (r) => r.properties
-      ).sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName));
+    if (map.current.getZoom() > 13.5) {
+      let uniqueRoutes = _.uniqBy(routesOnMap, "properties.routeShortName")
+        .map((r) => r.properties)
+        .sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName));
       setRoutes(uniqueRoutes);
     } else {
       setRoutes([]);
@@ -81,16 +87,18 @@ const AgencyMap = ({ routesFc, agency }) => {
           <GeolocateControl />
         </Mapbox>
       </div>
-      {routes.length > 0 && (
-        <>
-          <div className="underline-title">Routes in the map view</div>
+      <>
+        <div className="underline-title">{`Routes in the map view`}</div>
+        {routes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
               <RouteHeader {...r} agency={agency} />
             ))}
           </div>
-        </>
-      )}
+        ) : (
+          <div>Zoom in or press the geolocate button to show more routes.</div>
+        )}
+      </>
     </>
   );
 };

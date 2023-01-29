@@ -4657,6 +4657,46 @@
       }
     },
     {
+      "id": "route-labels",
+      "type": "symbol",
+      "source": "routes",
+      "interactive": true,
+      "paint": {
+        "text-color": ["get", "routeTextColor"],
+        "text-halo-color": ["get", "routeColor"],
+        "text-halo-width": {
+          "base": 1.5,
+          "stops": [
+            [10, 5],
+            [16, 2]
+          ]
+        }
+      },
+       "layout": {
+        "text-field": ["get", "routeShortName"],
+        "text-justify": "auto",
+        "symbol-placement": "line",
+        "symbol-spacing": 180,
+        "text-rotation-alignment": "viewport",
+        "text-font": ["Inter Bold"],
+        "text-padding": {
+          "base": 1,
+          "stops": [
+            [10, 0.1],
+            [18, 5]
+          ]
+        },
+        "text-size": {
+          "base": 1.5,
+          "stops": [
+            [10, 8],
+            [16, 18],
+            [18, 28]
+          ]
+        }
+        }
+    },
+    {
       "id": "road-label-small",
       "type": "symbol",
       "metadata": { "mapbox:group": "1444933721429.3076" },
