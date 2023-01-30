@@ -3,7 +3,7 @@ import { getCliClient } from "sanity/cli";
 const client = getCliClient({ apiVersion: "2021-08-21" });
 
 let query = `
-  *[_type == "route"]{
+  *[_type == "route"][!defined(mapPriority)][0...10]{
     _id,
     shortName,
     routeType,
@@ -66,13 +66,12 @@ client.fetch(query).then((routes) => {
     
     client
       .patch(route._id)
-      .set({ importance: 1 })
+      .set({ mapPriority: importance })
       .commit()
       .then(
         console.log(
           `updated ${route.agency.slug.current} ${route.shortName}`
         )
       ).catch((err) => console.log(err));
-    setTimeout(() => null, 5000)
   });
 });

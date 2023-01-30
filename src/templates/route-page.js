@@ -57,6 +57,7 @@ const Route = ({ data, pageContext }) => {
     });
   }
 
+  sanityRoute.mapPriority = 2;
   let routeData = createRouteData(gtfsRoute, sanityRoute)
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0]);
@@ -148,6 +149,7 @@ export const query = graphql`
       textColor {
         hex
       }
+      mapPriority
       directions: extRouteDirections {
         directionHeadsign
         directionDescription

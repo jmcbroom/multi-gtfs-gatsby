@@ -25,7 +25,7 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
 
   // turn off the route-labels
   style.layers.forEach((l, idx) => {
-    if(l.id === 'route-labels') {
+    if(l.id.startsWith('route-labels')) {
       style.layers[idx].layout.visibility = "none"
     }
   })

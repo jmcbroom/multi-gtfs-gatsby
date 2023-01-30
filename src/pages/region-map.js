@@ -53,6 +53,7 @@ const RegionMapPage = ({ data }) => {
         routeColor: routeData.routeColor,
         routeTextColor: routeData.routeTextColor,
         tripCount: routeData.trips.totalCount,
+        mapPriority: routeData.mapPriority,
         feedIndex: sanityRoute.agency.currentFeedIndex,
         agencySlug: sanityRoute.agency.slug.current,
       };
@@ -77,7 +78,7 @@ const RegionMapPage = ({ data }) => {
   const handleClick = (e) => {
     // click a routeLabel => navigate to that route URL
     let route = map.current.queryRenderedFeatures(e.point, {
-      layers: ["route-labels"],
+      layers: ["route-labels-1", "route-labels-2", "route-labels-3", "route-labels-4"],
     })[0];
     if (route) {
       navigate(`/${route.properties.agencySlug}/route/${route.properties.routeShortName}`)
@@ -113,7 +114,7 @@ const RegionMapPage = ({ data }) => {
 
   const handleMoveEnd = () => {
     let routesOnMap = map.current.queryRenderedFeatures({
-      layers: ["routes-case"],
+      layers: ["routes-case-1", "routes-case-2", "routes-case-3", "routes-case-4"],
     });
 
     if (map.current.getZoom() > 14) {
@@ -149,7 +150,6 @@ const RegionMapPage = ({ data }) => {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onMoveEnd={handleMoveEnd}
-          interactiveLayerIds={["routes-case"]}
         >
           <NavigationControl showCompass={false} />
           <GeolocateControl />
@@ -239,6 +239,7 @@ export const query = graphql`
             directionTimepoints
             directionShape
           }
+          mapPriority
         }
       }
     }
