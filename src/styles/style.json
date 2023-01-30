@@ -2008,7 +2008,7 @@
           },
           "paint": {
               "text-color": "hsl(220, 1%, 49%)",
-              "text-halo-color": "hsl(220, 0%, 100%)",
+              "text-halo-color": "rgba(255, 255, 255, 0.9)",
               "text-halo-width": 3
           }
       },

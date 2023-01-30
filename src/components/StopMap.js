@@ -4,12 +4,26 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import React from "react";
 import mapboxStyle from "../styles/styleFactory";
 import _ from 'lodash'
+import { createRouteFc } from "../util";
 
-const StopMap = ({ stopFc }) => {
+const StopMap = ({ stopFc, routeFc, times }) => {
   let stop = stopFc.features[0];
 
+  
   let style = _.cloneDeep(mapboxStyle)
   style.sources.stop.data = stopFc;
+
+  if (routeFc.features.length > 0) {
+    style.sources.routes.data = routeFc;
+  }
+
+  // turn off the route-labels
+  style.layers.forEach((l, idx) => {
+    if(l.id.startsWith('route-labels')) {
+      style.layers[idx].maxzoom = 15
+    }
+  });
+  
   
   const initialViewState = {
     longitude: stop.geometry.coordinates[0],

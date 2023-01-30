@@ -36,6 +36,32 @@ const Stop = ({ data, pageContext }) => {
     }
   });
 
+  // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
+  let allRouteFeatures = []
+  routes.forEach(route => {
+
+    route.directions.forEach(direction => {
+
+      let feature = JSON.parse(direction.directionShape)[0]
+      
+      feature.properties = {
+          routeColor: route.routeColor,
+          routeLongName: route.routeLongName,
+          routeShortName: route.routeShortName,
+          routeTextColor: route.routeTextColor,
+          mapPriority: route.mapPriority,
+          direction: direction.directionDescription,
+          directionId: direction.directionId
+      }
+
+      allRouteFeatures.push(feature)
+    })
+  })
+  let routeFc = {
+    type: "FeatureCollection",
+    features: allRouteFeatures
+  }
+
   let stopFc = {
     type: "FeatureCollection",
     features: [
@@ -65,7 +91,7 @@ const Stop = ({ data, pageContext }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* <StopRoutePicker {...{ routes, currentRoute, setCurrentRoute, agency: agencyData }} /> */}
         <StopTimesHere times={times} routes={routes} agency={agencyData} serviceDays={serviceDays}/>
-        <StopMap stopFc={stopFc} routes={routes} times={times} />
+        <StopMap stopFc={stopFc} routeFc={routeFc} times={times} />
       </div>
     </div>  
   );
@@ -98,11 +124,19 @@ export const query = graphql`
         node {
           longName
           shortName
-          routeColor: color {
+          color {
             hex
           }
-          routeTextColor: textColor {
+          textColor {
             hex
+          }
+          mapPriority
+          directions: extRouteDirections {
+            directionHeadsign
+            directionDescription
+            directionId
+            directionTimepoints
+            directionShape
           }
         }
       }

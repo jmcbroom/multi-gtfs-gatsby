@@ -17,8 +17,10 @@ const AgencyMap = ({ routesFc, agency }) => {
 
   let mapInitialBbox = bbox(routeFeatureCollection);
 
+  let style = _.cloneDeep(mapboxStyle)
+
   if (routeFeatureCollection.features.length > 0) {
-    mapboxStyle.sources.routes.data = routeFeatureCollection;
+    style.sources.routes.data = routeFeatureCollection;
   }
 
   const handleClick = (e) => {
@@ -97,7 +99,7 @@ const AgencyMap = ({ routesFc, agency }) => {
           ref={map}
           mapLib={MapboxGL}
           mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
-          mapStyle={mapboxStyle}
+          mapStyle={style}
           initialViewState={initialViewState}
           onClick={handleClick}
           onMouseEnter={handleMouseEnter}
