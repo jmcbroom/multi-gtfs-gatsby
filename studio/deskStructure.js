@@ -17,6 +17,7 @@ export default S =>
                 .title("Routes")
                 .filter('_type == "route" && $agencyId == agency._ref')
                 .params({ agencyId })
+                .defaultOrdering([{field: 'mapPriority', direction: 'asc'}, {field: "shortName", direction: "asc"}])
             )
         ),
       S.divider(),

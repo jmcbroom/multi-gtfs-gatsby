@@ -1,11 +1,20 @@
 import React from "react";
-const StopRoutePicker = ({ routes, currentRoute, setCurrentRoute }) => {
+import RouteListItem from "./RouteListItem";
+const StopRoutePicker = ({ routes, agency, currentRoute, setCurrentRoute }) => {
   return (
     <div className="">
       <h3>Routes at this stop</h3>
-      <p>There are some routes here</p>
+      <div className="flex flex-col gap-1">
+        {routes.map((route) => (
+          <RouteListItem
+            key={route.routeLongName}
+            {...route}
+            agency={agency}
+          />
+        ))}
+      </div>
     </div>
   );
 };
 
-export default StopRoutePicker
+export default StopRoutePicker;

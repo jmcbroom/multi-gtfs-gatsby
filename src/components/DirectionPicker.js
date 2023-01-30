@@ -1,5 +1,3 @@
-import { faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import React from "react";
 
