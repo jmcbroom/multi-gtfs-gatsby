@@ -1,11 +1,10 @@
 import React from "react";
-import { graphql, Link } from "gatsby";
+import { graphql } from "gatsby";
 import RouteHeader from "../components/RouteHeader";
 import AgencyHeader from "../components/AgencyHeader";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLink, faPhone } from "@fortawesome/free-solid-svg-icons";
+import AgencyMap from "../components/AgencyMap";
 import PortableText from "react-portable-text";
-import { createAgencyData } from "../util";
+import { createAgencyData, createRouteData } from "../util";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import * as Tabs from "@radix-ui/react-tabs";
 
@@ -14,7 +13,7 @@ const Agency = ({ data, pageContext }) => {
   let sanityAgency = data.allSanityAgency.edges[0].node;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
 
-  let { agencyUrl, agencyPhone, routes, description, name, agencyFareContent } = agencyData;
+  let { agencyUrl, agencyPhone, routes, description, name, fareAttributes, fareContent } = agencyData;
 
   // let's not display any routes that don't have scheduled trips.
   let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
@@ -22,18 +21,73 @@ const Agency = ({ data, pageContext }) => {
     .filter((r) => r.trips.totalCount > 0)
     .sort((a, b) => a.implicitSort - b.implicitSort);
 
+
+  
+  // match gtfsRoutes with the sanityRoutes
   routes.forEach((r) => {
     // find the matching sanityRoute
     let matching = sanityRoutes.filter(
-      (sr) => sr.agency.currentFeedIndex === r.feedIndex && sr.shortName === r.routeShortName
+      (sr) => sr.shortName === r.routeShortName
     );
 
     // let's override the route attributes with those from Sanity
     if (matching.length === 1) {
-      r.routeLongName = matching[0].longName;
-      r.routeColor = matching[0].routeColor.hex;
-      r.routeTextColor = matching[0].routeTextColor.hex;
+      r = createRouteData(r, matching[0])
     }
+  });
+
+  // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
+  let allRouteFeatures = []
+  routes.forEach(route => {
+
+    route.directions.forEach(direction => {
+
+      let feature = JSON.parse(direction.directionShape)[0]
+      
+      feature.properties = {
+          routeColor: route.routeColor,
+          routeLongName: route.routeLongName,
+          routeShortName: route.routeShortName,
+          routeTextColor: route.routeTextColor,
+          mapPriority: route.mapPriority,
+          direction: direction.directionDescription,
+          directionId: direction.directionId
+      }
+
+      allRouteFeatures.push(feature)
+    })
+  })
+  let allRouteFc = {
+    type: "FeatureCollection",
+    features: allRouteFeatures
+  }
+
+  // generate human-readable text for fare info
+  fareAttributes = fareAttributes?.map((fare) => {
+    fare.formattedPrice = new Intl.NumberFormat('en-US', {
+      style: 'currency', currency: fare.currencyType
+    }).format(fare.price);
+    
+    if (fare.transfers == 0) {
+      fare.formattedTransfers = 'a single ride';
+    } else {
+      fare.formattedTransfers = (fare.transferDuration <= 60**2 * 24) ?
+        `${Math.floor(fare.transferDuration / 60**2)} hour` :
+        `${Math.floor(fare.transferDuration / 60**2 / 24)} day`;
+        
+      fare.formattedTransfers +=
+        fare.formattedTransfers.startsWith('1 ') ? '' : 's';
+      
+      fare.formattedTransfers += ' with ';
+      
+      fare.formattedTransfers += fare.transfers ?
+        (fare.transfers + ' transfer' + fare.transfers == 1 ? '' : 's' ) :
+        fare.transfers === 0 ?
+        'no transfers' :
+        'unlimited tranfers';
+    }
+    
+    return fare;
   });
 
   return (
@@ -56,22 +110,29 @@ const Agency = ({ data, pageContext }) => {
           <PortableText content={description} />
 
           <h4>Fares</h4>
-          {agencyFareContent && <PortableText content={agencyFareContent} />}
+          {fareAttributes?.map((fare, idx) => (
+            <p key={`${agencyData.agencyId}${idx}`}>
+              The <span className="font-semibold">{fare.formattedPrice}</span> fare is valid for {fare.formattedTransfers}.
+            </p>
+          ))}
+          {fareContent && <PortableText content={fareContent} />}
 
           <h4>Contact information</h4>
-          <p>You can find {name}'s website at <Link to={agencyUrl}>{agencyUrl}</Link>.</p>
-          <p>{name}'s customer service number is <Link to={agencyUrl}>{agencyPhone}</Link>.</p>
+          <p>You can find {name}'s website at <a href={agencyUrl}>{agencyUrl}</a>.</p>
+          <p>{name}'s customer service number is <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.</p>
 
         </Tabs.Content>
         <Tabs.Content className="tabContent py-4" value="routes">
+          <p className="underline-title">List of bus routes</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
-              <RouteHeader key={r.routeId} {...r} agency={agencyData} />
+              <RouteHeader key={r.routeShortName} {...r} agency={agencyData} />
             ))}
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="map">
-          <h3>System map</h3>
+          <p className="underline-title">System map</p>
+          <AgencyMap agency={agencyData} routesFc={allRouteFc} />
         </Tabs.Content>
       </Tabs.Root>
       {/* 
@@ -135,6 +196,12 @@ export const query = graphql`
             serviceId
           }
         }
+        fareAttributes: fareAttributesByFeedIndexAndAgencyIdList(orderBy: [ PRICE_ASC, TRANSFER_DURATION_DESC ]) {
+          price
+          transfers
+          transferDuration
+          currencyType
+        }
       }
     }
     allSanityRoute(filter: { agency: { slug: { current: { eq: $agencySlug } } } }) {
@@ -148,11 +215,13 @@ export const query = graphql`
           routeTextColor: textColor {
             hex
           }
-          agency {
-            currentFeedIndex
-            slug {
-              current
-            }
+          mapPriority
+          directions: extRouteDirections {
+            directionHeadsign
+            directionDescription
+            directionId
+            directionTimepoints
+            directionShape
           }
         }
       }
@@ -172,6 +241,13 @@ export const query = graphql`
             current
           }
           description: _rawDescription
+          fareAttributes {
+            price
+            transferDuration
+            transfers
+            currencyType
+          }
+          fareContent: _rawFareContent
         }
       }
     }

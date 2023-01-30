@@ -1,6 +1,6 @@
 import React from "react";
-import { formatArrivalTime } from "../util";
 import { Link } from "gatsby";
+import StopTimeLabel from "./StopTimeLabel";
 import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { sortTripsByFrequentTimepoint } from "../util";
@@ -24,6 +24,9 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
     sortedTrips = sortTripsByFrequentTimepoint(selectedTrips).trips;
     timepoints = sortTripsByFrequentTimepoint(selectedTrips).timepoints;
   }
+
+  // needed to add this filter back in... but it's interesting to think about letting users see all times.
+  timepoints = timepoints.filter(tp => tp.timepoint)
 
   return (
     <div className="mx-auto" style={{width: '100%', overflow: 'auto', maxHeight: '700px'}}>
@@ -76,8 +79,8 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
                 let value = indices.indexOf(j)
                 return (
                   <td key={`${t.id}-${i}-${j}`}
-                    className={`text-center text-sm border-r-2 timetable-entry ${formatArrivalTime(filtered[value].arrivalTime).indexOf("p") > -1 ? `font-semibold` : `font-base`}`}>
-                    {formatArrivalTime(filtered[value].arrivalTime).slice(0, -3)}
+                    className={`text-center text-sm border-r-2 timetable-entry`}>
+                    <StopTimeLabel arrivalTime={filtered[value].arrivalTime} />
                   </td>
                 )
               }
@@ -87,16 +90,14 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
                     `
                     text-center text-sm border-r-2 border-opacity-25 border-dotted border-gray-700 z-0 timetable-entry tabular 
                     ${filtered.length === 0 && `bg-gray-100`} 
-                    ${formatArrivalTime(filtered[0].arrivalTime).indexOf("p") > -1 ? `font-semibold` : `font-base`}
                     ` :
                     `
                     text-center text-sm z-0 timetable-entry 
                     ${filtered.length === 0 && `bg-gray-100`} 
-                    ${formatArrivalTime(filtered[0].arrivalTime).indexOf("p") > -1 ? `font-semibold` : `font-base`}
                     `
                     }>
                   {filtered.length > 0 ?
-                    formatArrivalTime(filtered[0].arrivalTime).slice(0, -3) :
+                    <StopTimeLabel arrivalTime={filtered[0].arrivalTime} /> :
                     `-`
                   }
                 </td>

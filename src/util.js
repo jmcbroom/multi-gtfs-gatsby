@@ -1,11 +1,10 @@
-
 /**
  * Convert the GraphQL arrivalTime to a human-readable string.
  * @param {arrivalTime} time 
  * @param {boolean} showAp 
  * @returns 
  */
-export const formatArrivalTime = (time, showAp=true) => {
+export const formatArrivalTime = (time, showAp=true, twentyFourHr=false) => {
   let hour = time.hours;
   let minutes = time.minutes ? time.minutes.toString().padStart(2, "0") : "00";
   let ap = "am";
@@ -16,7 +15,7 @@ export const formatArrivalTime = (time, showAp=true) => {
     hour = time.hours;
     ap = "am";
   } else if (time.hours > 12 && time.hours < 24) {
-    hour = time.hours - 12;
+    if (!twentyFourHr) { hour = time.hours - 12; }
     ap = "pm";
   } else if (time.hours % 12 === 0) {
     hour = 12;
@@ -25,8 +24,12 @@ export const formatArrivalTime = (time, showAp=true) => {
     hour = time.hours - 24;
     ap = "am";
   }
+  
+  if (twentyFourHr) {
+    hour = time.hours ? time.hours.toString().padStart(2, "0") : "00";
+  }
 
-  return `${hour}:${minutes} ${ap}`;
+  return `${hour}:${minutes}${showAp ? ` ${ap}` : ``}`;
 };
 
 /**
@@ -61,8 +64,8 @@ export const sortTripsByFrequentTimepoint = (trips) => {
     });
 
   let sorted = trips.sort((a, b) => {
-    let aStopTime = a.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0].arrivalTime;
-    let bStopTime = b.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0].arrivalTime;
+    let aStopTime = a.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0]?.arrivalTime || 0;
+    let bStopTime = b.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0]?.arrivalTime || 0;
 
     return aStopTime.hours * 60 + aStopTime.minutes - (bStopTime.hours * 60 + bStopTime.minutes);
   });
@@ -165,7 +168,6 @@ export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDir
 export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
   let headsignsByDirectionId = {}
   const directions = [...new Set(trips.map(trip => trip.directionId))].sort()
-
   directions.forEach(dir => {
     let tripsThisDirection = trips.filter(trip => trip.directionId === dir)
     // get th unique tripHeadsigns
@@ -175,11 +177,12 @@ export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
 
   if(sanityRoute) {
     sanityRoute.directions.forEach((dir, idx) => {
+      let directionId = dir.directionId
       if (dir.directionHeadsign) {
-        headsignsByDirectionId[idx].headsigns = [dir.directionHeadsign];
+        headsignsByDirectionId[directionId].headsigns = [dir.directionHeadsign];
       }
       if (dir.directionDescription) {
-        headsignsByDirectionId[idx].description = dir.directionDescription;
+        headsignsByDirectionId[directionId].description = dir.directionDescription;
       }
     });
   }
@@ -222,21 +225,25 @@ export const createRouteFc = (sanityRoute, gtfsRoute) => {
  * Create a GeoJSON FeatureCollection from the GTFS and Sanity representations of a route.
  * @param {*} sanityRoute: the Sanity route object
  * @param {*} trips: the returned object from getTripsByServiceAndDirection
+ * @param {boolean} timepointsOnly: filter the collection down to timepoints
  * @returns GeoJSON feature collection of timepoints
  */
-export const createTimepointsFc = (sanityRoute, trips, shortFormat=true) => {
+export const createStopsFc = (sanityRoute, trips, timepointsOnly=false, shortFormat=true) => {
 
   // store GeoJSON features here to include with the featureCollection
   let features = []
 
   // iterate through each direction on weekday service
-  Object.keys(trips.weekday).map(key => {
+  Object.keys(trips.weekday).forEach(key => {
 
     // get the timepoints from the trip with the most timepoints
     const mostTimepointsTrip = trips.weekday[key].sort((a, b) => {
       return b.stopTimes.length - a.stopTimes.length;
     })[0];
-    let stops = mostTimepointsTrip.stopTimes.map(st => st.stop)
+    
+    let stops = mostTimepointsTrip.stopTimes
+      .filter(st => !timepointsOnly || st.timepoint == 1)
+      .map(st => st.stop);
 
     stops.forEach(stop => {
 
@@ -277,6 +284,19 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
   gtfsAgency.name = sanityAgency.name
   gtfsAgency.color = sanityAgency.color
   gtfsAgency.textColor = sanityAgency.textColor
+  gtfsAgency.fareAttributes = sanityAgency.fareAttributes?.length ?
+    sanityAgency.fareAttributes : gtfsAgency.fareAttributes
+  gtfsAgency.fareContent = sanityAgency.fareContent
+  
   return gtfsAgency
 
+}
+
+export const createRouteData = (gtfsRoute, sanityRoute) => {
+  gtfsRoute.routeLongName = sanityRoute.longName
+  gtfsRoute.routeColor = sanityRoute.routeColor?.hex || sanityRoute.color?.hex
+  gtfsRoute.routeTextColor = sanityRoute.routeTextColor?.hex || sanityRoute.textColor?.hex
+  gtfsRoute.mapPriority = sanityRoute.mapPriority
+  gtfsRoute.directions = sanityRoute.directions
+  return gtfsRoute
 }

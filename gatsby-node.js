@@ -1,6 +1,21 @@
 const { create } = require("domain");
 const path = require(`path`);
 
+exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
+  if (stage === "build-html") {
+    actions.setWebpackConfig({
+      module: {
+        rules: [
+          {
+            test: /mapbox-gl/,
+            use: loaders.null()
+          }
+        ]
+      }
+    });
+  }
+};
+
 exports.createPages = async ({ graphql, actions: { createPage } }) => {
   const allAgencies = await graphql(`
     {

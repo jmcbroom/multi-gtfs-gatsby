@@ -3,7 +3,7 @@ import { graphql } from "gatsby";
 import React, { useState } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import DirectionPicker from "../components/DirectionPicker";
-import RouteDirectionsTable from "../components/RouteDirectionsTable";
+import RouteIntroduction from "../components/RouteIntroduction";
 import RouteHeader from "../components/RouteHeader";
 import RouteMap from "../components/RouteMap";
 import RouteStopsList from "../components/RouteStopsList";
@@ -13,8 +13,9 @@ import ServicePicker from "../components/ServicePicker";
 import "../styles/tabs.css";
 import {
   createAgencyData,
+  createRouteData,
   createRouteFc,
-  createTimepointsFc,
+  createStopsFc,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
@@ -35,6 +36,7 @@ const Route = ({ data, pageContext }) => {
     gtfsRoute.routeTextColor = sanityRoute.textColor.hex;
   }
 
+
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
@@ -50,10 +52,13 @@ const Route = ({ data, pageContext }) => {
   if (sanityRoute) {
     sanityRoute.directions.forEach((dir, idx) => {
       if (dir.directionHeadsign) {
-        headsignsByDirectionId[idx][0] = dir.directionHeadsign;
+        headsignsByDirectionId[dir.directionId][0] = dir.directionHeadsign;
       }
     });
   }
+
+  sanityRoute.mapPriority = 2;
+  let routeData = createRouteData(gtfsRoute, sanityRoute)
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0]);
   const [service, setService] = useState(Object.keys(tripsByServiceDay)[0]);
@@ -67,7 +72,7 @@ const Route = ({ data, pageContext }) => {
         <RouteHeader {...gtfsRoute} agency={agencyData} />
       </div>
 
-      <Tabs.Root className="tabRoot" defaultValue="overview">
+      <Tabs.Root className="tabRoot" defaultValue="overview" onValueChange={(v) => console.log(v)}>
         <Tabs.List className="tabList" aria-label="Manage your account">
           <Tabs.Trigger className="tabTrigger" value="overview">
             Home
@@ -83,7 +88,9 @@ const Route = ({ data, pageContext }) => {
           </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="overview">
-          <RouteDirectionsTable
+          <RouteIntroduction
+            agency={agencyData}
+            route={routeData}
             trips={tripsByServiceAndDirection}
             headsigns={headsignsByDirectionId}
           />
@@ -92,7 +99,9 @@ const Route = ({ data, pageContext }) => {
           {sanityRoute && (
             <RouteMap
               routeFc={createRouteFc(sanityRoute, gtfsRoute)}
-              timepointsFc={createTimepointsFc(sanityRoute, tripsByServiceAndDirection)}
+              stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
+              timepointsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection, true)}
+              agency={agencyData}
             />
           )}
         </Tabs.Content>
@@ -113,7 +122,9 @@ const Route = ({ data, pageContext }) => {
           <div className="bg-gray-100 p-4 md:py-6 flex flex-col gap-4 md:gap-8">
             <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
           </div>
+          <div className="px-3 flex flex-col gap-4 md:gap-8">
           <RouteStopsList longTrips={longTrips} direction={direction} routeColor={gtfsRoute.routeColor} agency={agencyData} />
+          </div>
         </Tabs.Content>
       </Tabs.Root>
     </div>
@@ -138,6 +149,7 @@ export const query = graphql`
       textColor {
         hex
       }
+      mapPriority
       directions: extRouteDirections {
         directionHeadsign
         directionDescription
@@ -177,7 +189,6 @@ export const query = graphql`
           tripId
           tripHeadsign
           stopTimes: stopTimesByFeedIndexAndTripIdList(
-            condition: { timepoint: 1 }
             orderBy: STOP_SEQUENCE_ASC
           ) {
             arrivalTime {
@@ -191,7 +202,8 @@ export const query = graphql`
               stopName
               stopLon
               stopLat
-            }
+            },
+            timepoint
           }
         }
         longTrips: longestTripsList {
