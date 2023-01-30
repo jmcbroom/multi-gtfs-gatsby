@@ -4,7 +4,7 @@ import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef } from "react";
 import { navigate } from "gatsby";
-import mapboxStyle from "../styles/mapbox.json";
+import mapboxStyle from "../styles/styleFactory";
 import _ from 'lodash'
 
 

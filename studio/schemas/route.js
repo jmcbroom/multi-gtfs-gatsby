@@ -68,6 +68,13 @@ export default {
       type: "array",
       of: [{ type: "extRouteDirection" }],
     },
+    {
+      name: "mapPriority",
+      title: "Map priority",
+      description: "Affects how the route is drawn on the map, from more prominent (1) to least prominent (5).",
+      type: "number",
+      validation: Rule => Rule.min(1).max(5)
+    },
   ],
   preview: {
     select: {

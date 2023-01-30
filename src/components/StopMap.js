@@ -2,7 +2,7 @@ import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React from "react";
-import mapboxStyle from "../styles/mapbox.json";
+import mapboxStyle from "../styles/styleFactory";
 import _ from 'lodash'
 
 const StopMap = ({ stopFc }) => {

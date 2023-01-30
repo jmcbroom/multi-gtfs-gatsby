@@ -4,7 +4,7 @@ import Mapbox, { GeolocateControl, NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState } from "react";
 import { navigate } from "gatsby";
-import mapboxStyle from "../styles/mapbox.json";
+import mapboxStyle from "../styles/styleFactory";
 import _ from "lodash";
 import RouteHeader from "./RouteHeader";
 
@@ -22,18 +22,21 @@ const AgencyMap = ({ routesFc, agency }) => {
   }
 
   const handleClick = (e) => {
+
+    // click a stop => navigate to URL
     let stop = map.current.queryRenderedFeatures(e.point, {
       layers: ["stops-points"],
     })[0];
-
-    let route = map.current.queryRenderedFeatures(e.point, {
-      layers: ["routes-case"],
-    })[0];
-
-    console.log(route);
-
     if (stop) {
       navigate(`/${agency.slug.current}/stop/${stop.properties.stopCode}`);
+    }
+
+    // click a routeLabel => navigate to that route URL
+    let route = map.current.queryRenderedFeatures(e.point, {
+      layers: ["route-labels"],
+    })[0];
+    if (route) {
+      navigate(`/${agency.slug.current}/route/${route.properties.routeShortName}`)
     }
   };
 
