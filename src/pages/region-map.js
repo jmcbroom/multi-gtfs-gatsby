@@ -3,8 +3,9 @@ import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState } from "react";
 import Mapbox, { GeolocateControl, NavigationControl } from "react-map-gl";
-import mapboxStyle from "../styles/mapbox.json";
+import mapboxStyle from "../styles/styleFactory";
 import { createRouteData } from "../util";
+import { navigate } from "gatsby";
 import bbox from "@turf/bbox";
 import _ from "lodash";
 import RouteHeader from "../components/RouteHeader";
@@ -74,9 +75,13 @@ const RegionMapPage = ({ data }) => {
   }
 
   const handleClick = (e) => {
-    let routesClicked = map.current.queryRenderedFeatures(e.point, {
-      layers: ["routes-case"],
-    });
+    // click a routeLabel => navigate to that route URL
+    let route = map.current.queryRenderedFeatures(e.point, {
+      layers: ["route-labels"],
+    })[0];
+    if (route) {
+      navigate(`/${route.properties.agencySlug}/route/${route.properties.routeShortName}`)
+    }
   };
 
   const handleMouseEnter = () => {
