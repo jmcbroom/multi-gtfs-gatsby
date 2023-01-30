@@ -296,6 +296,7 @@ export const createRouteData = (gtfsRoute, sanityRoute) => {
   gtfsRoute.routeLongName = sanityRoute.longName
   gtfsRoute.routeColor = sanityRoute.routeColor?.hex || sanityRoute.color?.hex
   gtfsRoute.routeTextColor = sanityRoute.routeTextColor?.hex || sanityRoute.textColor?.hex
+  gtfsRoute.mapPriority = sanityRoute.mapPriority
   gtfsRoute.directions = sanityRoute.directions
   return gtfsRoute
 }

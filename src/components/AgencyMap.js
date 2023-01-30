@@ -33,7 +33,7 @@ const AgencyMap = ({ routesFc, agency }) => {
 
     // click a routeLabel => navigate to that route URL
     let route = map.current.queryRenderedFeatures(e.point, {
-      layers: ["route-labels"],
+      layers: ["route-labels-1", "route-labels-2", "route-labels-3", "route-labels-4"],
     })[0];
     if (route) {
       navigate(`/${agency.slug.current}/route/${route.properties.routeShortName}`)
@@ -69,7 +69,7 @@ const AgencyMap = ({ routesFc, agency }) => {
 
   const handleMoveEnd = () => {
     let routesOnMap = map.current.queryRenderedFeatures({
-      layers: ["routes-case"],
+      layers: ["routes-case-1", "routes-case-2", "routes-case-3", "routes-case-4"],
     });
 
     if (map.current.getZoom() > 13.5) {

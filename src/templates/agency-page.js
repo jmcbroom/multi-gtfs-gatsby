@@ -49,6 +49,7 @@ const Agency = ({ data, pageContext }) => {
           routeLongName: route.routeLongName,
           routeShortName: route.routeShortName,
           routeTextColor: route.routeTextColor,
+          mapPriority: route.mapPriority,
           direction: direction.directionDescription,
           directionId: direction.directionId
       }
@@ -214,6 +215,7 @@ export const query = graphql`
           routeTextColor: textColor {
             hex
           }
+          mapPriority
           directions: extRouteDirections {
             directionHeadsign
             directionDescription
