@@ -42,6 +42,9 @@ client.fetch(query).then((routes) => {
       if (route.routeType === 'fast') {
         importance = 1
       }
+      if (route.routeType === 'park-and-ride') {
+        importance = 4
+      }
     }
 
     console.log(`${route.agency.slug.current} ${route.shortName} importance: ${importance}`)
