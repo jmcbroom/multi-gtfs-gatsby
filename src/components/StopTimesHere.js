@@ -37,7 +37,13 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
   console.log(timesByRoute[routes[0].routeShortName][service]);
 
-  let defaultRoute = routes.length > 0 ? routes[0].routeShortName : 'none'
+  let [service, setService] = useState(defaultService);
+
+  
+  routes = routes.sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName)).sort((a, b) => a.mapPriority > b.mapPriority);
+  let defaultRoute = routes.length > 0 ? routes[0].routeShortName : "none";
+
+  console.log(timesByRoute[routes[0].routeShortName][service]);
 
   return (
     <div>
