@@ -55,8 +55,8 @@ const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
   });
 
   return (
-    <>
-      <p className="text-lg px-3 pb-2">
+    <div className="px-2 md:px-0">
+      <p className="text-lg">
         The bus travels {whatDirectionItRuns(route)} between{" "}
         {endpoints.map((e, idx) => (
           <>
@@ -65,8 +65,8 @@ const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
           </>
         ))}.
       </p>
-      <p className="text-lg px-3 pb-2">Here's a list of the major stops in each travel direction:</p>
-      <div className="px-3 grid grid-cols-1 md:grid-cols-2 items-start gap-8">
+      <p className="text-lg">Here's a list of the major stops in each travel direction:</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-8">
         {endpoints.map((end, idx) => (
           <div key={end}>
             <div className="text-lg inline font-bold">
@@ -87,7 +87,7 @@ const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 };
 
@@ -140,7 +140,7 @@ const RouteIntroRunTimes = ({ route, trips, headsigns }) => {
   });
 
   return (
-    <div className="px-3 text-lg list-disc list-inside">
+    <div className="text-lg list-disc list-inside px-2 md:px-0">
       {filteredServices.map((s) => (
         <p key={s}>
           On <span className="font-semibold">{serviceDisplayText[s]}</span>, this bus{" "}
@@ -161,14 +161,15 @@ const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
   let directions = Object.keys(headsigns);
 
   return (
-    <section className="gap-6 flex flex-col p-0 my-4">
+    <div className="gap-6 flex flex-col p-0 py-4">
       <div>
-        <div className="underline-title mx-3">When does this bus run?</div>
-        <div className="text-lg px-3">This bus route runs {whenItRuns(trips)}.</div>
+        <div className="underline-title">When does this bus run?</div>
+        <div className="text-lg px-2 md:px-0 my-2">This bus route runs {whenItRuns(trips)}.</div>
         <RouteIntroRunTimes route={route} trips={trips} headsigns={headsigns} />
       </div>
+
       <div>
-        <div className="underline-title mx-3">Where does this bus go?</div>
+        <div className="underline-title">Where does this bus go?</div>
         <RouteIntroEndpoints agency={agency} route={route} trips={trips} headsigns={headsigns} />
       </div>
 
@@ -226,7 +227,7 @@ const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
           ))}
         </tbody>
       </table>
-    </section>
+    </div>
   );
 };
 

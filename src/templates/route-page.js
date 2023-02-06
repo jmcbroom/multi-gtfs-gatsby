@@ -16,6 +16,7 @@ import {
   createRouteData,
   createRouteFc,
   createStopsFc,
+  dayOfWeek,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
@@ -61,7 +62,17 @@ const Route = ({ data, pageContext }) => {
   let routeData = createRouteData(gtfsRoute, sanityRoute)
 
   const [direction, setDirection] = useState(Object.keys(headsignsByDirectionId)[0]);
-  const [service, setService] = useState(Object.keys(tripsByServiceDay)[0]);
+
+  let defaultService = 'weekday'
+  
+  if (dayOfWeek() === 'sunday' && tripsByServiceDay.sunday.length > 0) {
+    defaultService = 'sunday';
+  }
+  if (dayOfWeek() === 'saturday' && tripsByServiceDay.saturday.length > 0) {
+    defaultService = 'saturday';
+  }
+
+  const [service, setService] = useState(defaultService);
 
 
   return (

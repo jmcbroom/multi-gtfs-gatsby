@@ -5,32 +5,36 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import classNames from "classnames";
 import _ from "lodash";
 import "../styles/accordion.css";
-import { getTripsByServiceDay } from "../util";
+import { dayOfWeek, getTripsByServiceDay } from "../util";
 import RouteListItem from "./RouteListItem";
 import ServicePicker from "./ServicePicker";
 
-const AccordionTrigger = React.forwardRef(({ children, className, ...props }, forwardedRef) => (
-  <Accordion.Header className="AccordionHeader">
-    <Accordion.Trigger
-      className={classNames("AccordionTrigger", className)}
+const AccordionTrigger = React.forwardRef(
+  ({ children, className, ...props }, forwardedRef) => (
+    <Accordion.Header className="AccordionHeader">
+      <Accordion.Trigger
+        className={classNames("AccordionTrigger", className)}
+        {...props}
+        ref={forwardedRef}
+      >
+        {children}
+        <ChevronDownIcon className="AccordionChevron" aria-hidden />
+      </Accordion.Trigger>
+    </Accordion.Header>
+  )
+);
+
+const AccordionContent = React.forwardRef(
+  ({ children, className, ...props }, forwardedRef) => (
+    <Accordion.Content
+      className={classNames("AccordionContent", className)}
       {...props}
       ref={forwardedRef}
     >
-      {children}
-      <ChevronDownIcon className="AccordionChevron" aria-hidden />
-    </Accordion.Trigger>
-  </Accordion.Header>
-));
-
-const AccordionContent = React.forwardRef(({ children, className, ...props }, forwardedRef) => (
-  <Accordion.Content
-    className={classNames("AccordionContent", className)}
-    {...props}
-    ref={forwardedRef}
-  >
-    <div className="AccordionContentText">{children}</div>
-  </Accordion.Content>
-));
+      <div className="AccordionContentText">{children}</div>
+    </Accordion.Content>
+  )
+);
 
 const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
   let timesByRoute = _.groupBy(times, "trip.route.routeShortName");
@@ -44,19 +48,34 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
     );
   });
 
-  let [service, setService] = useState("weekday");
+  let defaultService = dayOfWeek();
 
-  let defaultRoute = routes.length > 0 ? routes[0].routeShortName : 'none'
+  let [service, setService] = useState(defaultService);
+
+  
+  routes = routes.sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName)).sort((a, b) => a.mapPriority > b.mapPriority);
+  let defaultRoute = routes.length > 0 ? routes[0].routeShortName : "none";
+
+  console.log(timesByRoute[routes[0].routeShortName][service]);
 
   return (
     <div>
       <div className="underline-title mb-2">Routes that stop here</div>
-      <Accordion.Root className="AccordionRoot" type="single" defaultValue={defaultRoute} collapsible>
+      <Accordion.Root
+        className="AccordionRoot"
+        type="single"
+        defaultValue={defaultRoute}
+        collapsible
+      >
         {routes.map((route, idx) => {
           return (
-            <Accordion.Item key={route.routeShortName} className="AccordionItem" value={route.routeShortName}>
+            <Accordion.Item
+              key={route.routeShortName}
+              className="AccordionItem"
+              value={route.routeShortName}
+            >
               <AccordionTrigger>
-                <RouteListItem {...route} agency={agency} />
+                <RouteListItem {...route} agency={agency} className="px-2" />
               </AccordionTrigger>
               <AccordionContent>
                 <ServicePicker
@@ -65,12 +84,21 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                   setService={setService}
                 />
                 <p className="py-1">
-                  Buses arrive here at:
+                  {timesByRoute[route.routeShortName][service].length > 0
+                    ? `Buses arrive here at:`
+                    : `There is no service on this route on ${
+                        service.startsWith("s")
+                          ? `${service.slice(0,1).toUpperCase()}${service.slice(1)}s.`
+                          : `weekday`
+                      }`}
                 </p>
 
                 <ul className="columns-4 sm:columns-5 gap-0 border-l-2 border-dotted border-grey-700 text-center">
                   {timesByRoute[route.routeShortName][service].map((trip) => (
-                    <li className="border-r-2 border-dotted border-grey-700 tabular" key={trip.tripId}>
+                    <li
+                      className="border-r-2 border-dotted border-grey-700 tabular"
+                      key={trip.tripId}
+                    >
                       <StopTimeLabel arrivalTime={trip.arrivalTime} />
                     </li>
                   ))}
@@ -84,4 +112,4 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
   );
 };
 
-export default StopTimesHere
+export default StopTimesHere;

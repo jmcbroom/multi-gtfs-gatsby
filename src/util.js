@@ -242,7 +242,7 @@ export const createStopsFc = (sanityRoute, trips, timepointsOnly=false, shortFor
     })[0];
     
     let stops = mostTimepointsTrip.stopTimes
-      .filter(st => !timepointsOnly || st.timepoint == 1)
+      .filter(st => !timepointsOnly || st.timepoint === 1)
       .map(st => st.stop);
 
     stops.forEach(stop => {
@@ -276,6 +276,13 @@ export const createStopsFc = (sanityRoute, trips, timepointsOnly=false, shortFor
   }
 }
 
+/**
+ * Blend GTFS and Sanity data about an agency.
+ * 
+ * @param {} gtfsAgency 
+ * @param {*} sanityAgency 
+ * @returns 
+ */
 export const createAgencyData = (gtfsAgency, sanityAgency) => {
 
   gtfsAgency.slug = sanityAgency.slug
@@ -292,6 +299,12 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
 
 }
 
+/**
+ * Blend GTFS and Sanity data about a given route.
+ * @param {*} gtfsRoute 
+ * @param {*} sanityRoute 
+ * @returns 
+ */
 export const createRouteData = (gtfsRoute, sanityRoute) => {
   gtfsRoute.routeLongName = sanityRoute.longName
   gtfsRoute.routeColor = sanityRoute.routeColor?.hex || sanityRoute.color?.hex
@@ -299,4 +312,14 @@ export const createRouteData = (gtfsRoute, sanityRoute) => {
   gtfsRoute.mapPriority = sanityRoute.mapPriority
   gtfsRoute.directions = sanityRoute.directions
   return gtfsRoute
+}
+
+/**
+ * Is it currently weekday/saturday/sunday?
+ */
+export const dayOfWeek = () => {
+  let dow = new Date().getDay()
+  if(dow === 0) { return `sunday` }
+  if(dow === 6) { return `saturday` }
+  return `weekday`
 }
