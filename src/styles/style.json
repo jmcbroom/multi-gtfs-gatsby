@@ -2464,7 +2464,7 @@
                   15,
                   ["match", ["get", "type"], "suburb", 15, 14]
               ],
-              "visibility": "none"
+              "visibility": "visible"
           },
           "paint": {
               "text-halo-color": "rgb(255, 255, 255)",
@@ -2537,7 +2537,6 @@
               "symbol-sort-key": ["get", "symbolrank"],
               "icon-image": "",
               "text-font": ["DIN Pro Regular", "Arial Unicode MS Regular"],
-              "visibility": "none",
               "text-anchor": ["step", ["zoom"], "center", 8, "center"],
               "text-field": ["coalesce", ["get", "name_en"], ["get", "name"]],
               "text-max-width": 7
