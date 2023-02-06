@@ -90,8 +90,8 @@ const Stop = ({ data, pageContext }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* <StopRoutePicker {...{ routes, currentRoute, setCurrentRoute, agency: agencyData }} /> */}
-        <StopTimesHere times={times} routes={routes} agency={agencyData} serviceDays={serviceDays}/>
         <StopMap stopFc={stopFc} routeFc={routeFc} times={times} />
+        <StopTimesHere times={times} routes={routes} agency={agencyData} serviceDays={serviceDays}/>
       </div>
     </div>  
   );

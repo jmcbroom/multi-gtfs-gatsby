@@ -21,8 +21,12 @@ const RegionMapPage = ({ data }) => {
 
   // filter out non-active gtfsAgencies/feeds
   // TODO: Don't pull these from the GraphQL query in the first place.
-  let activeFeedIndices = sanityAgencies.map((agency) => agency.currentFeedIndex);
-  gtfsAgencies = gtfsAgencies.filter((agency) => activeFeedIndices.indexOf(agency.feedIndex) > -1);
+  let activeFeedIndices = sanityAgencies.map(
+    (agency) => agency.currentFeedIndex
+  );
+  gtfsAgencies = gtfsAgencies.filter(
+    (agency) => activeFeedIndices.indexOf(agency.feedIndex) > -1
+  );
 
   // roll up all the gtfsRoutes into one
   let gtfsRoutes = gtfsAgencies
@@ -61,7 +65,9 @@ const RegionMapPage = ({ data }) => {
     });
   });
 
-  allRouteFeatures.sort((a, b) => a.properties.tripCount > b.properties.tripCount);
+  allRouteFeatures.sort(
+    (a, b) => a.properties.tripCount > b.properties.tripCount
+  );
   let routeFeatureCollection = {
     type: "FeatureCollection",
     features: allRouteFeatures,
@@ -78,10 +84,17 @@ const RegionMapPage = ({ data }) => {
   const handleClick = (e) => {
     // click a routeLabel => navigate to that route URL
     let route = map.current.queryRenderedFeatures(e.point, {
-      layers: ["route-labels-1", "route-labels-2", "route-labels-3", "route-labels-4"],
+      layers: [
+        "route-labels-1",
+        "route-labels-2",
+        "route-labels-3",
+        "route-labels-4",
+      ],
     })[0];
     if (route) {
-      navigate(`/${route.properties.agencySlug}/route/${route.properties.routeShortName}`)
+      navigate(
+        `/${route.properties.agencySlug}/route/${route.properties.routeShortName}`
+      );
     }
   };
 
@@ -106,15 +119,20 @@ const RegionMapPage = ({ data }) => {
       navigator.geolocation.getCurrentPosition((x) => {
         map.current?.easeTo({
           center: [x.coords.longitude, x.coords.latitude],
-          zoom: 15
-        })
+          zoom: 15,
+        });
       });
     }
-  }
+  };
 
   const handleMoveEnd = () => {
     let routesOnMap = map.current.queryRenderedFeatures({
-      layers: ["routes-case-1", "routes-case-2", "routes-case-3", "routes-case-4"],
+      layers: [
+        "routes-case-1",
+        "routes-case-2",
+        "routes-case-3",
+        "routes-case-4",
+      ],
     });
 
     if (map.current.getZoom() > 14) {
@@ -135,6 +153,8 @@ const RegionMapPage = ({ data }) => {
       maxZoom: 17,
     },
   };
+
+  routes = routes.sort((a,b) => b.mapPriority < a.mapPriority)
 
   return (
     <div>
@@ -157,19 +177,32 @@ const RegionMapPage = ({ data }) => {
       </div>
 
       <>
-        <div className="underline-title my-2">{`${routes.length > 0 ? routes.length : `No`} routes shown on the map`}</div>
-        {routes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
-            {routes.map((r) => (
-              <RouteHeader {...r} agency={{ slug: { current: r.agencySlug } }} />
-            ))}
-          </div>
-        ) : (
-          <div>
-            <a className="font-bold" onClick={() => zoomToRoutes()}>Zoom in</a> or <a className="font-bold" onClick={() => geolocateOnMap()}>jump to your location</a> to show more
-            routes.
-          </div>
-        )}
+        <div className="underline-title my-2">{`${
+          routes.length > 0 ? routes.length : `No`
+        } routes shown on the map`}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
+          {routes.length > 0 ? (
+            <>
+              {routes.map((r) => (
+                <RouteHeader
+                  {...r}
+                  agency={{ slug: { current: r.agencySlug } }}
+                />
+              ))}
+            </>
+          ) : (
+            <div>
+              <a className="font-bold" onClick={() => zoomToRoutes()}>
+                Zoom in
+              </a>{" "}
+              or{" "}
+              <a className="font-bold" onClick={() => geolocateOnMap()}>
+                jump to your location
+              </a>{" "}
+              to show more routes.
+            </div>
+          )}
+        </div>
       </>
     </div>
   );
@@ -189,7 +222,9 @@ export const query = graphql`
         bikesPolicyUrl
         feedIndex
         agencyId
-        routes: routesByFeedIndexAndAgencyIdList(orderBy: ROUTE_SORT_ORDER_ASC) {
+        routes: routesByFeedIndexAndAgencyIdList(
+          orderBy: ROUTE_SORT_ORDER_ASC
+        ) {
           feedIndex
           routeShortName
           routeLongName

@@ -91,7 +91,7 @@ const Agency = ({ data, pageContext }) => {
   });
 
   return (
-    <div>
+    <>
       <AgencySlimHeader agency={agencyData} />
       <Tabs.Root className="tabRoot" defaultValue="home">
         <Tabs.List className="tabList" aria-label="Manage your account">
@@ -105,8 +105,10 @@ const Agency = ({ data, pageContext }) => {
             Map
           </Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content className="tabContent py-4" value="home">
-          <AgencyHeader agency={agencyData} />
+        <Tabs.Content className="tabContent" value="home">
+          <p className="underline-title">Agency information</p>
+          <div className="px-2 md:px-0">
+
           <PortableText content={description} />
 
           <h4>Fares</h4>
@@ -120,9 +122,10 @@ const Agency = ({ data, pageContext }) => {
           <h4>Contact information</h4>
           <p>You can find {name}'s website at <a href={agencyUrl}>{agencyUrl}</a>.</p>
           <p>{name}'s customer service number is <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.</p>
+            </div>
 
         </Tabs.Content>
-        <Tabs.Content className="tabContent py-4" value="routes">
+        <Tabs.Content className="tabContent" value="routes">
           <p className="underline-title">List of bus routes</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
@@ -154,7 +157,7 @@ const Agency = ({ data, pageContext }) => {
       <p>...</p>
       <h3>Bus routes</h3>
       */}
-    </div>
+    </>
   );
 };
 

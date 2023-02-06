@@ -1,6 +1,7 @@
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import React from "react";
-import '../styles/picker.css'
+import '../styles/picker.css';
+import { dayOfWeek } from "../util";
 
 /**
  * Let the user choose the current service day.
@@ -19,7 +20,7 @@ const ServicePicker = ({ services, service, setService }) => {
   return (
     <RadioGroup.Root
       className="radioGroupRoot"
-      defaultValue={service ? service : Object.keys(services)[0]}
+      defaultValue={service ? service : dayOfWeek()}
       onValueChange={(e) => setService(e)}
     >
       {/* <div className="w-12 flex flex-shrink-0 items-center justify-around">
