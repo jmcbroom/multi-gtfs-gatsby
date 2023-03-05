@@ -1,5 +1,5 @@
 import { graphql } from "gatsby";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopMap from "../components/StopMap";
 import StopTimesHere from "../components/StopTimesHere";
@@ -78,6 +78,32 @@ const Stop = ({ data, pageContext }) => {
       },
     ],
   };
+
+    // set up a 10s 'tick' using `now`
+    let [now, setNow] = useState(new Date());
+    const [predictions, setPredictions] = useState(null)
+
+    useEffect(() => {
+      let tick = setInterval(() => {
+        setNow(new Date());
+      }, 15000);
+      return () => clearInterval(tick);
+    }, []);
+  
+    useEffect(() => {
+      fetch(`/.netlify/functions/stop?stopId=${stopCode}`)
+        .then(r => r.json())
+        .then(d => {
+          console.log(d)
+          if (d['bustime-response'].prd && d['bustime-response'].prd.length > 0) {
+            console.log(d)
+            setPredictions(d)
+          }
+          else { return; }
+        })
+    }, [now])
+  
+  
 
   return (
     <div>
