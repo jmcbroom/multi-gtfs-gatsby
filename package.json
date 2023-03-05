@@ -61,6 +61,8 @@
     "react-helmet": "^6.1.0",
     "react-map-gl": "^7.0.21",
     "react-portable-text": "^0.4.3",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
     "tailwindcss": "^3.0.13"
   }
 }
