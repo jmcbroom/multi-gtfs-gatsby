@@ -93,7 +93,7 @@ const Stop = ({ data, pageContext }) => {
     if(!sanityAgency.realTimeEnabled) return;
     let tick = setInterval(() => {
       setNow(new Date());
-    }, 10000);
+    }, 30000);
     return () => clearInterval(tick);
   }, []);
 
