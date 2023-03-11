@@ -55,7 +55,7 @@ const PredictionListItem = ({
               <div className="flex flex-col">
                 <span className="font-semibold text-sm">{routeLongName}</span>
                 <span className="text-sm">
-                  {direction.directionDescription} to{" "}
+                  {direction.directionDescription.replace("bound", "")} to{" "}
                   {direction.directionHeadsign}
                 </span>
               </div>
@@ -76,7 +76,7 @@ const PredictionListItem = ({
         <span>
           {vehicle && (
             <ul className="list-disc list-inside">
-              <li>Arriving at {dayjs(prediction.prdtm, 'YYYYMMDD HH:MM').format('hh:mm a')}</li>
+              <li>Arriving at {dayjs(prediction.prdtm, 'YYYYMMDD HH:MM').format('h:mm a')}</li>
               <li>Bus number: {vehicle.vid}</li>
             </ul>
           )}
