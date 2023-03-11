@@ -27,7 +27,7 @@ const RouteListItem = ({
           >
             {routeShortName}
           </span>
-          <span className="text-base">{routeLongName}</span>
+          <span className="text-base font-medium">{routeLongName}</span>
         </div>
       </div>
     </Link>

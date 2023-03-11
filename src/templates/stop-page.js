@@ -3,7 +3,13 @@ import React, { useState, useEffect } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopMap from "../components/StopMap";
 import StopTimesHere from "../components/StopTimesHere";
-import { createAgencyData, createRouteData, getServiceDays, getTripsByServiceDay } from "../util";
+import StopPredictions from "../components/StopPredictions";
+import {
+  createAgencyData,
+  createRouteData,
+  getServiceDays,
+  getTripsByServiceDay,
+} from "../util";
 
 const Stop = ({ data, pageContext }) => {
   let gtfsAgency = data.postgres.agencies[0];
@@ -14,7 +20,8 @@ const Stop = ({ data, pageContext }) => {
 
   let { sanityRoutes } = data;
 
-  let { stopLon, stopLat, stopName, stopCode, stopId, routes, times } = data.postgres.stop[0];
+  let { stopLon, stopLat, stopName, stopCode, stopId, routes, times } =
+    data.postgres.stop[0];
 
   let [currentRoute, setCurrentRoute] = useState(routes[0]);
 
@@ -37,30 +44,28 @@ const Stop = ({ data, pageContext }) => {
   });
 
   // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
-  let allRouteFeatures = []
-  routes.forEach(route => {
+  let allRouteFeatures = [];
+  routes.forEach((route) => {
+    route.directions.forEach((direction) => {
+      let feature = JSON.parse(direction.directionShape)[0];
 
-    route.directions.forEach(direction => {
-
-      let feature = JSON.parse(direction.directionShape)[0]
-      
       feature.properties = {
-          routeColor: route.routeColor,
-          routeLongName: route.routeLongName,
-          routeShortName: route.routeShortName,
-          routeTextColor: route.routeTextColor,
-          mapPriority: route.mapPriority,
-          direction: direction.directionDescription,
-          directionId: direction.directionId
-      }
+        routeColor: route.routeColor,
+        routeLongName: route.routeLongName,
+        routeShortName: route.routeShortName,
+        routeTextColor: route.routeTextColor,
+        mapPriority: route.mapPriority,
+        direction: direction.directionDescription,
+        directionId: direction.directionId,
+      };
 
-      allRouteFeatures.push(feature)
-    })
-  })
+      allRouteFeatures.push(feature);
+    });
+  });
   let routeFc = {
     type: "FeatureCollection",
-    features: allRouteFeatures
-  }
+    features: allRouteFeatures,
+  };
 
   let stopFc = {
     type: "FeatureCollection",
@@ -79,31 +84,50 @@ const Stop = ({ data, pageContext }) => {
     ],
   };
 
-    // set up a 10s 'tick' using `now`
-    let [now, setNow] = useState(new Date());
-    const [predictions, setPredictions] = useState(null)
+  // set up a 10s 'tick' using `now`
+  let [now, setNow] = useState(new Date());
+  const [predictions, setPredictions] = useState(null);
+  const [vehicles, setVehicles] = useState(null);
 
-    useEffect(() => {
-      let tick = setInterval(() => {
-        setNow(new Date());
-      }, 15000);
-      return () => clearInterval(tick);
-    }, []);
-  
-    useEffect(() => {
-      fetch(`/.netlify/functions/stop?stopId=${stopCode}`)
-        .then(r => r.json())
-        .then(d => {
-          console.log(d)
-          if (d['bustime-response'].prd && d['bustime-response'].prd.length > 0) {
-            console.log(d)
-            setPredictions(d)
-          }
-          else { return; }
-        })
-    }, [now])
-  
-  
+  useEffect(() => {
+    if(!sanityAgency.realTimeEnabled) return;
+    let tick = setInterval(() => {
+      setNow(new Date());
+    }, 10000);
+    return () => clearInterval(tick);
+  }, []);
+
+  useEffect(() => {
+    if(!sanityAgency.realTimeEnabled) return;
+    fetch(
+      `/.netlify/functions/stop?stopId=${stopCode}&agency=${pageContext.agencySlug}`
+    )
+      .then((r) => r.json())
+      .then((d) => {
+        if (d["bustime-response"].prd && d["bustime-response"].prd.length > 0) {
+          setPredictions(d["bustime-response"].prd.slice(0,7));
+        } else {
+          return;
+        }
+      });
+  }, [now]);
+
+  useEffect(() => {
+    if(!sanityAgency.realTimeEnabled || !predictions) return;
+    fetch(
+      `/.netlify/functions/vehicle?vehicleIds=${predictions.map(prd => prd.vid).join(",")}&agency=${pageContext.agencySlug}`
+    )
+      .then((r) => r.json())
+      .then((d) => {
+        if (d["bustime-response"].vehicle && d["bustime-response"].vehicle.length > 0) {
+          setVehicles(d["bustime-response"].vehicle);
+        } else {
+          return;
+        }
+      });
+  }, [predictions]);
+
+  let [trackedBus, setTrackedBus] = useState(null);
 
   return (
     <div>
@@ -115,22 +139,47 @@ const Stop = ({ data, pageContext }) => {
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* <StopRoutePicker {...{ routes, currentRoute, setCurrentRoute, agency: agencyData }} /> */}
-        <StopMap stopFc={stopFc} routeFc={routeFc} times={times} />
-        <StopTimesHere times={times} routes={routes} agency={agencyData} serviceDays={serviceDays}/>
+        {predictions && (
+          <StopPredictions
+            trackedBus={trackedBus}
+            setTrackedBus={setTrackedBus}
+            predictions={predictions}
+            vehicles={vehicles}
+            times={times}
+            routes={routes}
+            agency={agencyData}
+          />
+        )}
+          <StopMap
+            stopFc={stopFc}
+            routeFc={routeFc}
+            times={times}
+            trackedBus={trackedBus}
+            predictions={predictions}
+            vehicles={vehicles}
+          />
+          <StopTimesHere
+            times={times}
+            routes={routes}
+            agency={agencyData}
+            serviceDays={serviceDays}
+          />
       </div>
-    </div>  
+    </div>
   );
 };
 
 export const query = graphql`
   query StopQuery($feedIndex: Int, $sanityFeedIndex: Float, $stopId: String) {
-    agency: allSanityAgency(filter: { currentFeedIndex: { eq: $sanityFeedIndex } }) {
+    agency: allSanityAgency(
+      filter: { currentFeedIndex: { eq: $sanityFeedIndex } }
+    ) {
       edges {
         node {
           name
           fullName
           id
+          realTimeEnabled
           color {
             hex
           }
@@ -197,7 +246,10 @@ export const query = graphql`
         }
       }
       stop: stopsList(
-        filter: { feedIndex: { equalTo: $feedIndex }, stopId: { equalTo: $stopId } }
+        filter: {
+          feedIndex: { equalTo: $feedIndex }
+          stopId: { equalTo: $stopId }
+        }
       ) {
         stopId
         stopCode

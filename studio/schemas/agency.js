@@ -67,6 +67,13 @@ export default {
       title: "Fare content",
       description: "Extended information about this agency's fare rules",
       type: "blockContent"
+    },
+    {
+      name: "realTimeEnabled",
+      title: "Real-time enabled",
+      description: "Is real-time data available for this agency?",
+      type: "boolean",
+      validation: Rule => Rule.required()
     }
   ]
 }

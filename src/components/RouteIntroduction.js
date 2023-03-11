@@ -59,10 +59,10 @@ const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
       <p className="text-lg">
         The bus travels {whatDirectionItRuns(route)} between{" "}
         {endpoints.map((e, idx) => (
-          <>
+          <span key={e}>
           <span className="font-semibold pl-1">{e}</span>
           {idx === 0 && <span className="pl-1">{` and `}</span>}
-          </>
+          </span>
         ))}.
       </p>
       <p className="text-lg">Here's a list of the major stops in each travel direction:</p>
