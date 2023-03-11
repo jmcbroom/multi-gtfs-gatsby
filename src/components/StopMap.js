@@ -70,6 +70,7 @@ const StopMap = ({ stopFc, routeFc, times, predictions, vehicles, trackedBus }) 
     latitude: stop.geometry.coordinates[1],
     zoom: 17.25
   };
+
   
   return (
     <div id="map" style={{height: 350}}>
