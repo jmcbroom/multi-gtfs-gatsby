@@ -1189,6 +1189,8 @@ let stopLayers = [
   },
 ];
 
-style.layers = style.layers.concat(stopLayers);
+for (const style in styles) {
+  styles[style].layers = styles[style].layers.concat(stopLayers);
+}
 
 export default styles;
