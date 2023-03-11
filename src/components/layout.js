@@ -12,7 +12,7 @@ import NavMenu from "./NavMenu";
  */
 export default function Layout({ children }) {
   return (
-    <div>
+    <div class="fill-page">
       <header className="bg-primary bg-opacity-80 px-4">
         <div className="max-w-4xl py-2 mx-auto flex items-center justify-between">
           <Link to={`/`}>
