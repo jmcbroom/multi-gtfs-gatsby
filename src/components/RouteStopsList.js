@@ -16,7 +16,7 @@ const RouteStopsList = ({ longTrips, direction, routeColor, agency, className, s
   }
 
   return (
-    <div className={small ? "grid w-100 col-span-2 overflow-y-auto px-2 text-sm section-scroll" : "grid w-100 col-span-2 overflow-y-auto px-2 section-scroll"} fullWidth>
+    <div className={small ? "grid w-100 col-span-2 overflow-y-auto px-2 text-sm section-scroll" : "grid w-100 col-span-2 overflow-y-auto px-2 section-scroll"}>
       {times.map((stopTime, i) => (
         <StopListItem key={stopTime.stop.stopCode} {...{ stopTime, routeColor }} small={small} agency={agency}/>
       ))}

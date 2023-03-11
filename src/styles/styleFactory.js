@@ -29,7 +29,7 @@ let newSources = {
       features: [],
     },
   },
-  realtime: {
+  vehicles: {
     type: "geojson",
     data: {
       type: "FeatureCollection",
@@ -511,6 +511,58 @@ let stopLayers = [
         ],
       },
     },
+  },
+  {
+    id: "vehicle-points",
+    type: "circle",
+    source: "vehicles",
+    interactive: true,
+    filter: ["==", "$type", "Point"],
+    layout: {},
+    paint: {
+      "circle-color": ["get", "routeTextColor"],
+      "circle-stroke-color": ["get", "routeColor"],
+      "circle-stroke-width": {
+        stops: [
+          [10, 2],
+          [19, 5],
+        ],
+      },
+      "circle-stroke-opacity": 0.8,
+      "circle-opacity": 0.95,
+      "circle-radius": {
+        stops: [
+          [8, 6],
+          [13, 10],
+          [19, 18],
+        ],
+      },
+    },
+  },
+  {
+    id: "vehicle-icons",
+    type: "symbol",
+    source: "vehicles",
+    interactive: true,
+    filter: ["==", "$type", "Point"],
+    layout: {
+      "icon-image": "bus",
+      "icon-size": {
+        stops: [
+          [8, 0.75],
+          [13, 1.25],
+          [19, 1.5],
+        ],
+      },
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": true,
+      "icon-rotate": ["get", "bearing"],
+      "icon-rotation-alignment": "map",
+      "icon-pitch-alignment": "map",
+    },
+    paint: {
+      "icon-opacity": 1
+    }
   },
   {
     id: "stops-labels",

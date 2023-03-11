@@ -6,12 +6,23 @@ h3 {
 
 .AccordionRoot {
   @apply w-full;
+  @apply flex;
+  @apply flex-col;
 }
 
 .AccordionItem {
   overflow: hidden;
   @apply px-2;
   @apply md:px-0;
+  @apply p-2;
+  @apply border-l-2;
+  @apply border-gray-100;
+}
+
+.AccordionItem[data-state='open'] {
+  @apply border-l-2;
+  @apply bg-gray-50;
+  @apply border-gray-200;
 }
 
 .AccordionItem:focus-within {
@@ -32,8 +43,6 @@ h3 {
   justify-content: space-between;
   font-size: 15px;
   line-height: 1;
-  @apply pr-3;
-  @apply mb-1;
 }
 
 .AccordionTrigger:hover {
@@ -51,7 +60,8 @@ h3 {
 }
 
 .AccordionContentText {
-  @apply p-4;
+  @apply pt-4;
+  @apply px-2;
 }
 
 .AccordionChevron {

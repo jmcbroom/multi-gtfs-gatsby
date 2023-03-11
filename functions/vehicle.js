@@ -1,10 +1,9 @@
 let rp = require('request-promise')
 
 exports.handler = function(event, context, callback) {
-
   let urls = {
-    ddot: `http://myddotbus.com/bustime/api/v3/getpredictions?key=${process.env.DDOT_KEY}&format=json&stpid=${event.queryStringParameters.stopId}`,
-    smart: `http://bustime.smartbus.org/bustime/api/v3/getpredictions?key=${process.env.SMART_KEY}&format=json&stpid=${event.queryStringParameters.stopId}`
+    ddot: `http://myddotbus.com/bustime/api/v3/getvehicles?key=${process.env.DDOT_KEY}&format=json&vid=${event.queryStringParameters.vehicleIds}`,
+    smart: `http://bustime.smartbus.org/bustime/api/v3/getvehicles?key=${process.env.SMART_KEY}&format=json&vid=${event.queryStringParameters.vehicleIds}`
   }
 
   let url = urls[event.queryStringParameters.agency]

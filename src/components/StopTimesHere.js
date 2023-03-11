@@ -1,40 +1,12 @@
-import React, { useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
-import StopTimeLabel from "./StopTimeLabel";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
-import classNames from "classnames";
 import _ from "lodash";
+import React, { useState } from "react";
 import "../styles/accordion.css";
 import { dayOfWeek, getTripsByServiceDay } from "../util";
+import { AccordionContent, AccordionTrigger } from "./AccordionTrigger";
 import RouteListItem from "./RouteListItem";
 import ServicePicker from "./ServicePicker";
-
-const AccordionTrigger = React.forwardRef(
-  ({ children, className, ...props }, forwardedRef) => (
-    <Accordion.Header className="AccordionHeader">
-      <Accordion.Trigger
-        className={classNames("AccordionTrigger", className)}
-        {...props}
-        ref={forwardedRef}
-      >
-        {children}
-        <ChevronDownIcon className="AccordionChevron" aria-hidden />
-      </Accordion.Trigger>
-    </Accordion.Header>
-  )
-);
-
-const AccordionContent = React.forwardRef(
-  ({ children, className, ...props }, forwardedRef) => (
-    <Accordion.Content
-      className={classNames("AccordionContent", className)}
-      {...props}
-      ref={forwardedRef}
-    >
-      <div className="AccordionContentText">{children}</div>
-    </Accordion.Content>
-  )
-);
+import StopTimeLabel from "./StopTimeLabel";
 
 const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
   let timesByRoute = _.groupBy(times, "trip.route.routeShortName");
@@ -56,7 +28,6 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
   routes = routes.sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName)).sort((a, b) => a.mapPriority > b.mapPriority);
   let defaultRoute = routes.length > 0 ? routes[0].routeShortName : "none";
 
-  console.log(timesByRoute[routes[0].routeShortName][service]);
 
   return (
     <div>
@@ -64,7 +35,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
       <Accordion.Root
         className="AccordionRoot"
         type="single"
-        defaultValue={defaultRoute}
+        defaultValue={null}
         collapsible
       >
         {routes.map((route, idx) => {
