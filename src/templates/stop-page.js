@@ -132,9 +132,9 @@ const Stop = ({ data, pageContext }) => {
   return (
     <div>
       <AgencySlimHeader agency={agencyData} />
-      <div className="mb-4 bg-gray-200 p-2">
+      <div className="mb-4 bg-gray-200 dark:bg-zinc-900 p-2">
         <h1 className="text-xl -mb-1">{stopName}</h1>
-        <span className="text-sm text-gray-500 m-0">
+        <span className="text-sm text-gray-500 dark:text-zinc-500 m-0">
           stop #{pageContext.agencySlug === "ddot" ? stopCode : stopId}
         </span>
       </div>

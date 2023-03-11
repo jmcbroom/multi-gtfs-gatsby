@@ -73,7 +73,7 @@ const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
               <span className="">{headsigns[idx]?.description || `unknown`}</span> to{" "}
               <span className="">{end}</span>
             </div>
-            <p className="m-0 text-gray-600 my-2">
+            <p className="m-0 text-gray-600 dark:text-zinc-400 my-2">
               Major {headsigns[idx]?.description || `unknown`} stops:
             </p>
             <RouteStopsList

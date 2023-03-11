@@ -13,11 +13,13 @@
   @apply border-2;
   @apply border-gray-400;
   @apply bg-blue-100;
+  @apply dark:bg-slate-400;
   @apply w-6;
   @apply h-6;
   @apply rounded-full;
   @apply shadow-slate-700;
   @apply hover:bg-blue-300;
+  @apply hover:dark:bg-slate-300;
   @apply focus:shadow-md;
   @apply flex-shrink-0;
 }
@@ -39,11 +41,12 @@
   @apply after:h-3;
   @apply after:rounded-lg;
   @apply after:bg-gray-600;
+  @apply after:dark:bg-gray-700;
 }
 
 .radioGroupLabel {
   @apply text-sm;
-  @apply text-black;
+  @apply text-opacity-100;
   @apply font-normal;
   @apply pl-2;
   @apply mr-4;
