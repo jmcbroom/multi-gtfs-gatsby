@@ -4,7 +4,8 @@ import Mapbox, { GeolocateControl, NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState } from "react";
 import { navigate } from "gatsby";
-import mapboxStyle from "../styles/styleFactory";
+import { useTheme } from "../hooks/ThemeContext";
+import mapboxStyles from "../styles/styleFactory";
 import _ from "lodash";
 import RouteHeader from "./RouteHeader";
 
@@ -14,10 +15,13 @@ const AgencyMap = ({ routesFc, agency }) => {
   let [routes, setRoutes] = useState([]);
 
   const map = useRef();
+  const { theme } = useTheme();
+  
+  if (!theme) { return null; }
 
   let mapInitialBbox = bbox(routeFeatureCollection);
 
-  let style = _.cloneDeep(mapboxStyle)
+  let style = _.cloneDeep(theme == "dark" ? mapboxStyles.dark : mapboxStyles.light);
 
   if (routeFeatureCollection.features.length > 0) {
     style.sources.routes.data = routeFeatureCollection;
