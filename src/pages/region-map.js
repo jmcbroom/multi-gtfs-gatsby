@@ -3,7 +3,8 @@ import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState } from "react";
 import Mapbox, { GeolocateControl, NavigationControl } from "react-map-gl";
-import mapboxStyle from "../styles/styleFactory";
+import { useTheme } from "../hooks/ThemeContext";
+import mapboxStyles from "../styles/styleFactory";
 import { createRouteData } from "../util";
 import { navigate } from "gatsby";
 import bbox from "@turf/bbox";
@@ -11,7 +12,9 @@ import _ from "lodash";
 import RouteHeader from "../components/RouteHeader";
 
 const RegionMapPage = ({ data }) => {
-  let style = _.cloneDeep(mapboxStyle);
+  const { theme } = useTheme();
+  
+  let style = _.cloneDeep(theme == "dark" ? mapboxStyles.dark : mapboxStyles.light);
 
   let [routes, setRoutes] = useState([]);
 
@@ -74,6 +77,8 @@ const RegionMapPage = ({ data }) => {
   };
 
   const map = useRef();
+  
+  if (!theme) { return null; }
 
   let mapInitialBbox = bbox(routeFeatureCollection);
 
