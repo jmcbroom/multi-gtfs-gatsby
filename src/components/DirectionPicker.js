@@ -35,7 +35,7 @@ const DirectionPicker = ({ directions, direction, setDirection }) => {
             </RadioGroup.Item>
             <label className="radioGroupLabel" htmlFor={dir}>
               <span className="font-semibold">{display[directions[dir].description]}</span> 
-              <span className="text-sm leading-none text-gray-600">to {directions[dir].headsigns[0]}</span>
+              <span className="text-sm leading-none text-gray-600 dark:text-zinc-500">to {directions[dir].headsigns[0]}</span>
             </label>
           </div>
         ))}

@@ -1,4 +1,8 @@
-import style from "./style.json";
+import _ from "lodash";
+import light from "./mapLight.json";
+import dark from "./mapDark.json";
+
+let styles = _.cloneDeep({ light, dark });
 
 let newSources = {
   routes: {
@@ -38,7 +42,9 @@ let newSources = {
   },
 };
 
-style.sources = { ...style.sources, ...newSources };
+for (const style in styles) {
+  styles[style].sources = { ...styles[style].sources, ...newSources };
+}
 
 let routeLayers = [
   {
@@ -400,11 +406,13 @@ let routeLayers = [
   },
 ];
 
-let adminBoundaryIndex = style.layers
-  .map((l) => l.id)
-  .indexOf(`admin-0-boundary-disputed`);
-
-style.layers.splice(adminBoundaryIndex, 0, ...routeLayers);
+for (const style in styles) {
+  let adminBoundaryIndex = styles[style].layers
+    .map((l) => l.id)
+    .indexOf(`admin-0-boundary-disputed`);
+  
+  styles[style].layers.splice(adminBoundaryIndex, 0, ...routeLayers);
+}
 
 let stopLayers = [
   {
@@ -625,6 +633,8 @@ let stopLayers = [
   },
 ];
 
-style.layers = style.layers.concat(stopLayers);
+for (const style in styles) {
+  styles[style].layers = styles[style].layers.concat(stopLayers);
+}
 
-export default style;
+export default styles;

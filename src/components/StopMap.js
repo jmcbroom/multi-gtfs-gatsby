@@ -2,15 +2,18 @@ import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React from "react";
-import mapboxStyle from "../styles/styleFactory";
+import { useTheme } from "../hooks/ThemeContext";
+import mapboxStyles from "../styles/styleFactory";
 import _ from 'lodash'
 import { createRouteFc } from "../util";
 
 const StopMap = ({ stopFc, routeFc, times }) => {
   let stop = stopFc.features[0];
-
+  const { theme } = useTheme();
   
-  let style = _.cloneDeep(mapboxStyle)
+  if (!theme) { return null; }
+  
+  let style = _.cloneDeep(theme == "dark" ? mapboxStyles.dark : mapboxStyles.light);
   style.sources.stop.data = stopFc;
 
   if (routeFc.features.length > 0) {

@@ -4,7 +4,8 @@ import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef } from "react";
 import { navigate } from "gatsby";
-import mapboxStyle from "../styles/styleFactory";
+import { useTheme } from "../hooks/ThemeContext";
+import mapboxStyles from "../styles/styleFactory";
 import _ from 'lodash'
 
 
@@ -15,14 +16,17 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
   const timepointsFeatureCollection = timepointsFc
   
   const map = useRef();
+  const { theme } = useTheme();
+  
+  if (!theme) { return null; }
 
   let mapInitialBbox = routeFeatureCollection.features.length > 0 ?
     bbox(routeFeatureCollection) : bbox(stopsFeatureCollection)
 
   let stopProperty = ['smart', 'the-ride'].indexOf(agency.slug.current) > -1 ? 'stopId' : 'stopCode'
   
-  let style = _.cloneDeep(mapboxStyle)
 
+  let style = _.cloneDeep(theme == "dark" ? mapboxStyles.dark : mapboxStyles.light);
   // turn off the route-labels
   style.layers.forEach((l, idx) => {
     if(l.id.startsWith('route-labels')) {

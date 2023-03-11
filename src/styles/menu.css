@@ -15,7 +15,8 @@ button,
 .NavigationMenuList {
   display: flex;
   justify-content: center;
-  background-color: white;
+  @apply bg-white;
+  @apply dark:bg-black;
   padding: 4px;
   border-radius: 6px;
   list-style: none;
@@ -105,7 +106,8 @@ button,
   transform-origin: top center;
   margin-top: 10px;
   width: 100%;
-  background-color: white;
+  @apply bg-white;
+  @apply dark:bg-zinc-800;
   border-radius: 6px;
   overflow: hidden;
   box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
@@ -229,6 +231,8 @@ button,
   position: relative;
   top: 70%;
   background-color: white;
+  @apply bg-white;
+  @apply dark:bg-zinc-800;
   width: 10px;
   height: 10px;
   transform: rotate(45deg);
