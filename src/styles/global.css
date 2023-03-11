@@ -82,6 +82,16 @@ td {
   font-feature-settings: "tnum" 1;
 }
 
+.fill-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.fill-page > footer {
+  margin-top: auto;
+}
+
 footer {
   @apply font-light;
 }
