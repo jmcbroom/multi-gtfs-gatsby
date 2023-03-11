@@ -116,3 +116,7 @@ footer {
   @apply px-2;
   @apply md:px-0;
 }
+
+#map {
+  isolation: isolate;
+}
