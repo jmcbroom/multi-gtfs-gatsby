@@ -2,14 +2,17 @@ import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, {useRef} from "react";
-import mapboxStyle from "../styles/styleFactory";
+import mapboxStyles from "../styles/styleFactory";
 import _ from 'lodash'
+import { useTheme } from "../hooks/ThemeContext";
 import { createRouteFc } from "../util";
 import bbox from "@turf/bbox";
 
 const StopMap = ({ stopFc, routeFc, times, predictions, vehicles, trackedBus }) => { 
   
   const map = useRef();
+  const { theme } = useTheme();
+  if (!theme) { return null; }
 
   let stop = stopFc.features[0];
 
@@ -50,7 +53,7 @@ const StopMap = ({ stopFc, routeFc, times, predictions, vehicles, trackedBus }) 
   }
 
 
-  let style = _.cloneDeep(mapboxStyle)
+  let style = _.cloneDeep(mapboxStyles[theme])
   style.sources.stop.data = stopFc;
   style.sources.vehicles.data = vehicleFc
 
