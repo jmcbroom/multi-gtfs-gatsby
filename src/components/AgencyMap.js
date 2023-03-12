@@ -21,7 +21,7 @@ const AgencyMap = ({ routesFc, agency }) => {
 
   let mapInitialBbox = bbox(routeFeatureCollection);
 
-  let style = _.cloneDeep(mapboxStyle);
+  let style = _.cloneDeep(mapboxStyles[theme]);
 
   if (routeFeatureCollection.features.length > 0) {
     style.sources.routes.data = routeFeatureCollection;
