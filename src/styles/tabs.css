@@ -9,8 +9,10 @@
   flex-grow: 0;
   display: flex;
   @apply border-b-2;
-  @apply border-b-primary;
+  @apply border-b-primary-light;
+  @apply dark:border-b-primary-dark;
   @apply bg-gray-200;
+  @apply dark:bg-zinc-800;
 }
 
 .tabTrigger {
@@ -31,11 +33,14 @@
 
 .tabTrigger:hover {
   @apply text-gray-600;
+  @apply dark:text-zinc-200;
 }
 .tabTrigger[data-state='active'] {
   @apply text-gray-600;
+  @apply dark:text-zinc-200;
   @apply font-semibold;
   @apply bg-gray-300;
+  @apply dark:bg-zinc-700;
   box-shadow: inset 0 -1px 0 0 currentColor, 0 1px 0 0 currentColor;
 }
 .tabTrigger:focus {
@@ -45,7 +50,6 @@
 
 .tabContent {
   flex-grow: 1;
-  background-color: white;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   outline: none;

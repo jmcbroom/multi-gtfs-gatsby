@@ -34,12 +34,12 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
       <thead className="z-10 mt-2" style={{ position: 'sticky' }}>
         <tr className="bg-gray-100" style={{ position: 'sticky' }}>
           {timepoints.map((s, k) => (
-            <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white tabular">
-              <div className="flex flex-col items-center justify-end h-24 bg-white">
-                <Link to={`/${agency.slug.current}/stop/${agency.slug.current === 'ddot' ? s.stop.stopCode : s.stop.stopId}`} className="leading-none text-sm font-bold bg-white mb-2 px-2">
+            <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white dark:bg-black tabular">
+              <div className="flex flex-col items-center justify-end h-24 bg-white dark:bg-black">
+                <Link to={`/${agency.slug.current}/stop/${agency.slug.current === 'ddot' ? s.stop.stopCode : s.stop.stopId}`} className="leading-none text-sm font-bold mb-2 px-2">
                   {s.stop.stopName}
                 </Link>
-                <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white text-gray-700" />
+                <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white dark:bg-black text-gray-700 dark:text-zinc-400" />
               </div>
               <div style={{
                 position: 'absolute',
@@ -69,7 +69,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
               if (filtered.length === 0) {
                 return (
                   <td key={`${t.id}-${i}-${j}`}
-                    className={`text-center timetable-entry bg-gray-100 text-gray-600 border-r-2 border-dotted`}>
+                    className={`text-center timetable-entry bg-gray-100 dark:bg-zinc-900 text-gray-600 dark:text-zinc-600 border-r-2 border-dotted dark:border-zinc-700`}>
                     -
                   </td>
                 )
@@ -79,7 +79,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
                 let value = indices.indexOf(j)
                 return (
                   <td key={`${t.id}-${i}-${j}`}
-                    className={`text-center text-sm border-r-2 timetable-entry`}>
+                    className={`text-center text-sm border-r-2 timetable-entry bg-white dark:bg-black`}>
                     <StopTimeLabel arrivalTime={filtered[value].arrivalTime} />
                   </td>
                 )
@@ -88,12 +88,12 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
                 <td key={`${t.id}-${i}-${j}`}
                   className={j < timepoints.length - 1 ?
                     `
-                    text-center text-sm border-r-2 border-opacity-25 border-dotted border-gray-700 z-0 timetable-entry tabular 
-                    ${filtered.length === 0 && `bg-gray-100`} 
+                    text-center text-sm border-r-2 border-opacity-25 border-dotted border-gray-700 dark:border-zinc-700 z-0 timetable-entry tabular 
+                    ${filtered.length === 0 ? `bg-gray-100 dark:bg-zinc-900` : `bg-white dark:bg-black`} 
                     ` :
                     `
                     text-center text-sm z-0 timetable-entry 
-                    ${filtered.length === 0 && `bg-gray-100`} 
+                    ${filtered.length === 0 ? `bg-gray-100 dark:bg-zinc-900` : `bg-white dark:bg-black`} 
                     `
                     }>
                   {filtered.length > 0 ?
