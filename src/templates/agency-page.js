@@ -81,7 +81,7 @@ const Agency = ({ data, pageContext }) => {
       fare.formattedTransfers += ' with ';
       
       fare.formattedTransfers += fare.transfers ?
-        (fare.transfers + ' transfer' + fare.transfers == 1 ? '' : 's' ) :
+        (fare.transfers + ' transfer' + (fare.transfers === 1 ? '' : 's')) :
         fare.transfers === 0 ?
         'no transfers' :
         'unlimited tranfers';

@@ -44,7 +44,7 @@ const IndexPage = ({ data }) => {
       <h2 className="underline-title">Local bus systems</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-2 md:mb-6">
         {merged.map((a) => (
-          <div className="bg-gray-100 border-b-2 border-gray-500" key={a.feedIndex}>
+          <div className="bg-zinc-100 dark:bg-zinc-900 border-b-2 border-zinc-500 dark:border-zinc-800" key={a.feedIndex}>
             <AgencySlimHeader agency={a} />
             <div className="px-4 pb-4 md:pb-8 pt-2">
               <AgencyHeader agency={a} />

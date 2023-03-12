@@ -7,7 +7,18 @@
   font-family: "Archivo";
 }
 
+body {
+  @apply text-black;
+  @apply text-opacity-90;
+  @apply dark:bg-black;
+  @apply dark:text-white;
+  @apply dark:text-opacity-80;
+}
+
 a {
+  @apply text-black;
+  @apply dark:text-white;
+  @apply text-opacity-90;
   text-decoration: none;
 }
 
@@ -50,6 +61,7 @@ h4 {
   @apply text-base;
   @apply font-semibold;
   @apply text-gray-600;
+  @apply dark:text-white;
   @apply mb-1;
 }
 
@@ -82,13 +94,29 @@ td {
   font-feature-settings: "tnum" 1;
 }
 
+.fill-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.fill-page > footer {
+  margin-top: auto;
+}
+
 footer {
   @apply font-light;
 }
 
 .underline-title {
   @apply text-gray-600;
+  @apply dark:text-zinc-400;
   @apply border-b-2;
+  @apply dark:border-zinc-800;
   @apply px-2;
   @apply md:px-0;
+}
+
+#map {
+  isolation: isolate;
 }
