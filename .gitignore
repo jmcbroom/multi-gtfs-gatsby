@@ -11,3 +11,4 @@ jupyter/
 .netlify
 
 yarn-error.log
+.vscode
