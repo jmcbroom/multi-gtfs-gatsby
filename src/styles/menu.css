@@ -147,6 +147,8 @@
 .ListItemText {
   line-height: 1.4;
   font-weight: initial;
+  @apply text-gray-500;
+  @apply dark:text-zinc-400;
 }
 
 .Callout {

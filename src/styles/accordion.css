@@ -11,12 +11,16 @@
   @apply p-2;
   @apply border-l-2;
   @apply border-gray-100;
+  @apply dark:border-zinc-900;
 }
 
 .AccordionItem[data-state='open'] {
   @apply border-l-2;
   @apply bg-gray-50;
+  @apply dark:bg-zinc-900;
+  @apply dark:bg-opacity-80;
   @apply border-gray-200;
+  @apply dark:border-zinc-800;
 }
 
 .AccordionHeader {
