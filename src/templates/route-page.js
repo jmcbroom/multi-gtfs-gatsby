@@ -1,5 +1,5 @@
 import * as Tabs from "@radix-ui/react-tabs";
-import { graphql } from "gatsby";
+import { graphql, navigate } from "gatsby";
 import React, { useState } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import DirectionPicker from "../components/DirectionPicker";
@@ -83,22 +83,22 @@ const Route = ({ data, pageContext }) => {
         <RouteHeader {...gtfsRoute} agency={agencyData} />
       </div>
 
-      <Tabs.Root className="tabRoot" defaultValue="overview" onValueChange={(v) => console.log(v)}>
+      <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab} onValueChange={(e) => navigate(`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/${e}`)}>
         <Tabs.List className="tabList" aria-label="Manage your account">
-          <Tabs.Trigger className="tabTrigger" value="overview">
+          <Tabs.Trigger className="tabTrigger" value="">
             Home
           </Tabs.Trigger>
           <Tabs.Trigger className="tabTrigger" value="map">
             Map
           </Tabs.Trigger>
-          <Tabs.Trigger className="tabTrigger" value="timetable">
+          <Tabs.Trigger className="tabTrigger" value="schedule">
             Schedule
           </Tabs.Trigger>
           <Tabs.Trigger className="tabTrigger" value="stops">
             Stops
           </Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content className="tabContent" value="overview">
+        <Tabs.Content className="tabContent" value="">
           <RouteIntroduction
             agency={agencyData}
             route={routeData}
@@ -116,7 +116,7 @@ const Route = ({ data, pageContext }) => {
             />
           )}
         </Tabs.Content>
-        <Tabs.Content className="tabContent" value="timetable">
+        <Tabs.Content className="tabContent" value="schedule">
           <div className="bg-gray-100 dark:bg-zinc-900 p-4 md:py-6 flex flex-col gap-4 md:gap-8">
             <DirectionPicker directions={headsignsByDirectionId} {...{ direction, setDirection }} />
             <ServicePicker services={tripsByServiceDay} {...{ service, setService }} />

@@ -1,5 +1,5 @@
 import React from "react";
-import { graphql } from "gatsby";
+import { graphql, navigate } from "gatsby";
 import RouteHeader from "../components/RouteHeader";
 import AgencyHeader from "../components/AgencyHeader";
 import AgencyMap from "../components/AgencyMap";
@@ -8,7 +8,7 @@ import { createAgencyData, createRouteData } from "../util";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import * as Tabs from "@radix-ui/react-tabs";
 
-const Agency = ({ data, pageContext }) => {
+const Agency = ({ data, pageContext, location }) => {
   let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.allSanityAgency.edges[0].node;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
@@ -93,9 +93,9 @@ const Agency = ({ data, pageContext }) => {
   return (
     <>
       <AgencySlimHeader agency={agencyData} />
-      <Tabs.Root className="tabRoot" defaultValue="home">
+      <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab} onValueChange={(e) => navigate(`/${pageContext.agencySlug}/${e}`)}>
         <Tabs.List className="tabList" aria-label="Manage your account">
-          <Tabs.Trigger className="tabTrigger" value="home">
+          <Tabs.Trigger className="tabTrigger" value="">
             Home
           </Tabs.Trigger>
           <Tabs.Trigger className="tabTrigger" value="routes">
@@ -105,7 +105,7 @@ const Agency = ({ data, pageContext }) => {
             Map
           </Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content className="tabContent" value="home">
+        <Tabs.Content className="tabContent" value="">
           <p className="underline-title">Agency information</p>
           <div className="px-2 md:px-0">
 
