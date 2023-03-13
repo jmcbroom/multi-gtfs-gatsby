@@ -7,12 +7,40 @@ import _ from 'lodash'
 import { useTheme } from "../hooks/ThemeContext";
 import { createRouteFc } from "../util";
 import bbox from "@turf/bbox";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
 
-const StopMap = ({ stopFc, routeFc, times, predictions, vehicles, trackedBus }) => { 
+const StopMap = ({ stopFc, times, routes, predictions, vehicles, trackedBus, agency }) => { 
   
+  const { sanityRoutes } = useSanityRoutes();
   const map = useRef();
   const { theme } = useTheme();
   if (!theme) { return null; }
+  let allRoutes = sanityRoutes.edges.map(e => e.node)
+
+  let routeFc = {
+    type: "FeatureCollection",
+    features: [],
+  };
+  let shortNames = routes.map(r => r.routeShortName)
+  let filtered = allRoutes.filter(r => r.agency.currentFeedIndex === agency.feedIndex && shortNames.indexOf(r.shortName) > -1)
+  filtered.forEach((route) => {
+    route.directions.forEach((direction) => {
+      let feature = JSON.parse(direction.directionShape)[0];
+      
+      feature.properties = {
+        routeColor: route.color.hex,
+        routeLongName: route.routeLongName,
+        routeShortName: route.routeShortName,
+        routeTextColor: route.textColor.hex,
+        mapPriority: route.mapPriority,
+        direction: direction.directionDescription,
+        directionId: direction.directionId,
+      };
+
+      routeFc.features.push(feature);
+    });
+  });
+
 
   let stop = stopFc.features[0];
 

@@ -30,7 +30,6 @@ const Stop = ({ data, pageContext }) => {
     serviceDays
   );
   // let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
-
   routes.forEach((r) => {
     // find the matching sanityRoute
     let matching = sanityRoutes.edges
@@ -42,30 +41,6 @@ const Stop = ({ data, pageContext }) => {
       r = createRouteData(r, matching[0]);
     }
   });
-
-  // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
-  let allRouteFeatures = [];
-  routes.forEach((route) => {
-    route.directions.forEach((direction) => {
-      let feature = JSON.parse(direction.directionShape)[0];
-
-      feature.properties = {
-        routeColor: route.routeColor,
-        routeLongName: route.routeLongName,
-        routeShortName: route.routeShortName,
-        routeTextColor: route.routeTextColor,
-        mapPriority: route.mapPriority,
-        direction: direction.directionDescription,
-        directionId: direction.directionId,
-      };
-
-      allRouteFeatures.push(feature);
-    });
-  });
-  let routeFc = {
-    type: "FeatureCollection",
-    features: allRouteFeatures,
-  };
 
   let stopFc = {
     type: "FeatureCollection",
@@ -151,8 +126,9 @@ const Stop = ({ data, pageContext }) => {
           />
         )}
           <StopMap
+            agency={agencyData}
             stopFc={stopFc}
-            routeFc={routeFc}
+            routes={routes}
             times={times}
             trackedBus={trackedBus}
             predictions={predictions}
@@ -211,7 +187,6 @@ export const query = graphql`
             directionDescription
             directionId
             directionTimepoints
-            directionShape
           }
         }
       }
