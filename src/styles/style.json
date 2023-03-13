@@ -134,8 +134,14 @@
                     "continent-label": {"layout": {"visibility": "none"}},
                     "settlement-subdivision-label": {
                         "paint": {
-                            "text-color": "#a1a1aa",
-                            "text-halo-color": "#52525b"
+                            "text-color": "#52525b",
+                            "text-halo-color": "#3f3f46"
+                        }
+                    },
+                    "settlement-minor-label": {
+                        "paint": {
+                            "text-halo-color": "#3f3f46",
+                            "text-color": "#52525b"
                         }
                     }
                 },
@@ -167,9 +173,9 @@
                                 ["linear"],
                                 ["zoom"],
                                 9,
-                                "#3f3f46",
+                                "#18181b",
                                 11,
-                                "#3f3f46"
+                                "#18181b"
                             ]
                         }
                     }
@@ -244,8 +250,8 @@
             }
         }
     },
-    "center": [-83.0812082447737, 42.361638304125165],
-    "zoom": 17.136778042488565,
+    "center": [-82.98428499126737, 42.35478734266064],
+    "zoom": 12.38730317429275,
     "bearing": 0,
     "pitch": 0,
     "fog": {
@@ -280,9 +286,9 @@
                     ["linear"],
                     ["zoom"],
                     9,
-                    "#3f3f46",
+                    "#18181b",
                     11,
-                    "#3f3f46"
+                    "#18181b"
                 ]
             }
         },
@@ -688,7 +694,7 @@
                     18,
                     4
                 ],
-                "line-color": "#a1a1aa",
+                "line-color": "#3f3f46",
                 "line-dasharray": [10, 0]
             }
         },
@@ -716,7 +722,7 @@
                     18,
                     6
                 ],
-                "line-color": "#71717a",
+                "line-color": "#3f3f46",
                 "line-dasharray": [
                     "step",
                     ["zoom"],
@@ -752,7 +758,7 @@
                     18,
                     12
                 ],
-                "line-color": "#71717a",
+                "line-color": "#3f3f46",
                 "line-dasharray": [
                     "step",
                     ["zoom"],
@@ -881,7 +887,7 @@
                         72
                     ]
                 ],
-                "line-color": "#52525b"
+                "line-color": "#27272a"
             }
         },
         {
@@ -995,7 +1001,7 @@
                     18,
                     4
                 ],
-                "line-color": "#71717a",
+                "line-color": "#3f3f46",
                 "line-dasharray": [10, 0]
             }
         },
@@ -1024,7 +1030,7 @@
                     18,
                     6
                 ],
-                "line-color": "#71717a",
+                "line-color": "#3f3f46",
                 "line-dasharray": [
                     "step",
                     ["zoom"],
@@ -1062,7 +1068,7 @@
                     18,
                     12
                 ],
-                "line-color": "#71717a",
+                "line-color": "#3f3f46",
                 "line-dasharray": [
                     "step",
                     ["zoom"],
@@ -1293,7 +1299,7 @@
                         60
                     ]
                 ],
-                "line-color": "#52525b"
+                "line-color": "#27272a"
             }
         },
         {
@@ -1425,7 +1431,7 @@
                     18,
                     4
                 ],
-                "line-color": "#71717a",
+                "line-color": "#3f3f46",
                 "line-dasharray": [10, 0]
             }
         },
@@ -1618,7 +1624,7 @@
                         96
                     ]
                 ],
-                "line-color": "#52525b"
+                "line-color": "#27272a"
             }
         },
         {
@@ -1747,7 +1753,7 @@
                         72
                     ]
                 ],
-                "line-color": "#52525b"
+                "line-color": "#27272a"
             }
         },
         {
@@ -2055,8 +2061,8 @@
                 "text-letter-spacing": -0.02
             },
             "paint": {
-                "text-color": "#a1a1aa",
-                "text-halo-color": "#52525b",
+                "text-color": "#71717a",
+                "text-halo-color": "#27272a",
                 "text-halo-width": 3
             }
         },
@@ -2527,9 +2533,9 @@
                 ]
             },
             "paint": {
-                "text-halo-color": "#52525b",
+                "text-halo-color": "#3f3f46",
                 "text-halo-width": 1,
-                "text-color": "#a1a1aa",
+                "text-color": "#52525b",
                 "text-halo-blur": 0.5
             }
         },
@@ -2602,8 +2608,8 @@
                 "text-max-width": 7
             },
             "paint": {
-                "text-color": "hsl(0, 0%, 95%)",
-                "text-halo-color": "rgb(44, 44, 53)",
+                "text-color": "#52525b",
+                "text-halo-color": "#3f3f46",
                 "text-halo-width": 1,
                 "icon-opacity": ["step", ["zoom"], 1, 8, 0],
                 "text-halo-blur": 1
@@ -2848,7 +2854,7 @@
         }
     ],
     "created": "2023-03-13T13:30:51.004Z",
-    "modified": "2023-03-13T13:46:10.620Z",
+    "modified": "2023-03-13T13:55:55.731Z",
     "id": "clf6v4e0e000s01mnzg9l6xwr",
     "owner": "jmcbroom",
     "visibility": "private",
