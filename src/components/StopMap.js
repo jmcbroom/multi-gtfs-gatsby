@@ -29,8 +29,8 @@ const StopMap = ({ stopFc, times, routes, predictions, vehicles, trackedBus, age
       
       feature.properties = {
         routeColor: route.color.hex,
-        routeLongName: route.routeLongName,
-        routeShortName: route.routeShortName,
+        routeLongName: route.longName,
+        routeShortName: route.shortName,
         routeTextColor: route.textColor.hex,
         mapPriority: route.mapPriority,
         direction: direction.directionDescription,
