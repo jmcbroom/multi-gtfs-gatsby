@@ -75,15 +75,41 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
   `);
 
     result.data.postgres.agencies.forEach((agency) => {
+
       createPage({
-        path: `/${a.slug.current}`,
+        path: `/${a.slug.current}/`,
         component: path.resolve("./src/templates/agency-page.js"),
         context: {
           id: agency.agencyId,
           feedIndex: agency.feedIndex,
-          agencySlug: a.slug.current
+          agencySlug: a.slug.current,
+          initialTab: ''
         },
       });
+
+      createPage({
+        path: `/${a.slug.current}/routes`,
+        component: path.resolve("./src/templates/agency-page.js"),
+        context: {
+          id: agency.agencyId,
+          feedIndex: agency.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: 'routes'
+        },
+      });
+
+      createPage({
+        path: `/${a.slug.current}/map`,
+        component: path.resolve("./src/templates/agency-page.js"),
+        context: {
+          id: agency.agencyId,
+          feedIndex: agency.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: 'map'
+        },
+      });
+
+
     });
 
     result.data.postgres.stops
@@ -103,16 +129,49 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     result.data.postgres.routes
       .filter((r) => r.trips.totalCount > 0)
       .forEach((r) => {
-        // main route page
+
         createPage({
-          path: `/${a.slug.current}/route/${r.routeShortName}`,
+          path: `/${a.slug.current}/route/${r.routeShortName}/`,
           component: path.resolve("./src/templates/route-page.js"),
           context: {
             routeNo: r.routeShortName,
             feedIndex: r.feedIndex,
-            agencySlug: a.slug.current
+            agencySlug: a.slug.current,
+            initialTab: ''
           },
         });
+        createPage({
+          path: `/${a.slug.current}/route/${r.routeShortName}/map`,
+          component: path.resolve("./src/templates/route-page.js"),
+          context: {
+            routeNo: r.routeShortName,
+            feedIndex: r.feedIndex,
+            agencySlug: a.slug.current,
+            initialTab: 'map'
+          },
+        });
+        createPage({
+          path: `/${a.slug.current}/route/${r.routeShortName}/stops`,
+          component: path.resolve("./src/templates/route-page.js"),
+          context: {
+            routeNo: r.routeShortName,
+            feedIndex: r.feedIndex,
+            agencySlug: a.slug.current,
+            initialTab: 'stops'
+          },
+        });
+        createPage({
+          path: `/${a.slug.current}/route/${r.routeShortName}/schedule`,
+          component: path.resolve("./src/templates/route-page.js"),
+          context: {
+            routeNo: r.routeShortName,
+            feedIndex: r.feedIndex,
+            agencySlug: a.slug.current,
+            initialTab: 'schedule'
+          },
+        });
+
+
       });
   }
 };
