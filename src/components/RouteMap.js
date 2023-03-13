@@ -28,7 +28,7 @@ const RouteMap = ({ routeFc, stopsFc, timepointsFc, agency }) => {
   let stopProperty = ['smart', 'the-ride'].indexOf(agency.slug.current) > -1 ? 'stopId' : 'stopCode'
   
 
-  let style = _.cloneDeep(theme == "dark" ? mapboxStyles.dark : mapboxStyles.light);
+  let style = _.cloneDeep(mapboxStyles[theme]);
   // turn off the route-labels
   style.layers.forEach((l, idx) => {
     if(l.id.startsWith('route-labels')) {
