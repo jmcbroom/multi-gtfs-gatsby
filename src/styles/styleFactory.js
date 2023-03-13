@@ -1,6 +1,6 @@
 import _ from "lodash";
 import light from "./mapLight.json";
-import dark from "./style.json";
+import dark from "./mapDark.json";
 
 let styles = _.cloneDeep({ light, dark });
 
