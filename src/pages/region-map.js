@@ -14,7 +14,7 @@ import RouteHeader from "../components/RouteHeader";
 const RegionMapPage = ({ data }) => {
   const { theme } = useTheme();
   
-  let style = _.cloneDeep(theme == "dark" ? mapboxStyles.dark : mapboxStyles.light);
+  let style = _.cloneDeep(mapboxStyles[theme]);
 
   let [routes, setRoutes] = useState([]);
 
