@@ -31,8 +31,7 @@ const PredictionListItem = ({
   direction,
   vehicle
 }) => {
-  // console.log(prediction, vehicle, direction)
-  console.log(dayjs(prediction.prdtm, 'YYYYMMDD HH:MM').format('hh:mm a'))
+
   return (
     <Accordion.Item
       className="AccordionItem"
