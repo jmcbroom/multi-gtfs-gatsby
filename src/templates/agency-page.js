@@ -84,7 +84,7 @@ const Agency = ({ data, pageContext, location }) => {
         (fare.transfers + ' transfer' + (fare.transfers === 1 ? '' : 's')) :
         fare.transfers === 0 ?
         'no transfers' :
-        'unlimited tranfers';
+        'unlimited transfers';
     }
     
     return fare;
