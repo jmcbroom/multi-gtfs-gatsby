@@ -25,7 +25,9 @@
 }
 
 .radioGroupItem[data-disabled=""] {
-  @apply bg-gray-100;
+  @apply bg-slate-200;
+  @apply dark:bg-gray-500;
+  @apply dark:opacity-40;
   @apply border-gray-200;
 }
 
@@ -56,6 +58,7 @@
 
 .radioGroupLabel[data-disabled="true"] {
   @apply text-gray-400;
+  @apply dark:opacity-50;
   @apply font-normal;
   @apply pl-2;
   @apply mr-4;
