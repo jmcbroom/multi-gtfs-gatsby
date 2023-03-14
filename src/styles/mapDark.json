@@ -1,6 +1,6 @@
 {
     "version": 8,
-    "name": "transit.det.city-dark-copy",
+    "name": "transit.det.city-dark",
     "metadata": {
         "mapbox:type": "default",
         "mapbox:origin": "monochrome-dark-v1",

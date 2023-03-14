@@ -46,367 +46,367 @@ for (const style in styles) {
   styles[style].sources = { ...styles[style].sources, ...newSources };
 }
 
-let routeLayers = [
-  {
-    id: "routes-case-4",
-    type: "line",
-    source: "routes",
-    filter: ["==", "mapPriority", 4],
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-    },
-    minzoom: 10.5,
-    paint: {
-      "line-color": ["get", "routeColor"],
-      "line-opacity": 1,
-      "line-width": {
-        base: 1.5,
-        stops: [
-          [10.5, 1],
-          [11, 2],
-          [13, 4],
-          [18, 22],
-        ],
-      },
-    },
-  },
-  {
-    id: "routes-4",
-    type: "line",
-    source: "routes",
-    minzoom: 10.5,
-    filter: ["==", "mapPriority", 4],
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-    },
-    paint: {
-      "line-color": ["get", "routeTextColor"],
-      "line-opacity": 0.55,
-      "line-width": {
-        base: 1.5,
-        stops: [
-          [10.5, 0.5],
-          [11, 1],
-          [13, 2],
-          [18, 12],
-        ],
-      },
-    },
-  },
-  {
-    id: "routes-case-3",
-    type: "line",
-    source: "routes",
-    filter: ["==", "mapPriority", 3],
-    minzoom: 8,
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-    },
-    paint: {
-      "line-color": ["get", "routeColor"],
-      "line-opacity": 1,
-      "line-width": {
-        base: 1.5,
-        stops: [
-          [8, 0.8],
-          [8.5, 1.75],
-          [13, 6],
-          [18, 28],
-        ],
-      },
-    },
-  },
-  {
-    id: "routes-3",
-    type: "line",
-    source: "routes",
-    minzoom: 8,
-    filter: ["==", "mapPriority", 3],
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-    },
-    paint: {
-      "line-color": ["get", "routeTextColor"],
-      "line-opacity": 0.55,
-      "line-width": {
-        base: 1.5,
-        stops: [
-          [8, 0.4],
-          [8.5, 0.75],
-          [13, 3.5],
-          [18, 20],
-        ],
-      },
-    },
-  },
-  {
-    id: "routes-case-2",
-    type: "line",
-    source: "routes",
-    filter: ["==", "mapPriority", 2],
-    minzoom: 7.5,
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-    },
-    paint: {
-      "line-color": ["get", "routeColor"],
-      "line-opacity": 1,
-      "line-width": {
-        base: 1.5,
-        stops: [
-          [7.5, 1],
-          [8, 2],
-          [13, 7],
-          [18, 30],
-        ],
-      },
-    },
-  },
-  {
-    id: "routes-2",
-    type: "line",
-    source: "routes",
-    minzoom: 7.5,
-    filter: ["==", "mapPriority", 2],
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-    },
-    paint: {
-      "line-color": ["get", "routeTextColor"],
-      "line-opacity": 0.55,
-      "line-width": {
-        base: 1.5,
-        stops: [
-          [7.5, 0.5],
-          [8, 1],
-          [13, 4],
-          [18, 22],
-        ],
-      },
-    },
-  },
-  {
-    id: "routes-case-1",
-    type: "line",
-    source: "routes",
-    filter: ["==", "mapPriority", 1],
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-    },
-    paint: {
-      "line-color": ["get", "routeColor"],
-      "line-opacity": 1,
-      "line-width": {
-        base: 1.5,
-        stops: [
-          [10, 2.5],
-          [10.5, 5],
-          [13, 7],
-          [18, 36],
-        ],
-      },
-    },
-  },
-  {
-    id: "routes-1",
-    type: "line",
-    source: "routes",
-    filter: ["==", "mapPriority", 1],
-    layout: {
-      "line-join": "round",
-      "line-cap": "round",
-    },
-    paint: {
-      "line-color": ["get", "routeTextColor"],
-      "line-opacity": 0.55,
-      "line-width": {
-        base: 1.5,
-        stops: [
-          [10, 1.25],
-          [10.5, 2.5],
-          [13, 5],
-          [18, 24],
-        ],
-      },
-    },
-  },
-  {
-    id: "route-labels-4",
-    type: "symbol",
-    source: "routes",
-    filter: ["==", "mapPriority", 4],
-    minzoom: 11.5,
-    interactive: true,
-    paint: {
-      "text-color": ["get", "routeTextColor"],
-      "text-halo-color": ["get", "routeColor"],
-      "text-halo-width": {
-        base: 1.5,
-        stops: [
-          [10, 5],
-          [16, 2],
-        ],
-      },
-    },
-    layout: {
-      "text-field": ["get", "routeShortName"],
-      "text-justify": "auto",
-      "symbol-placement": "line",
-      "symbol-spacing": 180,
-      "text-rotation-alignment": "viewport",
-      "text-font": ["Inter Bold"],
-      "text-padding": {
-        base: 1,
-        stops: [
-          [10, 0.1],
-          [18, 5],
-        ],
-      },
-      "text-size": {
-        base: 1.5,
-        stops: [
-          [10, 8],
-          [16, 18],
-          [18, 28],
-        ],
-      },
-    },
-  },
-  {
-    id: "route-labels-3",
-    type: "symbol",
-    source: "routes",
-    filter: ["==", "mapPriority", 3],
-    minzoom: 9,
-    interactive: true,
-    paint: {
-      "text-color": ["get", "routeTextColor"],
-      "text-halo-color": ["get", "routeColor"],
-      "text-halo-width": {
-        base: 1.5,
-        stops: [
-          [10, 5],
-          [16, 5],
-        ],
-      },
-    },
-    layout: {
-      "text-field": ["get", "routeShortName"],
-      "text-justify": "auto",
-      "symbol-placement": "line",
-      "symbol-spacing": 180,
-      "text-rotation-alignment": "viewport",
-      "text-font": ["Inter Bold"],
-      "text-padding": {
-        base: 1,
-        stops: [
-          [10, 0.1],
-          [18, 5],
-        ],
-      },
-      "text-size": {
-        base: 1.5,
-        stops: [
-          [10, 8],
-          [16, 18],
-          [18, 24],
-        ],
-      },
-    },
-  },
-  {
-    id: "route-labels-2",
-    type: "symbol",
-    source: "routes",
-    filter: ["==", "mapPriority", 2],
-    minzoom: 8.5,
-    interactive: true,
-    paint: {
-      "text-color": ["get", "routeTextColor"],
-      "text-halo-color": ["get", "routeColor"],
-      "text-halo-width": {
-        base: 1.5,
-        stops: [
-          [10, 5],
-          [16, 5],
-        ],
-      },
-    },
-    layout: {
-      "text-field": ["get", "routeShortName"],
-      "text-justify": "auto",
-      "symbol-placement": "line",
-      "symbol-spacing": 180,
-      "text-rotation-alignment": "viewport",
-      "text-font": ["Inter Bold"],
-      "text-padding": {
-        base: 1,
-        stops: [
-          [10, 0.1],
-          [18, 5],
-        ],
-      },
-      "text-size": {
-        base: 1.5,
-        stops: [
-          [10, 8],
-          [16, 20],
-          [18, 28],
-        ],
-      },
-    },
-  },
-  {
-    id: "route-labels-1",
-    type: "symbol",
-    source: "routes",
-    filter: ["==", "mapPriority", 1],
-    interactive: true,
-    paint: {
-      "text-color": ["get", "routeTextColor"],
-      "text-halo-color": ["get", "routeColor"],
-      "text-halo-width": {
-        base: 1.5,
-        stops: [
-          [10, 5],
-          [16, 5],
-        ],
-      },
-    },
-    layout: {
-      "text-field": ["get", "routeShortName"],
-      "text-justify": "auto",
-      "symbol-placement": "line",
-      "symbol-spacing": 100,
-      "text-rotation-alignment": "viewport",
-      "text-font": ["Inter Bold"],
-      "text-padding": {
-        base: 1,
-        stops: [
-          [10, 0.1],
-          [18, 4],
-        ],
-      },
-      "text-size": {
-        base: 1.5,
-        stops: [
-          [10, 10],
-          [16, 24],
-          [18, 32],
-        ],
-      },
-    },
-  },
-];
-
 for (const style in styles) {
+  let routeLayers = [
+    {
+      id: "routes-case-4",
+      type: "line",
+      source: "routes",
+      filter: ["==", "mapPriority", 4],
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      minzoom: 10.5,
+      paint: {
+        "line-color": ["get", "routeColor"],
+        "line-opacity": 1,
+        "line-width": {
+          base: 1.5,
+          stops: [
+            [10.5, 1],
+            [11, 2],
+            [13, 4],
+            [18, 22],
+          ],
+        },
+      },
+    },
+    {
+      id: "routes-4",
+      type: "line",
+      source: "routes",
+      minzoom: 10.5,
+      filter: ["==", "mapPriority", 4],
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": ["get", "routeTextColor"],
+        "line-opacity": style == "light" ? 0.55 : 0.35,
+        "line-width": {
+          base: 1.5,
+          stops: [
+            [10.5, 0.5],
+            [11, 1],
+            [13, 2],
+            [18, 12],
+          ],
+        },
+      },
+    },
+    {
+      id: "routes-case-3",
+      type: "line",
+      source: "routes",
+      filter: ["==", "mapPriority", 3],
+      minzoom: 8,
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": ["get", "routeColor"],
+        "line-opacity": 1,
+        "line-width": {
+          base: 1.5,
+          stops: [
+            [8, 0.8],
+            [8.5, 1.75],
+            [13, 6],
+            [18, 28],
+          ],
+        },
+      },
+    },
+    {
+      id: "routes-3",
+      type: "line",
+      source: "routes",
+      minzoom: 8,
+      filter: ["==", "mapPriority", 3],
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": ["get", "routeTextColor"],
+        "line-opacity": style == "light" ? 0.55 : 0.35,
+        "line-width": {
+          base: 1.5,
+          stops: [
+            [8, 0.4],
+            [8.5, 0.75],
+            [13, 3.5],
+            [18, 20],
+          ],
+        },
+      },
+    },
+    {
+      id: "routes-case-2",
+      type: "line",
+      source: "routes",
+      filter: ["==", "mapPriority", 2],
+      minzoom: 7.5,
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": ["get", "routeColor"],
+        "line-opacity": 1,
+        "line-width": {
+          base: 1.5,
+          stops: [
+            [7.5, 1],
+            [8, 2],
+            [13, 7],
+            [18, 30],
+          ],
+        },
+      },
+    },
+    {
+      id: "routes-2",
+      type: "line",
+      source: "routes",
+      minzoom: 7.5,
+      filter: ["==", "mapPriority", 2],
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": ["get", "routeTextColor"],
+        "line-opacity": style == "light" ? 0.55 : 0.35,
+        "line-width": {
+          base: 1.5,
+          stops: [
+            [7.5, 0.5],
+            [8, 1],
+            [13, 4],
+            [18, 22],
+          ],
+        },
+      },
+    },
+    {
+      id: "routes-case-1",
+      type: "line",
+      source: "routes",
+      filter: ["==", "mapPriority", 1],
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": ["get", "routeColor"],
+        "line-opacity": 1,
+        "line-width": {
+          base: 1.5,
+          stops: [
+            [10, 2.5],
+            [10.5, 5],
+            [13, 7],
+            [18, 36],
+          ],
+        },
+      },
+    },
+    {
+      id: "routes-1",
+      type: "line",
+      source: "routes",
+      filter: ["==", "mapPriority", 1],
+      layout: {
+        "line-join": "round",
+        "line-cap": "round",
+      },
+      paint: {
+        "line-color": ["get", "routeTextColor"],
+        "line-opacity": style == "light" ? 0.55 : 0.35,
+        "line-width": {
+          base: 1.5,
+          stops: [
+            [10, 1.25],
+            [10.5, 2.5],
+            [13, 5],
+            [18, 24],
+          ],
+        },
+      },
+    },
+    {
+      id: "route-labels-4",
+      type: "symbol",
+      source: "routes",
+      filter: ["==", "mapPriority", 4],
+      minzoom: 11.5,
+      interactive: true,
+      paint: {
+        "text-color": ["get", "routeTextColor"],
+        "text-halo-color": ["get", "routeColor"],
+        "text-halo-width": {
+          base: 1.5,
+          stops: [
+            [10, 5],
+            [16, 2],
+          ],
+        },
+      },
+      layout: {
+        "text-field": ["get", "routeShortName"],
+        "text-justify": "auto",
+        "symbol-placement": "line",
+        "symbol-spacing": 180,
+        "text-rotation-alignment": "viewport",
+        "text-font": ["Inter Bold"],
+        "text-padding": {
+          base: 1,
+          stops: [
+            [10, 0.1],
+            [18, 5],
+          ],
+        },
+        "text-size": {
+          base: 1.5,
+          stops: [
+            [10, 8],
+            [16, 18],
+            [18, 28],
+          ],
+        },
+      },
+    },
+    {
+      id: "route-labels-3",
+      type: "symbol",
+      source: "routes",
+      filter: ["==", "mapPriority", 3],
+      minzoom: 9,
+      interactive: true,
+      paint: {
+        "text-color": ["get", "routeTextColor"],
+        "text-halo-color": ["get", "routeColor"],
+        "text-halo-width": {
+          base: 1.5,
+          stops: [
+            [10, 5],
+            [16, 5],
+          ],
+        },
+      },
+      layout: {
+        "text-field": ["get", "routeShortName"],
+        "text-justify": "auto",
+        "symbol-placement": "line",
+        "symbol-spacing": 180,
+        "text-rotation-alignment": "viewport",
+        "text-font": ["Inter Bold"],
+        "text-padding": {
+          base: 1,
+          stops: [
+            [10, 0.1],
+            [18, 5],
+          ],
+        },
+        "text-size": {
+          base: 1.5,
+          stops: [
+            [10, 8],
+            [16, 18],
+            [18, 24],
+          ],
+        },
+      },
+    },
+    {
+      id: "route-labels-2",
+      type: "symbol",
+      source: "routes",
+      filter: ["==", "mapPriority", 2],
+      minzoom: 8.5,
+      interactive: true,
+      paint: {
+        "text-color": ["get", "routeTextColor"],
+        "text-halo-color": ["get", "routeColor"],
+        "text-halo-width": {
+          base: 1.5,
+          stops: [
+            [10, 5],
+            [16, 5],
+          ],
+        },
+      },
+      layout: {
+        "text-field": ["get", "routeShortName"],
+        "text-justify": "auto",
+        "symbol-placement": "line",
+        "symbol-spacing": 180,
+        "text-rotation-alignment": "viewport",
+        "text-font": ["Inter Bold"],
+        "text-padding": {
+          base: 1,
+          stops: [
+            [10, 0.1],
+            [18, 5],
+          ],
+        },
+        "text-size": {
+          base: 1.5,
+          stops: [
+            [10, 8],
+            [16, 20],
+            [18, 28],
+          ],
+        },
+      },
+    },
+    {
+      id: "route-labels-1",
+      type: "symbol",
+      source: "routes",
+      filter: ["==", "mapPriority", 1],
+      interactive: true,
+      paint: {
+        "text-color": ["get", "routeTextColor"],
+        "text-halo-color": ["get", "routeColor"],
+        "text-halo-width": {
+          base: 1.5,
+          stops: [
+            [10, 5],
+            [16, 5],
+          ],
+        },
+      },
+      layout: {
+        "text-field": ["get", "routeShortName"],
+        "text-justify": "auto",
+        "symbol-placement": "line",
+        "symbol-spacing": 100,
+        "text-rotation-alignment": "viewport",
+        "text-font": ["Inter Bold"],
+        "text-padding": {
+          base: 1,
+          stops: [
+            [10, 0.1],
+            [18, 4],
+          ],
+        },
+        "text-size": {
+          base: 1.5,
+          stops: [
+            [10, 10],
+            [16, 24],
+            [18, 32],
+          ],
+        },
+      },
+    },
+  ];
+  
   let adminBoundaryIndex = styles[style].layers
     .map((l) => l.id)
     .indexOf(`admin-0-boundary-disputed`);
