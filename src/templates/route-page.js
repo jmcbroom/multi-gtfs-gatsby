@@ -1,5 +1,5 @@
 import * as Tabs from "@radix-ui/react-tabs";
-import { graphql, navigate } from "gatsby";
+import { graphql, Link, navigate } from "gatsby";
 import React, { useState } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import DirectionPicker from "../components/DirectionPicker";
@@ -83,19 +83,19 @@ const Route = ({ data, pageContext }) => {
         <RouteHeader {...gtfsRoute} agency={agencyData} />
       </div>
 
-      <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab} onValueChange={(e) => navigate(`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/${e}`)}>
+      <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
         <Tabs.List className="tabList" aria-label="Manage your account">
           <Tabs.Trigger className="tabTrigger" value="">
-            Home
+            <Link to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}`}>Home</Link>
           </Tabs.Trigger>
           <Tabs.Trigger className="tabTrigger" value="map">
-            Map
+            <Link to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/map`}>Map</Link>
           </Tabs.Trigger>
           <Tabs.Trigger className="tabTrigger" value="schedule">
-            Schedule
+            <Link to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/schedule`}>Schedule</Link>
           </Tabs.Trigger>
           <Tabs.Trigger className="tabTrigger" value="stops">
-            Stops
+            <Link to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/stops`}>Stops</Link>
           </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
