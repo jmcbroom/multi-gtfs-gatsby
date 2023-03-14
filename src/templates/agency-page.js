@@ -1,5 +1,5 @@
 import React from "react";
-import { graphql, navigate } from "gatsby";
+import { graphql, Link } from "gatsby";
 import RouteHeader from "../components/RouteHeader";
 import AgencyHeader from "../components/AgencyHeader";
 import AgencyMap from "../components/AgencyMap";
@@ -93,16 +93,16 @@ const Agency = ({ data, pageContext, location }) => {
   return (
     <>
       <AgencySlimHeader agency={agencyData} />
-      <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab} onValueChange={(e) => navigate(`/${pageContext.agencySlug}/${e}`)}>
+      <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
         <Tabs.List className="tabList" aria-label="Manage your account">
           <Tabs.Trigger className="tabTrigger" value="">
-            Home
+            <Link to={`/${pageContext.agencySlug}`}>Home</Link>
           </Tabs.Trigger>
           <Tabs.Trigger className="tabTrigger" value="routes">
-            Routes
+            <Link to={`/${pageContext.agencySlug}/routes`}>Routes</Link>
           </Tabs.Trigger>
           <Tabs.Trigger className="tabTrigger" value="map">
-            Map
+            <Link to={`/${pageContext.agencySlug}/map`}>Map</Link>
           </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
