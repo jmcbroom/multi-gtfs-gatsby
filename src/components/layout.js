@@ -1,8 +1,8 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { Link } from "gatsby";
-import { ThemeProvider } from "../hooks/ThemeContext";
 import React from "react";
+import { Helmet } from "react-helmet";
+import { ThemeProvider } from "../hooks/ThemeContext";
 import NavMenu from "./NavMenu";
 
 /**
@@ -14,6 +14,11 @@ import NavMenu from "./NavMenu";
 export default function Layout({ children }) {
   return (
     <ThemeProvider>
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>transit.det.city</title>
+        <link rel="canonical" href="https://transit.det.city" />
+      </Helmet>
       <div className="fill-page">
         <header className="bg-primary-light dark:bg-primary-dark bg-opacity-80 px-4">
           <div className="max-w-4xl py-2 mx-auto flex items-center justify-between">

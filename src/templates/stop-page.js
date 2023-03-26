@@ -1,14 +1,14 @@
 import { graphql } from "gatsby";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopMap from "../components/StopMap";
-import StopTimesHere from "../components/StopTimesHere";
 import StopPredictions from "../components/StopPredictions";
+import StopTimesHere from "../components/StopTimesHere";
 import {
   createAgencyData,
   createRouteData,
   getServiceDays,
-  getTripsByServiceDay,
+  getTripsByServiceDay
 } from "../util";
 
 const Stop = ({ data, pageContext }) => {
@@ -41,6 +41,8 @@ const Stop = ({ data, pageContext }) => {
       r = createRouteData(r, matching[0]);
     }
   });
+
+  routes = routes.sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName)).sort((a, b) => a.mapPriority > b.mapPriority)
 
   let stopFc = {
     type: "FeatureCollection",

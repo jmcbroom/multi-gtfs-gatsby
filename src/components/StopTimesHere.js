@@ -24,8 +24,6 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
   let [service, setService] = useState(defaultService);
 
-  routes = routes.sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName)).sort((a, b) => a.mapPriority > b.mapPriority);
-
   return (
     <div>
       <div className="underline-title mb-2">Routes that stop here</div>
