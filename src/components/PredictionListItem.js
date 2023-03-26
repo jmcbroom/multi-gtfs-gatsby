@@ -4,7 +4,7 @@ import { AccordionContent, AccordionTrigger } from "./AccordionTrigger";
 import * as Accordion from "@radix-ui/react-accordion";
 import dayjs from "dayjs";
 
-const predictionText = (prdctdn) => {
+export const predictionText = (prdctdn) => {
   if (prdctdn === "DUE") {
     return <span className="text-base font-bold">now</span>;
   } else {

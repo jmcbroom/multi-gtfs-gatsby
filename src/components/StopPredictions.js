@@ -10,6 +10,7 @@ const matchPredictionToRoute = (prediction, routes) => {
       direction.directionDescription.toLowerCase().slice(0, 3) ===
       prediction.rtdir.toLowerCase().slice(0, 3)
   )[0];
+if(!direction) { direction = `unknown` }
   return { route, direction };
 };
 

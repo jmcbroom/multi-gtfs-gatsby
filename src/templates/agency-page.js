@@ -1,12 +1,11 @@
-import React from "react";
-import { graphql, Link } from "gatsby";
-import RouteHeader from "../components/RouteHeader";
-import AgencyHeader from "../components/AgencyHeader";
-import AgencyMap from "../components/AgencyMap";
-import PortableText from "react-portable-text";
-import { createAgencyData, createRouteData } from "../util";
-import AgencySlimHeader from "../components/AgencySlimHeader";
 import * as Tabs from "@radix-ui/react-tabs";
+import { graphql, Link } from "gatsby";
+import React from "react";
+import PortableText from "react-portable-text";
+import AgencyMap from "../components/AgencyMap";
+import AgencySlimHeader from "../components/AgencySlimHeader";
+import RouteHeader from "../components/RouteHeader";
+import { createAgencyData, createRouteData } from "../util";
 
 const Agency = ({ data, pageContext, location }) => {
   let gtfsAgency = data.postgres.agencies[0];
@@ -138,25 +137,6 @@ const Agency = ({ data, pageContext, location }) => {
           <AgencyMap agency={agencyData} routesFc={allRouteFc} />
         </Tabs.Content>
       </Tabs.Root>
-      {/* 
-      <section className="flex flex-col sm:flex-row items-center justify-start gap-4 mb-4">
-        <div className="flex items-center justify-between">
-          <Link to={agencyUrl}>
-            <FontAwesomeIcon icon={faLink} />
-            <span className="ml-2">Website</span>
-          </Link>
-        </div>
-        <div className="flex items-center justify-between">
-          <a href={`tel:+1${agencyPhone}`}>
-            <FontAwesomeIcon icon={faPhone} />
-            <span className="ml-2">Phone: {agencyPhone}</span>
-          </a>
-        </div>
-      </section>
-      <h3>Fare information</h3>
-      <p>...</p>
-      <h3>Bus routes</h3>
-      */}
     </>
   );
 };
