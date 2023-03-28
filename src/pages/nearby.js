@@ -75,9 +75,9 @@ const NearbyPage = ({ data }) => {
   let combinedAgencies = sanityAgencies.map((sanityAgency) => {
     let gtfsAgency = gtfsAgencies.find(
       (agency) => agency.feedIndex == sanityAgency.currentFeedIndex
-    )
-    return createAgencyData(gtfsAgency, sanityAgency)
-  })
+    );
+    return createAgencyData(gtfsAgency, sanityAgency);
+  });
 
   let sanityRoutes = data.allSanityRoute.edges.map((edge) => edge.node);
   let { allStops } = data.postgres;
@@ -141,14 +141,13 @@ const NearbyPage = ({ data }) => {
 
   const map = useRef();
 
-
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         setPosition([position.coords.longitude, position.coords.latitude]);
         map.current.easeTo({
           center: [position.coords.longitude, position.coords.latitude],
-          zoom: 16,
+          zoom: 15.75,
         });
       });
     }
@@ -202,8 +201,8 @@ const NearbyPage = ({ data }) => {
     if (map.current.getZoom() > 15.5) {
       let uniqueStops = _.uniqBy(stopsOnMap, "properties.stopCode");
       setStops(_.groupBy(uniqueStops, "properties.agencySlug"));
-      if(!predictions) {
-        setNow(new Date())
+      if (!predictions) {
+        setNow(new Date());
       }
     } else {
       setStops([]);
@@ -222,23 +221,8 @@ const NearbyPage = ({ data }) => {
 
   return (
     <div>
-      <div className="grayHeader">Map near your location</div>
-      <div id="map" style={{ height: 450 }}>
-        <Mapbox
-          ref={map}
-          mapLib={MapboxGL}
-          mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
-          mapStyle={style}
-          initialViewState={initialViewState}
-          onClick={handleClick}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onMoveEnd={handleMoveEnd}
-        >
-          <NavigationControl showCompass={false} />
-        </Mapbox>
-      </div>
-      {predictions && (
+      <h2 className="grayTitle">Near your location</h2>
+      <div className="md:grid md:grid-cols-2 gap-2">
         <NearbyPredictions
           agencies={combinedAgencies}
           predictions={predictions}
@@ -248,7 +232,23 @@ const NearbyPage = ({ data }) => {
           allStops={allStopsFc}
           setTrackedBus={setTrackedBus}
         />
-      )}
+        <div id="map" style={{ height: 450 }}>
+          <div className="grayHeader">Your general location</div>
+          <Mapbox
+            ref={map}
+            mapLib={MapboxGL}
+            mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
+            mapStyle={style}
+            initialViewState={initialViewState}
+            onClick={handleClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onMoveEnd={handleMoveEnd}
+          >
+            <NavigationControl showCompass={false} />
+          </Mapbox>
+        </div>
+      </div>
     </div>
   );
 };

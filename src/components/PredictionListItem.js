@@ -36,7 +36,6 @@ const PredictionListItem = ({
     <Accordion.Item
       className="AccordionItem"
       value={prediction.vid}
-      on
     >
       <AccordionTrigger>
         <div className="flex items-center justify-between gap-2 text-xs flex-grow">

@@ -163,8 +163,8 @@ const RegionMapPage = ({ data }) => {
 
   return (
     <div>
-      <p className="underline-title">Regional transit map</p>
-      <div id="map" style={{ height: 450 }}>
+      <p className="grayHeader">Regional transit map</p>
+      <div id="map" style={{ height: 550 }}>
         <Mapbox
           ref={map}
           mapLib={MapboxGL}
@@ -182,10 +182,10 @@ const RegionMapPage = ({ data }) => {
       </div>
 
       <>
-        <div className="underline-title my-2">{`${
+        <div className="grayHeader my-2">{`${
           routes.length > 0 ? routes.length : `No`
         } routes shown on the map`}</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
           {routes.length > 0 ? (
             <>
               {routes.map((r) => (
