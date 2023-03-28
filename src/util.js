@@ -222,6 +222,63 @@ export const createRouteFc = (sanityRoute, gtfsRoute) => {
 }
 
 /**
+ * Create a GeoJSON FeatureCollection of vehicles
+ * from the BusTime API response and the Sanity route directions
+ * @param {*} vehicles: an array of vehicle objects
+ * @param {*} patterns: an array of pattern objects
+ * @param {*} route: the Sanity route object
+ * @param {*} agency: the agency object
+ * @returns GeoJSON feature collection
+ */
+
+export const createVehicleFc = (vehicles, patterns, route, agency) => {
+  // Create a GeoJSON FeatureCollection of vehicles
+  // from the BusTime API response and the Sanity route directions
+  if (!vehicles || !patterns || !route) return null;
+
+  // create a GeoJSON feature for each vehicle
+  let features = vehicles.map((v) => {
+    // find the pattern and direction for this vehicle
+    let pattern = patterns.find((p) => p.pid === v.pid);
+    if(!pattern) return;
+    let direction =
+      route.directions.find(
+        (d) =>
+          d.directionDescription
+            .toLowerCase()
+            .indexOf(pattern.rtdir.toLowerCase()) > -1
+      ) || "unknown";
+
+    // get the next stops from the pattern and distance traveled
+    let nextStops = pattern.pt.filter((p) => p.pdist > v.pdist && p.stpid);
+
+    // return a GeoJSON feature
+    return {
+      type: "Feature",
+      properties: {
+        ...v,
+        ...route,
+        agency: agency.slug.current,
+        description: direction.directionDescription || `unknown`,
+        headsign: direction.directionHeadsign || `unknown`,
+        nextStop: nextStops[0],
+        nextStops: nextStops,
+        bearing: parseInt(v.hdg)
+      },
+      geometry: {
+        type: "Point",
+        coordinates: [parseFloat(v.lon), parseFloat(v.lat)],
+      },
+    };
+  });
+
+  return {
+    type: "FeatureCollection",
+    features: features,
+  };
+};
+
+/**
  * Create a GeoJSON FeatureCollection from the GTFS and Sanity representations of a route.
  * @param {*} sanityRoute: the Sanity route object
  * @param {*} trips: the returned object from getTripsByServiceAndDirection
@@ -292,8 +349,9 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
   gtfsAgency.color = sanityAgency.color
   gtfsAgency.textColor = sanityAgency.textColor
   gtfsAgency.fareAttributes = sanityAgency.fareAttributes?.length ?
-    sanityAgency.fareAttributes : gtfsAgency.fareAttributes
+  sanityAgency.fareAttributes : gtfsAgency.fareAttributes
   gtfsAgency.fareContent = sanityAgency.fareContent
+  gtfsAgency.realTimeEnabled = sanityAgency.realTimeEnabled
   
   return gtfsAgency
 
@@ -323,3 +381,48 @@ export const dayOfWeek = () => {
   if(dow === 6) { return `saturday` }
   return `weekday`
 }
+
+export const matchPredictionToRoute = (prediction, routes) => {
+  let route = routes.filter((r) => r.routeShortName === prediction.rt)[0];
+  let direction = route.directions.filter(
+    (direction) =>
+      direction.directionDescription.toLowerCase().slice(0, 3) ===
+      prediction.rtdir.toLowerCase().slice(0, 3)
+  )[0];
+if(!direction) { direction = `unknown` }
+  return { route, direction };
+};
+
+export const matchPredictionToVehicle = (prediction, vehicles) => {
+  let vehicle = vehicles.find(
+    (v) => v.vid === prediction.vid
+  );
+  return vehicle;
+};
+
+export const createAllStopsFc = ({ allStops, agencies }) => {
+
+  let allStopsFc = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
+  allStops.forEach((stop) => {
+    let agency = agencies.find((a) => a.currentFeedIndex == stop.feedIndex);
+    let feature = {
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [stop.stopLon, stop.stopLat],
+      },
+      properties: {
+        stopId: stop.stopId,
+        stopName: stop.stopName,
+        stopCode: stop.stopCode,
+        agencySlug: agency.slug.current,
+      },
+    };
+    allStopsFc.features.push(feature);
+  });
+  return allStopsFc;
+};

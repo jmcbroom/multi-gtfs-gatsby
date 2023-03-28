@@ -139,9 +139,10 @@ footer {
 }
 
 .grayHeader {
-
   @apply bg-gray-200;
-  @apply text-gray-700;
+  @apply dark:bg-zinc-800;
+  @apply text-zinc-800;
+  @apply dark:text-gray-200;
   @apply font-semibold;
   @apply px-2;
   @apply py-1;

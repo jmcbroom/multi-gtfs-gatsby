@@ -18,56 +18,13 @@ import {
   createRouteData,
   createRouteFc,
   createStopsFc,
+  createVehicleFc,
   dayOfWeek,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
   getTripsByServiceDay,
 } from "../util";
-
-const createVehicleFc = (vehicles, patterns, route, agency) => {
-  // Create a GeoJSON FeatureCollection of vehicles
-  // from the BusTime API response and the Sanity route directions
-  if (!vehicles || !patterns || !route) return null;
-
-  // create a GeoJSON feature for each vehicle
-  let features = vehicles.map((v) => {
-    // find the pattern and direction for this vehicle
-    let pattern = patterns.find((p) => p.pid === v.pid) || patterns[0]
-    let direction = route.directions.find(
-      (d) =>
-        d.directionDescription
-          .toLowerCase()
-          .indexOf(pattern.rtdir.toLowerCase()) > -1
-    ) || 'unknown';
-
-    // get the next stops from the pattern and distance traveled
-    let nextStops = pattern.pt.filter((p) => p.pdist > v.pdist && p.stpid);
-
-    // return a GeoJSON feature
-    return {
-      type: "Feature",
-      properties: {
-        ...v,
-        ...route,
-        agency: agency.slug.current,
-        description: direction.directionDescription || `unknown`,
-        headsign: direction.directionHeadsign || `unknown`,
-        nextStop: nextStops[0],
-        nextStops: nextStops,
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [parseFloat(v.lon), parseFloat(v.lat)],
-      },
-    };
-  });
-
-  return {
-    type: "FeatureCollection",
-    features: features,
-  };
-};
 
 const Route = ({ data, pageContext }) => {
   let gtfsAgency = data.postgres.agencies[0];
@@ -147,7 +104,9 @@ const Route = ({ data, pageContext }) => {
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled || !vehicles) return;
     fetch(
-      `/.netlify/functions/predictions?vehicleId=${vehicles.map(v => v.vid).join(",")}&agency=${pageContext.agencySlug}`
+      `/.netlify/functions/predictions?vehicleId=${vehicles
+        .map((v) => v.vid)
+        .join(",")}&agency=${pageContext.agencySlug}`
     )
       .then((r) => r.json())
       .then((d) => {
@@ -189,44 +148,44 @@ const Route = ({ data, pageContext }) => {
 
       <AgencySlimHeader agency={agencyData} />
 
-      <div className="px-2 md:px-0 my-2 md:my-4">
+      <div className="px-2 md:px-0 my-2 md:my-2 bg-gray-200 dark:bg-zinc-900">
         <RouteHeader {...gtfsRoute} agency={agencyData} />
       </div>
 
       <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
         <Tabs.List className="tabList" aria-label="Manage your account">
-          <Tabs.Trigger className="tabTrigger" value="">
-            <Link
-              to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/`}
-            >
+          <Link
+            to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/`}
+          >
+            <Tabs.Trigger className="tabTrigger" value="">
               Home
-            </Link>
-          </Tabs.Trigger>
-          <Tabs.Trigger className="tabTrigger" value="map">
-            <Link
-              to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/map`}
-            >
+            </Tabs.Trigger>
+          </Link>
+          <Link
+            to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/map`}
+          >
+            <Tabs.Trigger className="tabTrigger" value="map">
               Map
-            </Link>
-          </Tabs.Trigger>
-          <Tabs.Trigger className="tabTrigger" value="schedule">
-            <Link
-              to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/schedule`}
-            >
+            </Tabs.Trigger>
+          </Link>
+          <Link
+            to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/schedule`}
+          >
+            <Tabs.Trigger className="tabTrigger" value="schedule">
               Schedule
-            </Link>
-          </Tabs.Trigger>
-          <Tabs.Trigger className="tabTrigger" value="stops">
-            <Link
-              to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/stops`}
-            >
+            </Tabs.Trigger>
+          </Link>
+          <Link
+            to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/stops`}
+          >
+            <Tabs.Trigger className="tabTrigger" value="stops">
               Stops
-            </Link>
-          </Tabs.Trigger>
+            </Tabs.Trigger>
+          </Link>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
           <div className="md:grid md:grid-cols-2 gap-2">
-            {(
+            {
               <RoutePredictions
                 vehicles={createVehicleFc(
                   vehicles,
@@ -238,7 +197,7 @@ const Route = ({ data, pageContext }) => {
                 setTrackedBus={setTrackedBus}
                 now={now}
               />
-            )}
+            }
             {sanityRoute && (
               <RouteMap
                 routeFc={createRouteFc(sanityRoute, gtfsRoute)}

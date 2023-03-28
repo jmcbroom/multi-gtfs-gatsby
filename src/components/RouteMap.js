@@ -18,8 +18,6 @@ const RouteMap = ({
   className = ``,
 }) => {
 
-  console.log(trackedBus)
-
   const routeFeatureCollection = routeFc;
   const stopsFeatureCollection = stopsFc;
   const timepointsFeatureCollection = timepointsFc;
@@ -90,10 +88,11 @@ const RouteMap = ({
 
   if(trackedBus) {
     let trackedFeature = vehicleFc.features.filter(v => v.properties.vid === trackedBus)[0]
+    if(!trackedFeature) { return };
     map.current?.easeTo({
       center: trackedFeature.geometry.coordinates,
-      zoom: 15.25,
-      duration: 3000
+      zoom: 14.75,
+      duration: 2000
     })
   }
   else {

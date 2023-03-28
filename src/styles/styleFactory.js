@@ -808,8 +808,8 @@ for (const style in styles) {
             [18, 15],
           ],
         },
-        "text-allow-overlap": true,
-        "text-ignore-placement": true,
+        "text-allow-overlap": false,
+        "text-ignore-placement": false,
         "text-font": ["Inter Semi Bold"],
         "text-justify": "center",
         "text-padding": 0,
@@ -839,6 +839,38 @@ for (const style in styles) {
       },
     },
     {
+      id: "vehicle-icon-arrows",
+      type: "symbol",
+      source: "vehicles",
+      interactive: true,
+      filter: ["==", "$type", "Point"],
+      layout: {
+        "icon-image": "campsite",
+        "icon-size": {
+          stops: [
+            [8, 1],
+            [13, 1.5],
+            [19, 2.25],
+          ],
+        },
+        "icon-offset": {
+          stops: [
+            [8, [0, -7]],
+            [19, [0, -11]]
+          ]
+        },
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true,
+        "icon-rotate": ["get", "bearing"],
+        "icon-rotation-alignment": "map",
+        "icon-pitch-alignment": "map",
+      },
+      paint: {
+        "icon-opacity": 1,
+        "icon-color": "#222",
+      }
+    },
+    {
       id: "vehicle-points",
       type: "circle",
       source: "vehicles",
@@ -854,7 +886,7 @@ for (const style in styles) {
             [19, 5],
           ],
         },
-        "circle-stroke-opacity": 0.8,
+        "circle-stroke-opacity": 1,
         "circle-opacity": 0.95,
         "circle-radius": {
           stops: [
@@ -865,6 +897,7 @@ for (const style in styles) {
         },
       },
     },
+    
     {
       id: "vehicle-icons",
       type: "symbol",
@@ -882,14 +915,12 @@ for (const style in styles) {
         },
         "icon-allow-overlap": true,
         "icon-ignore-placement": true,
-        "icon-rotate": ["get", "bearing"],
-        "icon-rotation-alignment": "map",
-        "icon-pitch-alignment": "map",
       },
       paint: {
         "icon-opacity": 1
       }
     },
+
     {
       id: "stop-point",
       type: "circle",
