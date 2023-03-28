@@ -29,17 +29,14 @@ const RoutePredictionItem = ({ vehicle, now, predictions }) => {
     )
   );
 
-  console.log(nextStop)
-  console.log(predictions)
-
   return (
-    <Accordion.Item className="AccordionItem" value={vid} on>
+    <Accordion.Item className="AccordionItem" value={vid}>
       <AccordionTrigger>
         <div className="flex items-center justify-between gap-2 text-xs flex-grow">
           <div className="flex items-center justify-between gap-2 w-full flex-grow">
             <div className="flex items-center gap-2">
               <span
-                className="w-8 h-8 font-extrabold text-center justify-center items-center flex bg-white"
+                className="w-6 h-6 text-2xs font-bold text-center justify-center items-center flex bg-white"
                 style={{
                   background: `${routeColor}`,
                   color: `${routeTextColor}`,
@@ -58,7 +55,7 @@ const RoutePredictionItem = ({ vehicle, now, predictions }) => {
             <div className="flex flex-col justify-end">
               <span className="text-xs block text-right mr-2 text-gray-400">
                 {nextStop && (<>
-                <span>next stop, {predictions[0].prdctdn === 'DUE' ? `now:` : ` in ${predictions[0].prdctdn}m:`}</span>
+                <span>next stop, {predictions.length > 0 && (predictions[0].prdctdn === 'DUE' ? `now:` : ` in ${predictions[0].prdctdn}m:`)}</span>
                 </>)}
               </span>
               <span className="text-sm mr-2 text-right">

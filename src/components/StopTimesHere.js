@@ -26,7 +26,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
   return (
     <div>
-      <div className="underline-title mb-2">Routes that stop here</div>
+      <div className="grayHeader">Routes that stop here</div>
       <Accordion.Root
         className="AccordionRoot"
         type="single"

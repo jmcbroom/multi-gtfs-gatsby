@@ -1,9 +1,9 @@
-import React from 'react';
-import * as NavigationMenu from '@radix-ui/react-navigation-menu';
-import classNames from 'classnames';
-import { CaretDownIcon } from '@radix-ui/react-icons';
-import '../styles/menu.css'
-import {Link} from 'gatsby'
+import React from "react";
+import * as NavigationMenu from "@radix-ui/react-navigation-menu";
+import classNames from "classnames";
+import { CaretDownIcon } from "@radix-ui/react-icons";
+import "../styles/menu.css";
+import { Link } from "gatsby";
 
 const NavMenu = () => {
   return (
@@ -28,11 +28,12 @@ const NavMenu = () => {
           </NavigationMenu.Content>
         </NavigationMenu.Item>
 
-        <NavigationMenu.Item className='NavigationMenuLink'>
-            <Link to="/region-map">
-              
-            Map
-              </Link>
+        <NavigationMenu.Item className="NavigationMenuLink">
+          <Link to="/region-map">Map</Link>
+        </NavigationMenu.Item>
+
+        <NavigationMenu.Item className="NavigationMenuLink">
+          <Link to="/nearby">Nearby</Link>
         </NavigationMenu.Item>
 
         <NavigationMenu.Indicator className="NavigationMenuIndicator">
@@ -47,15 +48,21 @@ const NavMenu = () => {
   );
 };
 
-const ListItem = React.forwardRef(({ className, children, title, ...props }, forwardedRef) => (
-  <li>
-    <NavigationMenu.Link asChild>
-      <Link className={classNames('ListItemLink', className)} {...props} ref={forwardedRef}>
-        <div className="ListItemHeading">{title}</div>
-        <p className="ListItemText">{children}</p>
-      </Link>
-    </NavigationMenu.Link>
-  </li>
-));
+const ListItem = React.forwardRef(
+  ({ className, children, title, ...props }, forwardedRef) => (
+    <li>
+      <NavigationMenu.Link asChild>
+        <Link
+          className={classNames("ListItemLink", className)}
+          {...props}
+          ref={forwardedRef}
+        >
+          <div className="ListItemHeading">{title}</div>
+          <p className="ListItemText">{children}</p>
+        </Link>
+      </NavigationMenu.Link>
+    </li>
+  )
+);
 
 export default NavMenu;

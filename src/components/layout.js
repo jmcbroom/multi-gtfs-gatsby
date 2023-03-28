@@ -21,7 +21,7 @@ export default function Layout({ children }) {
       </Helmet>
       <div className="fill-page">
         <header className="bg-primary-light dark:bg-primary-dark bg-opacity-80 px-4">
-          <div className="max-w-4xl py-2 mx-auto flex items-center justify-between">
+          <div className="max-w-5xl py-2 mx-auto flex items-center justify-between">
             <Link to={`/`}>
               <h1 className="header font-bold text-gray-700 dark:text-gray-300 text-xl m-0">
                 transit<span className="text-gray-500 dark:text-gray-400">.det.city</span>
@@ -31,10 +31,10 @@ export default function Layout({ children }) {
           </div>
         </header>
         <div className="px-0f md:px-4">
-          <div className="max-w-4xl mx-auto">{children}</div>
+          <div className="max-w-5xl mx-auto">{children}</div>
         </div>
         <footer className="mt-8 bg-primary-light dark:bg-primary-dark px-2 md:px-4 pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-8 md:gap-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto gap-8 md:gap-0">
             <div className="flex flex-col justify-start gap-2">
               <h4>More information</h4>
               <Link to={`/about`}>

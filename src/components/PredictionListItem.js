@@ -43,7 +43,7 @@ const PredictionListItem = ({
           <div className="flex items-center justify-between gap-2 w-full flex-grow">
             <div className="flex items-center gap-2">
               <span
-                className="w-8 h-8 font-extrabold text-center justify-center items-center flex bg-white"
+                className="w-6 h-6 text-2xs font-bold text-center justify-center items-center flex bg-white"
                 style={{
                   background: `${routeColor}`,
                   color: `${routeTextColor}`,

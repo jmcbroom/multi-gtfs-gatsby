@@ -8,6 +8,10 @@ module.exports = {
           dark: "#161619"
         }
       },
+      fontSize: {
+        '2xs': '.675rem',
+      }
+
     },
   },
   plugins: ["gatsby-plugin-postcss"],
