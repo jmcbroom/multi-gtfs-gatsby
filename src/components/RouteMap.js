@@ -31,7 +31,7 @@ const RouteMap = ({
 
   let mapInitialBbox =
     routeFeatureCollection.features.length > 0
-      ? bbox(routeFeatureCollection)
+      ? bbox(stopsFeatureCollection)
       : bbox(stopsFeatureCollection);
 
   let stopProperty =

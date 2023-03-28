@@ -118,7 +118,7 @@ const Agency = ({ data, pageContext, location }) => {
           </Link>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
-          <p className="underline-title">Agency information</p>
+          <p className="grayHeader">Agency information</p>
           <div className="px-2 md:px-0">
             <PortableText content={description} />
 
@@ -143,7 +143,7 @@ const Agency = ({ data, pageContext, location }) => {
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="routes">
-          <p className="underline-title">List of bus routes</p>
+          <p className="grayHeader">List of bus routes</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
               <RouteHeader key={r.routeShortName} {...r} agency={agencyData} />
@@ -151,7 +151,7 @@ const Agency = ({ data, pageContext, location }) => {
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="map">
-          <p className="underline-title">System map</p>
+          <p className="grayHeader">System map</p>
           <AgencyMap agency={agencyData} routesFc={allRouteFc} />
         </Tabs.Content>
       </Tabs.Root>

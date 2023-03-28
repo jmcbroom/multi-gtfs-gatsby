@@ -148,3 +148,15 @@ footer {
   @apply py-1;
   @apply text-sm;
 }
+
+.grayTitle {
+  @apply bg-gray-100;
+  @apply dark:bg-zinc-700;
+  @apply text-zinc-700;
+  @apply dark:text-gray-100;
+  @apply font-semibold;
+  @apply px-2;
+  @apply py-2;
+  @apply text-lg;
+  @apply mt-2;
+}
