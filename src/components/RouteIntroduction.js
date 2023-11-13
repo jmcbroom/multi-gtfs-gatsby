@@ -163,13 +163,13 @@ const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
   return (
     <div className="gap-6 flex flex-col p-0 py-4">
       <div>
-        <div className="underline-title">When does this bus run?</div>
+        <h4 className="underline-title plex">When does this bus run?</h4>
         <div className="text-lg px-2 md:px-0 my-2">This bus route runs {whenItRuns(trips)}.</div>
         <RouteIntroRunTimes route={route} trips={trips} headsigns={headsigns} />
       </div>
 
       <div>
-        <div className="underline-title">Where does this bus go?</div>
+        <h4 className="underline-title plex">Where does this bus go?</h4>
         <RouteIntroEndpoints agency={agency} route={route} trips={trips} headsigns={headsigns} />
       </div>
 

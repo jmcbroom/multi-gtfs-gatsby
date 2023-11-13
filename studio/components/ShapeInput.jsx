@@ -4,7 +4,7 @@ import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { PatchEvent, FormField, set, unset } from "sanity";
 import bbox from "@turf/bbox";
-import { Map, mapboxgl } from "mapbox-gl";
+import { Map, mapboxgl, FullscreenControl } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useEffect } from "react";
 
@@ -56,7 +56,7 @@ const ShapeInput = React.forwardRef((props, ref) => {
         },
       });
 
-      map.addControl(Draw, "top-left");
+      map.addControl(Draw, "bottom-left");
 
       // Add the control to the map.
       map.addControl(
@@ -66,7 +66,7 @@ const ShapeInput = React.forwardRef((props, ref) => {
           bbox: detroitBbox
         })
       );
-
+      map.addControl(new FullscreenControl(), "top-left");
       map.on("load", () => {
         if (fc) {
           Draw.set(fc);
@@ -93,8 +93,6 @@ const ShapeInput = React.forwardRef((props, ref) => {
   return (
     <>
       <FormField
-        description={schemaType.description}
-        title={schemaType.title}
         compareValue={compareValue}
         __unstable_markers={markers}
         __unstable_presence={presence}

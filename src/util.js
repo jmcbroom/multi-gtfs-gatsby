@@ -62,6 +62,8 @@ export const sortTripsByFrequentTimepoint = (trips) => {
         return false;
       }
     });
+  
+  
 
   let sorted = trips.sort((a, b) => {
     let aStopTime = a.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0]?.arrivalTime || 0;
@@ -105,8 +107,19 @@ export const getServiceDays = ( serviceCalendars ) => {
     }
     if (weekdayMatches.every(e => !e) && sc.sunday === 1 && sc.saturday === 0) {
       serviceDays.sunday = sc.serviceId
-    }    
+    }
+
+    // all weekdayMatches are false + match both Sat and Sun
+    if (weekdayMatches.every(e => !e) && sc.sunday === 1 && sc.saturday === 1) {
+      serviceDays.saturday = sc.serviceId
+      serviceDays.sunday = sc.serviceId
+    }
   })
+
+  // if there's still no weekday match, assign the wednesday serviceCalendar
+  if(!serviceDays.weekday) {
+    serviceDays.weekday = serviceCalendars.find(sc => sc.wednesday === 1).serviceId
+  }
 
   return serviceDays;
 }
@@ -364,6 +377,7 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
  * @returns 
  */
 export const createRouteData = (gtfsRoute, sanityRoute) => {
+  if(!sanityRoute) return gtfsRoute;
   gtfsRoute.routeLongName = sanityRoute.longName
   gtfsRoute.routeColor = sanityRoute.routeColor?.hex || sanityRoute.color?.hex
   gtfsRoute.routeTextColor = sanityRoute.routeTextColor?.hex || sanityRoute.textColor?.hex
@@ -383,7 +397,7 @@ export const dayOfWeek = () => {
 }
 
 export const matchPredictionToRoute = (prediction, routes) => {
-  let route = routes.filter((r) => r.routeShortName === prediction.rt)[0];
+  let route = routes.filter((r) => r.routeShortName === prediction.rt && r.feedIndex === prediction.agency)[0];
   let direction = route.directions.filter(
     (direction) =>
       direction.directionDescription.toLowerCase().slice(0, 3) ===

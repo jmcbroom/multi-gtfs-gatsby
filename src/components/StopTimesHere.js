@@ -59,7 +59,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                       }`}
                 </p>
 
-                <ul className="columns-4 sm:columns-5 gap-0 border-l-2 border-dotted border-grey-700 dark:border-zinc-700 text-center">
+                <ul className="columns-4 sm:columns-5 gap-0 border-l-2 border-dotted border-grey-700 dark:border-zinc-700 text-center list-none ml-0">
                   {timesByRoute[route.routeShortName][service].map((trip) => (
                     <li
                       className="border-r-2 border-dotted border-grey-700 dark:border-zinc-700 tabular"

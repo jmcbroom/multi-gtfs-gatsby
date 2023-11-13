@@ -24,6 +24,10 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
     sortedTrips = sortTripsByFrequentTimepoint(selectedTrips).trips;
     timepoints = sortTripsByFrequentTimepoint(selectedTrips).timepoints;
   }
+  else {
+    sortedTrips = [];
+    timepoints = [];
+  }
 
   // needed to add this filter back in... but it's interesting to think about letting users see all times.
   timepoints = timepoints.filter(tp => tp.timepoint)

@@ -17,12 +17,20 @@ const RouteListItem = ({
   routeTextColor = "#fff",
   agency,
 }) => {
+
+  let widths = {
+    1: 'w-10',
+    2: 'w-10',
+    3: 'w-12',
+    4: 'w-14'
+  }
+
   return (
     <Link to={`/${agency.slug.current}/route/${routeShortName}`}>
       <div className="inline-block mr-2">
         <div className="flex items-center justify-start gap-2 text-sm">
           <span
-            className="w-8 h-8 font-extrabold text-center justify-center items-center flex bg-white"
+            className={`${widths[routeShortName.length]} h-8 font-extrabold text-center justify-center items-center flex bg-white`}
             style={{ background: `${routeColor}`, color: `${routeTextColor}` }}
           >
             {routeShortName}

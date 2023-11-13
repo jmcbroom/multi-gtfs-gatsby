@@ -4,6 +4,8 @@ import classNames from "classnames";
 import { CaretDownIcon } from "@radix-ui/react-icons";
 import "../styles/menu.css";
 import { Link } from "gatsby";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
 
 const NavMenu = () => {
   return (
@@ -21,7 +23,7 @@ const NavMenu = () => {
               <ListItem to="/smart" title="SMART">
                 Buses in Macomb, Oakland, Wayne counties
               </ListItem>
-              <ListItem to="/the-ride" title="The Ride">
+              <ListItem to="/theride" title="The Ride">
                 Buses in Ann Arbor and Ypsilanti
               </ListItem>
             </ul>
@@ -34,6 +36,10 @@ const NavMenu = () => {
 
         <NavigationMenu.Item className="NavigationMenuLink">
           <Link to="/nearby">Nearby</Link>
+        </NavigationMenu.Item>
+
+        <NavigationMenu.Item className="NavigationMenuLink">
+          <Link to="/favorites"><FontAwesomeIcon icon={faStar} className="text-yellow-500"></FontAwesomeIcon> </Link>
         </NavigationMenu.Item>
 
         <NavigationMenu.Indicator className="NavigationMenuIndicator">

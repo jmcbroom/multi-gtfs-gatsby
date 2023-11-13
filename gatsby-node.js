@@ -23,6 +23,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
         edges {
           node {
             currentFeedIndex
+            agencyId
             name
             slug {
               current
@@ -34,12 +35,11 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
   `);
 
   let agencies = allAgencies.data.allSanityAgency.edges.map((e) => e.node);
-
   for (let a of agencies) {
     const result = await graphql(`
     {
       postgres {
-        agencies: agenciesList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}}) {
+        agencies: agenciesList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}, agencyId: {equalTo: "${a.agencyId}"}}) {
           agencyName
           agencyUrl
           agencyTimezone
@@ -50,7 +50,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           bikesPolicyUrl
           feedIndex
         }
-        routes: routesList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}}) {
+        routes: routesList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}, agencyId: {equalTo: "${a.agencyId}"}}) {
           agencyId
           routeShortName
           routeLongName
