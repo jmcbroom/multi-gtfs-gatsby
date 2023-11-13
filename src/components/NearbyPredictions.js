@@ -63,6 +63,8 @@ const NearbyPredictions = ({
           dayjs(a.prdtm, "YYYYMMDD hh:mm") - dayjs(b.prdtm, "YYYYMMDD hh:mm")
       );
   }
+
+
   return (
     <div>
       <div className="grayHeader">Next buses to arrive</div>

@@ -10,32 +10,32 @@ import {Link} from 'gatsby';
  * @param {Number} routeColor 
  * @param {Number} routeTextColor 
  */
-const RouteHeader = ({ routeShortName, routeLongName, routeColor='#000', routeTextColor='#fff', agency, className }) => {
+const RouteSlim = ({ routeShortName, routeLongName, routeColor='#000', routeTextColor='#fff' }) => {
   console.log(routeShortName)
   
   let widths = {
-    1: 'w-10',
-    2: 'w-10',
-    3: 'w-12',
-    4: 'w-16'
+    1: 'w-5',
+    2: 'w-6',
+    3: 'w-8',
+    4: 'w-10'
   }
 
-  let routeNumberClassName = `plex font-extrabold text-center py-2 bg-white ${widths[routeShortName.length]}`
+  let routeNumberClassName = `plex font-base text-sm text-center bg-white ${widths[routeShortName.length]}`
   return (
-    <Link to={`/${agency.slug.current}/route/${routeShortName}`}>
-      <li className={"flex items-center justify-start gap-2 " + className}>
+      <li className={"flex items-center justify-start gap-2"}>
+
         <span 
           className={routeNumberClassName}
           style={{background: `${routeColor}`, color: `${routeTextColor}`}}
         >
           {routeShortName}
         </span>
-        <span className='plex'>
+
+        <h2 className="text-sm mb-0">
           {routeLongName}
-        </span>
+        </h2>
       </li>
-    </Link>
   )
 }
 
-export default RouteHeader;
+export default RouteSlim;

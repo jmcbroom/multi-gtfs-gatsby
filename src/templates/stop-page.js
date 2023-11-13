@@ -11,8 +11,27 @@ import {
   getServiceDays,
   getTripsByServiceDay,
 } from "../util";
+import { db } from "../db";
+import { useLiveQuery } from "dexie-react-hooks";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+const addFavoriteStop = (stop) => {
+  db.stops.add(stop);
+};
+
+const removeFavoriteStop = (stopToRemove, favoriteStops) => {
+  let stopIdsToRemove = favoriteStops
+    .filter((stop) => stop.stopId === stopToRemove.stopId && stop.agency.agencySlug === stopToRemove.agency.agencySlug)
+    .map((s) => s.id);
+  stopIdsToRemove.forEach((id) => {
+    db.stops.delete(id);
+  });
+};
 
 const Stop = ({ data, pageContext }) => {
+  const favoriteStops = useLiveQuery(() => db.stops.toArray());
+
   let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.agency.edges.map((e) => e.node)[0];
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
@@ -21,10 +40,13 @@ const Stop = ({ data, pageContext }) => {
 
   let { sanityRoutes } = data;
 
-  let { stopLon, stopLat, stopName, stopCode, stopId, routes, times } =
-    data.postgres.stop[0];
+  let indexedStop = {...data.postgres.stop[0]};
+  indexedStop.agency = { agencySlug: agencyData.slug.current, agencyName: agencyData.name, feedIndex: agencyData.feedIndex };
+  console.log(indexedStop)
 
-  let stopIdentifier = pageContext.agencySlug === "ddot" ? stopCode : stopId
+  let { stopLon, stopLat, stopName, stopCode, stopId, routes, times } = data.postgres.stop[0];
+
+  let stopIdentifier = pageContext.agencySlug === "ddot" ? stopCode : stopId;
 
   let [currentRoute, setCurrentRoute] = useState(routes[0]);
 
@@ -32,6 +54,8 @@ const Stop = ({ data, pageContext }) => {
     times.map((time) => time.trip),
     serviceDays
   );
+
+  console.log(favoriteStops);
 
   routes.forEach((r) => {
     // find the matching sanityRoute
@@ -60,7 +84,7 @@ const Stop = ({ data, pageContext }) => {
         },
         properties: {
           name: stopName,
-          code: pageContext.agencySlug === "ddot" ? stopCode : stopId,
+          code: stopIdentifier,
         },
       },
     ],
@@ -116,6 +140,12 @@ const Stop = ({ data, pageContext }) => {
 
   let [trackedBus, setTrackedBus] = useState(null);
 
+  let isFavoriteStop =
+    favoriteStops?.filter(
+      (stop) =>
+        stop.stopId === stopId && stop.agency?.agencySlug === pageContext.agencySlug
+    ).length > 0;
+
   return (
     <div>
       <Helmet>
@@ -135,11 +165,30 @@ const Stop = ({ data, pageContext }) => {
         />
       </Helmet>
       <AgencySlimHeader agency={agencyData} />
-      <div className="mb-2 bg-gray-200 dark:bg-zinc-900 p-2">
-        <h1 className="text-xl -mb-1">{stopName}</h1>
-        <span className="text-sm text-gray-500 dark:text-zinc-500 m-0">
-          stop #{pageContext.agencySlug === "ddot" ? stopCode : stopId}
-        </span>
+      <div className="mb-2 bg-gray-200 dark:bg-zinc-900 p-2 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl -mb-1">{stopName}</h1>
+          <span className="text-sm text-gray-500 dark:text-zinc-500 m-0">
+            stop #{pageContext.agencySlug === "ddot" ? stopCode : stopId}
+          </span>
+        </div>
+        <div className="mx-2">
+          <FontAwesomeIcon
+            icon={faStar}
+            size="lg"
+            className={isFavoriteStop ? "text-yellow-500" : "text-gray-400"}
+            onClick={() => {
+              if (isFavoriteStop === false) {
+                addFavoriteStop(indexedStop);
+              } else {
+                removeFavoriteStop(
+                  indexedStop,
+                  favoriteStops
+                );
+              }
+            }}
+          />
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {predictions && (

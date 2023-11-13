@@ -76,6 +76,8 @@ const RegionMapPage = ({ data }) => {
     features: allRouteFeatures,
   };
 
+  console.log(routeFeatureCollection)
+
   const map = useRef();
   
   if (!theme) { return null; }

@@ -1,15 +1,16 @@
 import { graphql } from "gatsby";
 import React from "react";
-import PortableText from "react-portable-text";
-import { createRouteData } from "../util";
 import AgencyHeader from "../components/AgencyHeader";
 import AgencySlimHeader from "../components/AgencySlimHeader";
+import PortableText from "react-portable-text";
+import { createRouteData } from "../util";
+import { Link } from "gatsby";
 
 /**
  * The home page.
  * @param {*} data: GraphQL query
  */
-const IndexPage = ({ data }) => {
+const AllAgenciesPage = ({ data }) => {
   let { agencies } = data.postgres;
   let sanityAgencies = data.allSanityAgency.edges.map((e) => e.node);
   let { indexPageContent } = data.indexPage;
@@ -43,32 +44,41 @@ const IndexPage = ({ data }) => {
   });
 
   // sort agencies by their `name` property:
-  let order = ["DDOT", "SMART", "TheRide", "Transit Windsor", "D2A2"];
+  let order = [
+    "DDOT",
+    "SMART",
+    "TheRide",
+    "Transit Windsor",
+    "D2A2"
+  ]
 
   merged.sort((a, b) => {
-    return order.indexOf(a.name) - order.indexOf(b.name);
-  });
-
-  console.log(merged);
+    return order.indexOf(a.name) - order.indexOf(b.name)
+  })
 
   return (
     <>
-      <PortableText
+      <div className="">
+        {/* <PortableText
           content={indexPageContent}
-          className="my-4 md:my-6 px-2 md:px-0.5"
-      />
-
-      <p>This site provides information about:</p>
-      <h2>Transit agencies</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-
-      {merged.map((a) => (
-        <div className="bg-gray-100 dark:bg-zinc-800">
-          <AgencySlimHeader agency={a} />
-          <PortableText content={a.description} className="px-4 py-2" />
+          className="my-4 md:my-6 px-2 md:px-0"
+        /> */}
+        {/* <h2 className="underline-title">Local bus systems</h2> */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-2 md:mb-6 mt-4">
+          {merged.map((a) => (
+            <div
+              className="bg-zinc-100 dark:bg-zinc-900 border-b-2 border-zinc-500 dark:border-zinc-800"
+              key={a.feedIndex}
+            >
+              <AgencySlimHeader agency={a} />
+              <div className="px-4 pb-4 md:pb-8 pt-2">
+                <AgencyHeader agency={a} />
+                {a.description && <PortableText content={a.description} />}
+              </div>
+            </div>
+          ))}
         </div>
-        ))}
-        </div>
+      </div>
     </>
   );
 };
@@ -146,4 +156,4 @@ export const query = graphql`
   }
 `;
 
-export default IndexPage;
+export default AllAgenciesPage;

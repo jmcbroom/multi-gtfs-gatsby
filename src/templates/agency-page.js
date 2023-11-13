@@ -43,7 +43,11 @@ const Agency = ({ data, pageContext, location }) => {
 
   // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
   let allRouteFeatures = [];
+
   routes.forEach((route) => {
+    if (!route.directions) {
+      console.log(route);
+    }
     route.directions.forEach((direction) => {
       let feature = JSON.parse(direction.directionShape)[0];
 
@@ -60,10 +64,13 @@ const Agency = ({ data, pageContext, location }) => {
       allRouteFeatures.push(feature);
     });
   });
+
   let allRouteFc = {
     type: "FeatureCollection",
     features: allRouteFeatures,
   };
+
+  console.log(allRouteFc);
 
   // generate human-readable text for fare info
   fareAttributes = fareAttributes?.map((fare) => {
@@ -97,7 +104,7 @@ const Agency = ({ data, pageContext, location }) => {
   });
 
   return (
-    <>
+    <div className="py-4">
       <AgencySlimHeader agency={agencyData} />
       <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
         <Tabs.List className="tabList" aria-label="Manage your account">
@@ -118,28 +125,33 @@ const Agency = ({ data, pageContext, location }) => {
           </Link>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
-          <p className="grayHeader">Agency information</p>
-          <div className="px-2 md:px-0">
-            <PortableText content={description} />
+          <PortableText
+            content={description} className="py-2 font-light text-lg"
+          />
+          <div className="px-2 md:px-0 gap-6 flex flex-col">
+            <div>
+              <h4>Fares</h4>
+              {fareAttributes?.map((fare, idx) => (
+                <p key={`${agencyData.agencyId}${idx}`}>
+                  The{" "}
+                  <span className="font-semibold">{fare.formattedPrice}</span>{" "}
+                  fare is valid for {fare.formattedTransfers}.
+                </p>
+              ))}
+              {fareContent && <PortableText content={fareContent} />}
+            </div>
 
-            <h4>Fares</h4>
-            {fareAttributes?.map((fare, idx) => (
-              <p key={`${agencyData.agencyId}${idx}`}>
-                The <span className="font-semibold">{fare.formattedPrice}</span>{" "}
-                fare is valid for {fare.formattedTransfers}.
+            <div>
+              <h4>Contact information</h4>
+              <p>
+                You can find {name}'s website at{" "}
+                <a href={agencyUrl}>{agencyUrl}</a>.
               </p>
-            ))}
-            {fareContent && <PortableText content={fareContent} />}
-
-            <h4>Contact information</h4>
-            <p>
-              You can find {name}'s website at{" "}
-              <a href={agencyUrl}>{agencyUrl}</a>.
-            </p>
-            <p>
-              {name}'s customer service number is{" "}
-              <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.
-            </p>
+              <p>
+                {name}'s customer service number is{" "}
+                <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.
+              </p>
+            </div>
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="routes">
@@ -155,7 +167,7 @@ const Agency = ({ data, pageContext, location }) => {
           <AgencyMap agency={agencyData} routesFc={allRouteFc} />
         </Tabs.Content>
       </Tabs.Root>
-    </>
+    </div>
   );
 };
 

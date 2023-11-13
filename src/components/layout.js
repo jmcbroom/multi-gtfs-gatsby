@@ -36,20 +36,15 @@ export default function Layout({ children }) {
         <footer className="mt-8 bg-primary-light dark:bg-primary-dark px-2 md:px-4 pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto gap-8 md:gap-0">
             <div className="flex flex-col justify-start gap-2">
-              <h4>More information</h4>
               <Link to={`/about`}>
                 About this site
               </Link>
-              <span>Feedback, comments, questions?</span>
+              <p>Feedback, comments, questions? Please let us know.</p>
             </div>
             <div className="flex flex-col justify-start gap-2">
-              <h4>Help build this</h4>
               <div className="flex items-center justify-start gap-2">
                 <GitHubLogoIcon />
-                <span>GitHub: <a href="https://github.com/jmcbroom/multi-gtfs-gatsby">multi-gtfs-gatsby</a></span>
-              </div>
-              <div className="flex items-center justify-start gap-2">
-                <span><a href="https://github.com/jmcbroom/multi-gtfs-gatsby/issues/new">Open a new issue</a></span>
+                <span>GitHub: <a href="https://github.com/jmcbroom/multi-gtfs-gatsby" target="_blank">multi-gtfs-gatsby</a></span>
               </div>
             </div>
           </div>

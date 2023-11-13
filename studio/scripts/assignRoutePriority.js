@@ -50,7 +50,7 @@ client.fetch(query).then((routes) => {
       }
     }
 
-    if (route.agency.slug.current === 'the-ride') {
+    if (route.agency.slug.current === 'theride') {
       if ([4, 5, 23, 28].indexOf(routeNum) > -1) {
         importance = 1
       }

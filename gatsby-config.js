@@ -4,10 +4,11 @@ require("dotenv").config({
 
 module.exports = {
   siteMetadata: {
-    siteUrl: "https://www.yourdomain.tld",
-    title: "multi-agency-transit",
+    siteUrl: "https://transit.det.city",
+    title: "transit.det.city",
   },
   plugins: [
+    "gatsby-plugin-netlify",
     "gatsby-plugin-postcss",
     "gatsby-plugin-image",
     // {

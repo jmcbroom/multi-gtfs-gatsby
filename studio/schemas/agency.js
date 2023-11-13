@@ -32,6 +32,13 @@ export default {
       type: "number"
     },
     {
+      name: "agencyId",
+      title: "Agency ID",
+      description: "The ID of the transit agency -- this is usually 1",
+      type: "string",
+      default: "1"
+    },
+    {
       name: "color",
       title: "Color",
       description: "A color for the agency",

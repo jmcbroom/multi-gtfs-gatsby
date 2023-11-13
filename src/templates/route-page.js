@@ -43,6 +43,11 @@ const Route = ({ data, pageContext }) => {
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
+  trips.forEach(trip => {
+    // set first and last stopTimes to timepoint = 1
+    trip.stopTimes[0].timepoint = 1;
+    trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
+  })
   let serviceDays = getServiceDays(serviceCalendars);
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
@@ -58,9 +63,9 @@ const Route = ({ data, pageContext }) => {
         headsignsByDirectionId[dir.directionId][0] = dir.directionHeadsign;
       }
     });
+    sanityRoute.mapPriority = 2;
   }
 
-  sanityRoute.mapPriority = 2;
   let routeData = createRouteData(gtfsRoute, sanityRoute);
   const [direction, setDirection] = useState(
     Object.keys(headsignsByDirectionId)[0]
@@ -97,12 +102,19 @@ const Route = ({ data, pageContext }) => {
     )
       .then((r) => r.json())
       .then((d) => {
-        setVehicles(d["bustime-response"]["vehicle"]);
+        if (pageContext.agencySlug === 'transit-windsor') {
+          setVehicles(d);
+        }
+        else {
+          setVehicles(d["bustime-response"]["vehicle"]);
+        }
       });
   }, [now]);
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled || !vehicles) return;
+    if (sanityAgency.name === 'Transit Windsor') return;
+
     fetch(
       `/.netlify/functions/predictions?vehicleId=${vehicles
         .map((v) => v.vid)
@@ -116,6 +128,7 @@ const Route = ({ data, pageContext }) => {
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled) return;
+    if (sanityAgency.name === 'Transit Windsor') return;
     fetch(
       `/.netlify/functions/patterns?routeId=${sanityRoute.shortName}&agency=${pageContext.agencySlug}`
     )
@@ -153,7 +166,7 @@ const Route = ({ data, pageContext }) => {
       </div>
 
       <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
-        <Tabs.List className="tabList" aria-label="Manage your account">
+        <Tabs.List className="tabList" aria-label="Bus route pages">
           <Link
             to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/`}
           >
@@ -184,8 +197,8 @@ const Route = ({ data, pageContext }) => {
           </Link>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
-          <div className="md:grid md:grid-cols-2 gap-2">
-            {
+          <div className="md:grid md:grid-cols-2 gap-2 pb-6">
+            {agencyData.realTimeEnabled &&
               <RoutePredictions
                 vehicles={createVehicleFc(
                   vehicles,

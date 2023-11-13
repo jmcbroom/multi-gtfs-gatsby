@@ -29,6 +29,13 @@ const RoutePredictionItem = ({ vehicle, now, predictions }) => {
     )
   );
 
+  let widths = {
+    1: 'w-10',
+    2: 'w-10',
+    3: 'w-12',
+    4: 'w-16'
+  }
+
   return (
     <Accordion.Item className="AccordionItem" value={vid}>
       <AccordionTrigger>
@@ -36,7 +43,7 @@ const RoutePredictionItem = ({ vehicle, now, predictions }) => {
           <div className="flex items-center justify-between gap-2 w-full flex-grow">
             <div className="flex items-center gap-2">
               <span
-                className="w-6 h-6 text-2xs font-bold text-center justify-center items-center flex bg-white"
+                className={`${widths[routeShortName.length]} h-6 text-2xs font-bold text-center justify-center items-center flex bg-white`}
                 style={{
                   background: `${routeColor}`,
                   color: `${routeTextColor}`,

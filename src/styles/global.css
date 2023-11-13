@@ -51,7 +51,11 @@ section {
   @apply p-4;
 }
 
-.header {
+h1,h2,h3,h4,label, input,.plex {
+  font-family: "IBM Plex Sans"; 
+}
+
+label, input, textarea {
   font-family: "IBM Plex Sans";
 }
 
@@ -80,6 +84,11 @@ h4 {
   @apply text-gray-600;
   @apply dark:text-white;
   @apply mb-1;
+}
+
+ul {
+  @apply list-disc;
+  @apply ml-6;
 }
 
 p {
@@ -147,6 +156,7 @@ footer {
   @apply px-2;
   @apply py-1;
   @apply text-sm;
+  font-family: "IBM Plex Sans";
 }
 
 .grayTitle {

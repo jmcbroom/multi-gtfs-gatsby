@@ -53,7 +53,7 @@ const PredictionListItem = ({
               <div className="flex flex-col justify-start text-left">
                 <span className="font-semibold text-sm">{routeLongName}</span>
                 <span className="text-sm">
-                  {direction.directionDescription.replace("bound", "")} to{" "}
+                  {direction.directionDescription?.replace("bound", "")} to{" "}
                   {direction.directionHeadsign}
                 </span>
               </div>

@@ -30,7 +30,7 @@ const NearbyPage = ({ data }) => {
   useEffect(() => {
     let tick = setInterval(() => {
       setNow(new Date());
-    }, 10000);
+    }, 5000);
     return () => clearInterval(tick);
   }, []);
 
@@ -44,13 +44,19 @@ const NearbyPage = ({ data }) => {
         ?.slice(0, 10)
         .map((s) => s.properties.stopCode)
         .join(",");
+      let therideStops = stops["theride"]
+        ?.slice(0, 10)
+        .map((s) => s.properties.stopCode)
+        .join(",");
       let fetches = [];
+      let agencies = []
       if (stops.ddot?.length > 0) {
         fetches.push(
           fetch(
             `/.netlify/functions/stop?stopId=${ddotStops}&agency=ddot`
           ).then((r) => r.json())
         );
+        agencies.push(24)
       }
       if (stops.smart?.length > 0) {
         fetches.push(
@@ -58,8 +64,23 @@ const NearbyPage = ({ data }) => {
             `/.netlify/functions/stop?stopId=${smartStops}&agency=smart`
           ).then((r) => r.json())
         );
+        agencies.push(25)
+      }
+      if (stops.theride?.length > 0) {
+        fetches.push(
+          fetch(
+            `/.netlify/functions/stop?stopId=${therideStops}&agency=theride`
+          ).then((r) => r.json())
+        );
+        agencies.push(27)
       }
       Promise.all(fetches).then((r) => {
+        r.forEach((agency, idx) => {
+          agency["bustime-response"].prd?.forEach((prediction) => {
+            prediction.agency = agencies[idx];
+          });
+        });
+    
         setPredictions(
           _.groupBy(
             r.map((response) => response["bustime-response"].prd).flat(),
@@ -256,7 +277,7 @@ const NearbyPage = ({ data }) => {
 export const query = graphql`
   query NearbyQuery {
     postgres {
-      allStops: stopsList(filter: { feedIndex: { in: [20, 21, 23] } }) {
+      allStops: stopsList(filter: { feedIndex: { in: [24, 25, 27] } }) {
         stopLat
         stopLon
         stopName

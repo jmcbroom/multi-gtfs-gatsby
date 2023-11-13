@@ -54,6 +54,12 @@ export default {
         input: ShapeInput
       }
     },
+    {
+      name: "shapeId",
+      title: "Shape ID",
+      description: "A shape_id from the GTFS data",
+      type: "string",
+    }
   ],
   preview: {
     select: {

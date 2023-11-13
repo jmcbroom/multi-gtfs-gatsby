@@ -35,7 +35,7 @@ const RouteMap = ({
       : bbox(stopsFeatureCollection);
 
   let stopProperty =
-    ["smart", "the-ride"].indexOf(agency.slug.current) > -1
+    ["smart", "theride"].indexOf(agency.slug.current) > -1
       ? "stopId"
       : "stopCode";
 
