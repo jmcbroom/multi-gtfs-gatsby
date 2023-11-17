@@ -8,7 +8,8 @@ const ContactPage = () => {
         Let us know how we can help you. Send us a message and we’ll get back
         to you as soon as possible.
       </p>
-      <form name="contact" method="POST" netlify className="w-full max-w-lg p-4">
+      <form name="contact" data-netlify="true" method="POST" netlify action="/thank-you" className="w-full max-w-lg p-4">
+        <input type="hidden" name="contact" value='Contact Form' />
         <div className="mb-4">
           <label className="block text-gray-700 font-semibold mb-2" htmlFor="name">
             Your Name:
