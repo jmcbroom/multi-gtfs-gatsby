@@ -56,6 +56,16 @@ const Route = ({ data, pageContext }) => {
       });
       trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
     });
+
+    longTrips.forEach((trip) => {
+      trip.stopTimes[0].timepoint = 1;
+      trip.stopTimes.forEach((st, idx) => {
+        if (timepoints.includes(st.stop[agencyData.stopIdentifierField])) {
+          st.timepoint = 1;
+        }
+      });
+      trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
+    })
   });
 
   let serviceDays = getServiceDays(serviceCalendars);
