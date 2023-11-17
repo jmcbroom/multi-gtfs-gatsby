@@ -40,7 +40,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
           {timepoints.map((s, k) => (
             <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white dark:bg-black tabular">
               <div className="flex flex-col items-center justify-end h-24 bg-white dark:bg-black">
-                <Link to={`/${agency.slug.current}/stop/${agency.slug.current === 'ddot' ? s.stop.stopCode : s.stop.stopId}`} className="leading-none text-sm font-bold mb-2 px-2">
+                <Link to={`/${agency.slug.current}/stop/${s.stop[agency.stopIdentifierField]}`} className="leading-none text-sm font-bold mb-2 px-2">
                   {s.stop.stopName}
                 </Link>
                 <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white dark:bg-black text-gray-700 dark:text-zinc-400" />
@@ -109,29 +109,6 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
             })}
           </tr>
         ))}
-                {/* <tr style={{ }}>
-          {timepoints.map((s, k) => (
-            <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white tabular">
-              <div style={{
-                position: 'absolute',
-                right: k === 0 ? -10 : null,
-                height: ".5em",
-                top: "1em",
-                zIndex: 1,
-                width: (k === 0 || k + 1 === timepoints.length) ? "55%" : "100%",
-                backgroundColor: `${routeColor === 'FFFFFF' ? '5f6369' : routeColor}`,
-                verticalAlign: "center"
-              }} />
-              <div className="flex flex-col items-center justify-start h-24 bg-white">
-                <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white text-gray-700" />
-                <Link to={`/${agency.slug.current}/stop/${agency.slug.current === 'ddot' ? s.stop.stopCode : s.stop.stopId}`} className="leading-none text-sm font-bold bg-white mt-2 px-2">
-                  {s.stop.stopName}
-                </Link>
-              </div>
-            </th>
-          ))}
-        </tr> */}
-
       </tbody>
     </table>
     </div>

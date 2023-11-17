@@ -43,11 +43,21 @@ const Route = ({ data, pageContext }) => {
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
-  trips.forEach(trip => {
-    // set first and last stopTimes to timepoint = 1
-    trip.stopTimes[0].timepoint = 1;
-    trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
-  })
+  sanityRoute.directions.forEach((dir, idx) => {
+    // get timepoints for each direction
+    let timepoints = dir.directionTimepoints;
+    // set timepoint = 1 for each stopTime that is a timepoint
+    trips.forEach((trip) => {
+      trip.stopTimes[0].timepoint = 1;
+      trip.stopTimes.forEach((st, idx) => {
+        if (timepoints.includes(st.stop[agencyData.stopIdentifierField])) {
+          st.timepoint = 1;
+        }
+      });
+      trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
+    });
+  });
+
   let serviceDays = getServiceDays(serviceCalendars);
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
@@ -335,6 +345,7 @@ export const query = graphql`
       }
       currentFeedIndex
       realTimeEnabled
+      stopIdentifierField
       slug {
         current
       }

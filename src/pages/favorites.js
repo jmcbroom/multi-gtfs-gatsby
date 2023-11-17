@@ -183,6 +183,7 @@ export const query = graphql`
             hex
           }
           description: _rawDescription
+          stopIdentifierField
           slug {
             current
           }

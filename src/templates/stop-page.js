@@ -46,7 +46,7 @@ const Stop = ({ data, pageContext }) => {
 
   let { stopLon, stopLat, stopName, stopCode, stopId, routes, times } = data.postgres.stop[0];
 
-  let stopIdentifier = pageContext.agencySlug === "ddot" ? stopCode : stopId;
+  let stopIdentifier = sanityAgency.stopIdentifierField === "stopId" ? stopId : stopCode;
 
   let [currentRoute, setCurrentRoute] = useState(routes[0]);
 
@@ -169,7 +169,7 @@ const Stop = ({ data, pageContext }) => {
         <div>
           <h1 className="text-xl -mb-1">{stopName}</h1>
           <span className="text-sm text-gray-500 dark:text-zinc-500 m-0">
-            stop #{pageContext.agencySlug === "ddot" ? stopCode : stopId}
+            stop #{stopIdentifier}
           </span>
         </div>
         <div className="mx-2">
@@ -233,6 +233,7 @@ export const query = graphql`
           fullName
           id
           realTimeEnabled
+          stopIdentifierField
           color {
             hex
           }

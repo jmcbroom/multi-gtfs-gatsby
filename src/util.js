@@ -365,6 +365,7 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
   sanityAgency.fareAttributes : gtfsAgency.fareAttributes
   gtfsAgency.fareContent = sanityAgency.fareContent
   gtfsAgency.realTimeEnabled = sanityAgency.realTimeEnabled
+  gtfsAgency.stopIdentifierField = sanityAgency.stopIdentifierField
   
   return gtfsAgency
 
