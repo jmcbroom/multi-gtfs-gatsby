@@ -9,7 +9,6 @@ import React from "react";
  * @returns
  */
 const DirectionPicker = ({ directions, direction, setDirection }) => {
-
   let display = {
     northbound: `Northbound`,
     southbound: `Southbound`,
@@ -19,10 +18,11 @@ const DirectionPicker = ({ directions, direction, setDirection }) => {
 
   return (
     <>
-      <RadioGroup.Root className="radioGroupRoot" defaultValue={direction ? direction : Object.keys(directions)[0]} onValueChange={(e) => setDirection(e)}>
-        {/* <div className="w-12 flex flex-shrink-0 items-center justify-around">
-          <FontAwesomeIcon icon={faExchangeAlt} className="radioGroupIcon" />
-        </div> */}
+      <RadioGroup.Root
+        className="radioGroupRoot"
+        defaultValue={direction ? direction : Object.keys(directions)[0]}
+        onValueChange={(e) => setDirection(e)}
+      >
         {Object.keys(directions).map((dir) => (
           <div className="flex items-center" key={dir}>
             <RadioGroup.Item
@@ -30,17 +30,21 @@ const DirectionPicker = ({ directions, direction, setDirection }) => {
               value={dir}
               id={dir}
               key={dir}
-              >
+            >
               <RadioGroup.Indicator className="radioGroupIndicator" />
             </RadioGroup.Item>
             <label className="radioGroupLabel" htmlFor={dir}>
-              <span className="font-semibold">{display[directions[dir].description]}</span> 
-              <span className="text-sm leading-none text-gray-600 dark:text-zinc-500">to {directions[dir].headsigns[0]}</span>
+              <span className="font-semibold">
+                {display[directions[dir].description]}
+              </span>
+              <span className="text-sm leading-none text-gray-600 dark:text-zinc-500">
+                to {directions[dir].headsigns[0]}
+              </span>
             </label>
           </div>
         ))}
       </RadioGroup.Root>
-        </>
+    </>
   );
 };
 

@@ -6,7 +6,6 @@ const RouteStopsList = ({ longTrips, direction, routeColor, agency, className, s
   let modelTrip = longTrips.filter(lt => lt.directionId === parseInt(direction))[0];
 
   if (modelTrip === undefined) {
-
     modelTrip=longTrips[0]
   }
   let times = modelTrip.stopTimes
