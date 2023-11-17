@@ -39,7 +39,9 @@ export default function Layout({ children }) {
               <Link to={`/about`}>
                 About this site
               </Link>
+              <Link to={`/contact-us`}>
               <p>Feedback, comments, questions? Please let us know.</p>
+                </Link>
             </div>
             <div className="flex flex-col justify-start gap-2">
               <div className="flex items-center justify-start gap-2">
