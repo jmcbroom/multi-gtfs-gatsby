@@ -25,6 +25,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
             currentFeedIndex
             agencyId
             name
+            stopIdentifierField
             slug {
               current
             }
@@ -115,7 +116,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     result.data.postgres.stops
       .forEach(s => {
         createPage({
-          path: `/${a.slug.current}/stop/${a.slug.current === 'ddot' ? s.stopCode : s.stopId}`,
+          path: `/${a.slug.current}/stop/${s[a.stopIdentifierField]}`,
           component: path.resolve("./src/templates/stop-page.js"),
           context: {
             feedIndex: s.feedIndex,

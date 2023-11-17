@@ -15,7 +15,7 @@ const StopPredictions = ({
 }) => {
   return (
     <div>
-      <div className="grayHeader">Buses arriving here soon</div>
+      <div className="grayHeader">Next buses here (real-time information)</div>
       <Accordion.Root
         className="AccordionRoot"
         type="single"

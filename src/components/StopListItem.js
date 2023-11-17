@@ -20,6 +20,7 @@ const StopListItem = ({ stopTime, feedIndex, routeColor, agency, small = false }
   const normalStopClass = `bg-white dark:bg-black ${commonBorderClass}`;
   const timepointClass = `border-black dark:border-white bg-black dark:bg-white`;
 
+  console.log(agency);
   return (
     <div
       className={`flex items-center border-l-4 ${commonBorderClass} py-2 ml-2`}
@@ -33,13 +34,13 @@ const StopListItem = ({ stopTime, feedIndex, routeColor, agency, small = false }
       ></span>
       <Link
         to={`/${agency.slug.current}/stop/${
-          agency.slug.current === "ddot" ? stopTime.stop.stopCode : stopTime.stop.stopId
+          stopTime.stop[agency.stopIdentifierField]
         }`}
         aria-label={`Stop page for stop ${stopTime.stop.stopName}`}
       >
         <span className="ml-2 text-opacity-100">{stopTime.stop.stopName}</span>
         <span className="text-xs text-gray-700 dark:text-neutral-400 bg-gray-200 dark:bg-zinc-900 p-1 mx-3">
-          #{agency.slug.current === "ddot" ? stopTime.stop.stopCode : stopTime.stop.stopId}
+          #{stopTime.stop[agency.stopIdentifierField]}
         </span>
       </Link>
     </div>
