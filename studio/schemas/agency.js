@@ -81,6 +81,19 @@ export default {
       description: "Is real-time data available for this agency?",
       type: "boolean",
       validation: Rule => Rule.required()
+    },
+    {
+      name: "stopIdentifierField",
+      title: "Stop identifier field",
+      description: "The field used to publicly identify stops for this agency",
+      type: "string",
+      validation: Rule => Rule.required(),
+      options: {
+        list: [
+          { title: "Stop ID", value: "stopId" },
+          { title: "Stop code", value: "stopCode" },
+        ],
+      },
     }
   ]
 }
