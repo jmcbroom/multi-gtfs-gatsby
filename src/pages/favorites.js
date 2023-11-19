@@ -82,9 +82,7 @@ const FavoritesPage = ({ data }) => {
                   <div key={s.id} className="bg-gray-300 dark:bg-zinc-800">
                     <Link
                       className="plex px-2 font-bold text-sm"
-                      to={`/${s.agency.agencySlug}/stop/${
-                        s.agency.agencySlug === "ddot" ? s.stopCode : s.stopId
-                      }`}
+                      to={`/${s.agency.agencySlug}/stop/${s[agency.stopIdentifierField]}`}
                       >
                       {s.stopName}
                     </Link>
