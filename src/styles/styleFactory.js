@@ -257,7 +257,7 @@ for (const style in styles) {
         },
       },
       layout: {
-        "text-field": ["get", "routeShortName"],
+        "text-field": ["get", "displayShortName"],
         "text-justify": "auto",
         "symbol-placement": "line",
         "symbol-spacing": 180,
@@ -299,7 +299,7 @@ for (const style in styles) {
         },
       },
       layout: {
-        "text-field": ["get", "routeShortName"],
+        "text-field": ["get", "displayShortName"],
         "text-justify": "auto",
         "symbol-placement": "line",
         "symbol-spacing": 180,
@@ -341,7 +341,7 @@ for (const style in styles) {
         },
       },
       layout: {
-        "text-field": ["get", "routeShortName"],
+        "text-field": ["get", "displayShortName"],
         "text-justify": "auto",
         "symbol-placement": "line",
         "symbol-spacing": 180,
@@ -382,7 +382,7 @@ for (const style in styles) {
         },
       },
       layout: {
-        "text-field": ["get", "routeShortName"],
+        "text-field": ["get", "displayShortName"],
         "text-justify": "auto",
         "symbol-placement": "line",
         "symbol-spacing": 100,

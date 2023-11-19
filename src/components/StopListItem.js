@@ -20,7 +20,6 @@ const StopListItem = ({ stopTime, feedIndex, routeColor, agency, small = false }
   const normalStopClass = `bg-white dark:bg-black ${commonBorderClass}`;
   const timepointClass = `border-black dark:border-white bg-black dark:bg-white`;
 
-  console.log(agency);
   return (
     <div
       className={`flex items-center border-l-4 ${commonBorderClass} py-2 ml-2`}

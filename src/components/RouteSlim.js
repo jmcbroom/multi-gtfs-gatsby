@@ -10,25 +10,23 @@ import {Link} from 'gatsby';
  * @param {Number} routeColor 
  * @param {Number} routeTextColor 
  */
-const RouteSlim = ({ routeShortName, routeLongName, routeColor='#000', routeTextColor='#fff' }) => {
-  console.log(routeShortName)
+const RouteSlim = ({ routeShortName, displayShortName, routeLongName, routeColor='#000', routeTextColor='#fff' }) => {
   
   let widths = {
-    1: 'w-5',
+    1: 'w-6',
     2: 'w-6',
-    3: 'w-8',
+    3: 'w-9',
     4: 'w-10'
   }
 
-  let routeNumberClassName = `plex font-base text-sm text-center bg-white ${widths[routeShortName.length]}`
+  let routeNumberClassName = `plex font-semibold text-sm text-center bg-white ${widths[displayShortName.length]}`
   return (
-      <li className={"flex items-center justify-start gap-2"}>
-
+      <li className={"flex items-center justify-start gap-1"}>
         <span 
           className={routeNumberClassName}
           style={{background: `${routeColor}`, color: `${routeTextColor}`}}
-        >
-          {routeShortName}
+          >
+          {displayShortName}
         </span>
 
         <h2 className="text-sm mb-0">

@@ -52,7 +52,6 @@ const FavoritesPage = ({ data }) => {
 
   // sort agencies by their `name` property:
   let order = ["ddot", "smart", "the-ride", "transit-windsor", "d2a2"];
-  console.log(merged);
   merged.sort((a, b) => {
     return order.indexOf(a.slug.current) - order.indexOf(b.slug.current);
   });
@@ -71,18 +70,16 @@ const FavoritesPage = ({ data }) => {
 
       {Object.keys(grouped).map((key) => {
         let agency = merged.filter((a) => a.slug.current === key)[0];
-        
-        console.log(agency);
-        
+                
         return (
           <div>
             <AgencySlimHeader agency={agency} />
-            <div className="grid gap-2">
+            <div className="grid mt-2">
             {grouped[key]
               .sort((a, b) => b.times.length - a.times.length)
               .map((s) => {
                 return (
-                  <div key={s.id} className="bg-gray-300">
+                  <div key={s.id} className="bg-gray-300 dark:bg-zinc-800">
                     <Link
                       className="plex px-2 font-bold text-sm"
                       to={`/${s.agency.agencySlug}/stop/${
@@ -93,7 +90,6 @@ const FavoritesPage = ({ data }) => {
                     </Link>
                     <div className="bg-gray-200 dark:bg-zinc-600 p-2 flex flex-col gap-2">
                       {s.routes.map((r) => {
-                        console.log(r);
                         return (<RouteSlim key={r.routeId} {...r} agency={agency} />);
                         })}
                       </div>

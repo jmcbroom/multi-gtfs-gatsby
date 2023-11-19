@@ -8,6 +8,7 @@ const RoutePredictionItem = ({ vehicle, now, predictions }) => {
     routeColor,
     routeTextColor,
     routeShortName,
+    displayShortName,
     routeLongName,
     direction,
     prediction,
@@ -49,7 +50,7 @@ const RoutePredictionItem = ({ vehicle, now, predictions }) => {
                   color: `${routeTextColor}`,
                 }}
               >
-                {routeShortName}
+                {displayShortName}
               </span>
               <div className="flex flex-col justify-start text-left">
                 <span className="font-semibold text-xs">

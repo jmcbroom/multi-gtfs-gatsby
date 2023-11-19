@@ -47,7 +47,7 @@ const AgencyMap = ({ routesFc, agency }) => {
     })[0];
     if (route) {
       navigate(
-        `/${agency.slug.current}/route/${route.properties.routeShortName}`
+        `/${agency.slug.current}/route/${route.properties.displayShortName}`
       );
     }
   };

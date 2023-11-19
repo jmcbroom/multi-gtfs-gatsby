@@ -10,9 +10,8 @@ import {Link} from 'gatsby';
  * @param {Number} routeColor 
  * @param {Number} routeTextColor 
  */
-const RouteHeader = ({ routeShortName, routeLongName, routeColor='#000', routeTextColor='#fff', agency, className }) => {
-  console.log(routeShortName)
-  
+const RouteHeader = ({ routeShortName, displayShortName, routeLongName, routeColor='#000', routeTextColor='#fff', agency, className }) => {
+
   let widths = {
     1: 'w-10',
     2: 'w-10',
@@ -20,15 +19,15 @@ const RouteHeader = ({ routeShortName, routeLongName, routeColor='#000', routeTe
     4: 'w-16'
   }
 
-  let routeNumberClassName = `plex font-extrabold text-center py-2 bg-white ${widths[routeShortName.length]}`
+  let routeNumberClassName = `plex font-extrabold text-center py-2 bg-white ${widths[displayShortName.length]}`
   return (
-    <Link to={`/${agency.slug.current}/route/${routeShortName}`}>
+    <Link to={`/${agency.slug.current}/route/${displayShortName}`}>
       <li className={"flex items-center justify-start gap-2 " + className}>
         <span 
           className={routeNumberClassName}
           style={{background: `${routeColor}`, color: `${routeTextColor}`}}
         >
-          {routeShortName}
+          {displayShortName}
         </span>
         <span className='plex'>
           {routeLongName}

@@ -11,7 +11,7 @@ const NavMenu = () => {
   return (
     <NavigationMenu.Root className="NavigationMenuRoot">
       <NavigationMenu.List className="NavigationMenuList">
-        <NavigationMenu.Item>
+        {/* <NavigationMenu.Item>
           <NavigationMenu.Trigger className="NavigationMenuTrigger">
             Buses <CaretDownIcon className="CaretDown" aria-hidden />
           </NavigationMenu.Trigger>
@@ -28,15 +28,15 @@ const NavMenu = () => {
               </ListItem>
             </ul>
           </NavigationMenu.Content>
-        </NavigationMenu.Item>
+        </NavigationMenu.Item> */}
 
-        <NavigationMenu.Item className="NavigationMenuLink">
+        {/* <NavigationMenu.Item className="NavigationMenuLink">
           <Link to="/region-map">Map</Link>
         </NavigationMenu.Item>
 
         <NavigationMenu.Item className="NavigationMenuLink">
           <Link to="/nearby">Nearby</Link>
-        </NavigationMenu.Item>
+        </NavigationMenu.Item> */}
 
         <NavigationMenu.Item className="NavigationMenuLink">
           <Link to="/favorites"><FontAwesomeIcon icon={faStar} className="text-yellow-500"></FontAwesomeIcon> </Link>

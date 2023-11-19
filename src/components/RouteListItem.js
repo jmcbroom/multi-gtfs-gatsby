@@ -13,6 +13,7 @@ import { Link } from "gatsby";
 const RouteListItem = ({
   routeShortName,
   routeLongName,
+  displayShortName,
   routeColor = "#000",
   routeTextColor = "#fff",
   agency,
@@ -26,14 +27,14 @@ const RouteListItem = ({
   }
 
   return (
-    <Link to={`/${agency.slug.current}/route/${routeShortName}`}>
+    <Link to={`/${agency.slug.current}/route/${displayShortName}`}>
       <div className="inline-block mr-2">
         <div className="flex items-center justify-start gap-2 text-sm">
           <span
-            className={`${widths[routeShortName.length]} h-8 font-extrabold text-center justify-center items-center flex bg-white`}
+            className={`${widths[displayShortName.length]} h-8 font-extrabold text-center justify-center items-center flex bg-white`}
             style={{ background: `${routeColor}`, color: `${routeTextColor}` }}
           >
-            {routeShortName}
+            {displayShortName}
           </span>
           <span className="text-base font-medium">{routeLongName}</span>
         </div>
