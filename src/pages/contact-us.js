@@ -2,16 +2,14 @@
 import React from "react"
 
 const ContactPage = () => {
+
+  let labelClasses = "block text-gray-700 dark:text-gray-300 font-base mb-2"
   return (
-    <div className="flex flex-col items-center mb-8">
-      <p className="my-8 font-semibold">
-        Let us know how we can help you. Send us a message and we’ll get back
-        to you as soon as possible.
-      </p>
-      <form name="contact" data-netlify="true" method="POST" netlify action="/thank-you" className="w-full max-w-lg p-4">
+    <div className="flex flex-col items-center my-8 px-4 md:px-0">
+      <form name="contact" data-netlify="true" method="POST" action="/thank-you/" className="w-full max-w-lg p-4">
         <input type="hidden" name="contact" value='Contact Form' />
         <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2" htmlFor="name">
+          <label className={labelClasses} htmlFor="name">
             Your Name:
           </label>
           <input
@@ -23,7 +21,7 @@ const ContactPage = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2" htmlFor="email">
+          <label className={labelClasses} htmlFor="email">
             Your Email:
           </label>
           <input
@@ -35,7 +33,7 @@ const ContactPage = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 font-semibold mb-2" htmlFor="message">
+          <label className={labelClasses} htmlFor="message">
             Message:
           </label>
           <textarea
@@ -48,7 +46,7 @@ const ContactPage = () => {
         </div>
         <div className="flex">
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-blue-500 hover:bg-blue-700 dark:bg-purple-900 dark:hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             type="submit"
           >
             Send

@@ -53,6 +53,8 @@
   border-bottom-right-radius: 6px;
   outline: none;
   @apply mt-2;
+  @apply px-2;
+  @apply md:px-0;
 }
 .tabContent:focus {
   box-shadow: 0 0 0 2px black;

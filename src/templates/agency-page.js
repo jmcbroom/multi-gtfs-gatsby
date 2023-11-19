@@ -5,6 +5,7 @@ import PortableText from "react-portable-text";
 import AgencyMap from "../components/AgencyMap";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import RouteHeader from "../components/RouteHeader";
+import RouteSlim from "../components/RouteSlim";
 import { createAgencyData, createRouteData } from "../util";
 
 const Agency = ({ data, pageContext, location }) => {
@@ -41,6 +42,8 @@ const Agency = ({ data, pageContext, location }) => {
     }
   });
 
+  let allRoutes = Object.assign([], routes);
+
   // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
   let allRouteFeatures = [];
 
@@ -55,6 +58,7 @@ const Agency = ({ data, pageContext, location }) => {
         routeColor: route.routeColor,
         routeLongName: route.routeLongName,
         routeShortName: route.routeShortName,
+        displayShortName: route.displayShortName,
         routeTextColor: route.routeTextColor,
         mapPriority: route.mapPriority,
         direction: direction.directionDescription,
@@ -69,8 +73,6 @@ const Agency = ({ data, pageContext, location }) => {
     type: "FeatureCollection",
     features: allRouteFeatures,
   };
-
-  console.log(allRouteFc);
 
   // generate human-readable text for fare info
   fareAttributes = fareAttributes?.map((fare) => {
@@ -152,13 +154,24 @@ const Agency = ({ data, pageContext, location }) => {
                 <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.
               </p>
             </div>
+            <div>
+              <h4>List of routes</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 py-2">
+
+              {allRoutes.map((r) => (
+                <Link to={`/${pageContext.agencySlug}/route/${r.displayShortName}`} key={r.displayShortName}>
+                <RouteSlim {...r} />  
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="routes">
           <p className="grayHeader">List of bus routes</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
             {routes.map((r) => (
-              <RouteHeader key={r.routeShortName} {...r} agency={agencyData} />
+              <RouteHeader key={r.displayShortName} {...r} agency={agencyData} />
             ))}
           </div>
         </Tabs.Content>
@@ -228,6 +241,7 @@ export const query = graphql`
         node {
           longName
           shortName
+          displayShortName
           routeColor: color {
             hex
           }

@@ -23,6 +23,7 @@ export const predictionText = (prdctdn) => {
  */
 const PredictionListItem = ({
   routeShortName,
+  displayShortName,
   routeLongName,
   routeColor = "#000",
   routeTextColor = "#fff",
@@ -48,7 +49,7 @@ const PredictionListItem = ({
                   color: `${routeTextColor}`,
                 }}
               >
-                {routeShortName}
+                {displayShortName}
               </span>
               <div className="flex flex-col justify-start text-left">
                 <span className="font-semibold text-sm">{routeLongName}</span>

@@ -49,8 +49,6 @@ const IndexPage = ({ data }) => {
     return order.indexOf(a.name) - order.indexOf(b.name);
   });
 
-  console.log(merged);
-
   return (
     <>
       <PortableText
@@ -58,14 +56,15 @@ const IndexPage = ({ data }) => {
           className="my-4 md:my-6 px-2 md:px-0.5"
       />
 
-      <p>This site provides information about:</p>
       <h2>Transit agencies</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-
       {merged.map((a) => (
         <div className="bg-gray-100 dark:bg-zinc-800">
           <AgencySlimHeader agency={a} />
-          <PortableText content={a.description} className="px-4 py-2" />
+          <div className="px-4 py-4">
+          <h2>{a.name}</h2>
+          <PortableText content={a.description} className="" />
+          </div>
         </div>
         ))}
         </div>

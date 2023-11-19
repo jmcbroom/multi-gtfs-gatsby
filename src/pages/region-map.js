@@ -55,7 +55,8 @@ const RegionMapPage = ({ data }) => {
       let feature = JSON.parse(direction.directionShape)[0];
       feature.properties = {
         feedIndex: routeData.feedIndex,
-        routeShortName: routeData.routeShortName,
+        routeShortName: routeData.displayShortName,
+        displayShortName: routeData.displayShortName,
         routeLongName: routeData.routeLongName,
         routeColor: routeData.routeColor,
         routeTextColor: routeData.routeTextColor,
@@ -75,8 +76,6 @@ const RegionMapPage = ({ data }) => {
     type: "FeatureCollection",
     features: allRouteFeatures,
   };
-
-  console.log(routeFeatureCollection)
 
   const map = useRef();
   
@@ -100,7 +99,7 @@ const RegionMapPage = ({ data }) => {
     })[0];
     if (route) {
       navigate(
-        `/${route.properties.agencySlug}/route/${route.properties.routeShortName}`
+        `/${route.properties.agencySlug}/route/${route.properties.displayShortName}`
       );
     }
   };
@@ -262,6 +261,7 @@ export const query = graphql`
         node {
           longName
           shortName
+          displayShortName
           agency {
             currentFeedIndex
             slug {

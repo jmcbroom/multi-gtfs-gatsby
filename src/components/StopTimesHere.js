@@ -36,9 +36,9 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
         {routes.map((route, idx) => {
           return (
             <Accordion.Item
-              key={route.routeShortName}
+              key={route.displayShortName}
               className="AccordionItem"
-              value={route.routeShortName}
+              value={route.displayShortName}
             >
               <AccordionTrigger>
                 <RouteListItem {...route} agency={agency} className="px-2" />

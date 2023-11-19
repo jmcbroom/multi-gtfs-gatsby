@@ -13,6 +13,12 @@ export default {
       type: "string",
     },
     {
+      name: "displayShortName",
+      title: "Display short name",
+      description: "Short name of a route to display to users.",
+      type: "string",
+    },
+    {
       name: "longName",
       title: "Route long name",
       description:
@@ -79,16 +85,17 @@ export default {
   preview: {
     select: {
       shortName: "shortName",
+      displayShortName: "displayShortName",
       longName: "longName",
       color: "color",
       textColor: "textColor",
       agency: "agency.name",
     },
-    prepare({ shortName, longName, agency, color, textColor }) {
+    prepare({ shortName, displayShortName, longName, agency, color, textColor }) {
       return {
         title: longName,
         subtitle: agency,
-        media: RouteIcon({ shortName, color, textColor }),
+        media: RouteIcon({ shortName: (displayShortName ? displayShortName : shortName), color, textColor }),
       };
     },
   },

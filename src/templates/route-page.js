@@ -163,53 +163,56 @@ const Route = ({ data, pageContext }) => {
   return (
     <div>
       <Helmet>
-        <title>{`${agencyData.name} ${routeData.routeShortName}: ${routeData.routeLongName}`}</title>
+        <title>{`${agencyData.name} ${routeData.displayShortName}: ${routeData.routeLongName}`}</title>
         <meta
           property="og:url"
-          content={`https://transit.det.city/${pageContext.agencySlug}/route/${routeData.routeShortName}/`}
+          content={`https://transit.det.city/${pageContext.agencySlug}/route/${routeData.displayShortName}/`}
         />
         <meta property="og:type" content={`website`} />
         <meta
           property="og:title"
-          content={`${agencyData.name} bus route: ${routeData.routeShortName} ${routeData.routeLongName}`}
+          content={`${agencyData.name} bus route: ${routeData.displayShortName} ${routeData.routeLongName}`}
         />
         <meta
           property="og:description"
-          content={`${agencyData.name} bus route ${routeData.routeShortName} ${routeData.routeLongName}`}
+          content={`${agencyData.name} bus route ${routeData.displayShortName} ${routeData.routeLongName}`}
         />
       </Helmet>
 
-      <AgencySlimHeader agency={agencyData} />
+      <div className="mt-4">
 
-      <div className="px-2 md:px-0 my-2 md:my-2 bg-gray-200 dark:bg-zinc-900">
+      <AgencySlimHeader agency={agencyData} />
+      </div>
+
+      <div className="px-2 md:px-0 mt-2 md:mt-2 bg-gray-300 dark:bg-zinc-900">
         <RouteHeader {...gtfsRoute} agency={agencyData} />
       </div>
 
       <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
         <Tabs.List className="tabList" aria-label="Bus route pages">
           <Link
-            to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/`}
+            to={`/${pageContext.agencySlug}/route/${gtfsRoute.displayShortName}/`}
           >
             <Tabs.Trigger className="tabTrigger" value="">
               Home
             </Tabs.Trigger>
           </Link>
           <Link
-            to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/map`}
+            to={`/${pageContext.agencySlug}/route/${gtfsRoute.displayShortName}/map`}
           >
             <Tabs.Trigger className="tabTrigger" value="map">
               Map
             </Tabs.Trigger>
           </Link>
           <Link
-            to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/schedule`}
+            to={`/${pageContext.agencySlug}/route/${gtfsRoute.displayShortName}/schedule`}
           >
             <Tabs.Trigger className="tabTrigger" value="schedule">
               Schedule
             </Tabs.Trigger>
           </Link>
           <Link
-            to={`/${pageContext.agencySlug}/route/${gtfsRoute.routeShortName}/stops`}
+            to={`/${pageContext.agencySlug}/route/${gtfsRoute.displayShortName}/stops`}
           >
             <Tabs.Trigger className="tabTrigger" value="stops">
               Stops
@@ -330,6 +333,7 @@ export const query = graphql`
       longName
       routeType
       shortName
+      displayShortName
       slug {
         current
       }

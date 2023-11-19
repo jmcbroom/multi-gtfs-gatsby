@@ -72,6 +72,17 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           feedIndex
         }
       }
+      allSanityRoute(filter: {agency: {currentFeedIndex: {eq: ${a.currentFeedIndex}}}}) {
+        edges {
+          node {
+            id
+            shortName
+            routeType
+            displayShortName
+            longName
+          }
+        }
+      }
     }
   `);
 
@@ -131,8 +142,22 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
       .filter((r) => r.trips.totalCount > 0)
       .forEach((r) => {
 
+
+        // override routeShortName from gtfs with displayShortName from Sanity
+        let short = r.routeShortName;
+        
+        let matchingSanityRoute = result.data.allSanityRoute.edges
+          .map((e) => e.node)
+          .filter((sr) => sr.shortName === r.routeShortName);
+
+          if(matchingSanityRoute.length === 1) {
+          if(matchingSanityRoute[0].displayShortName) {
+            short = matchingSanityRoute[0].displayShortName;
+          }
+        }
+
         createPage({
-          path: `/${a.slug.current}/route/${r.routeShortName}/`,
+          path: `/${a.slug.current}/route/${short}/`,
           component: path.resolve("./src/templates/route-page.js"),
           context: {
             routeNo: r.routeShortName,
@@ -142,7 +167,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           },
         });
         createPage({
-          path: `/${a.slug.current}/route/${r.routeShortName}/map`,
+          path: `/${a.slug.current}/route/${short}/map`,
           component: path.resolve("./src/templates/route-page.js"),
           context: {
             routeNo: r.routeShortName,
@@ -152,7 +177,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           },
         });
         createPage({
-          path: `/${a.slug.current}/route/${r.routeShortName}/stops`,
+          path: `/${a.slug.current}/route/${short}/stops`,
           component: path.resolve("./src/templates/route-page.js"),
           context: {
             routeNo: r.routeShortName,
@@ -162,7 +187,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           },
         });
         createPage({
-          path: `/${a.slug.current}/route/${r.routeShortName}/schedule`,
+          path: `/${a.slug.current}/route/${short}/schedule`,
           component: path.resolve("./src/templates/route-page.js"),
           context: {
             routeNo: r.routeShortName,

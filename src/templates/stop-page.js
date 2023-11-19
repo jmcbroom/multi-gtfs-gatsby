@@ -42,7 +42,6 @@ const Stop = ({ data, pageContext }) => {
 
   let indexedStop = {...data.postgres.stop[0]};
   indexedStop.agency = { agencySlug: agencyData.slug.current, agencyName: agencyData.name, feedIndex: agencyData.feedIndex };
-  console.log(indexedStop)
 
   let { stopLon, stopLat, stopName, stopCode, stopId, routes, times } = data.postgres.stop[0];
 
@@ -54,9 +53,7 @@ const Stop = ({ data, pageContext }) => {
     times.map((time) => time.trip),
     serviceDays
   );
-
-  console.log(favoriteStops);
-
+ 
   routes.forEach((r) => {
     // find the matching sanityRoute
     let matching = sanityRoutes.edges
@@ -253,6 +250,7 @@ export const query = graphql`
         node {
           longName
           shortName
+          displayShortName
           color {
             hex
           }
