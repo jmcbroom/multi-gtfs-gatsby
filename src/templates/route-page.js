@@ -68,7 +68,7 @@ const Route = ({ data, pageContext }) => {
     })
   });
 
-  let serviceDays = getServiceDays(serviceCalendars);
+  let serviceDays = getServiceDays(serviceCalendars.filter(sc => data.agency.serviceIds.includes(sc.serviceId)));
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(
@@ -117,19 +117,39 @@ const Route = ({ data, pageContext }) => {
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled) return;
-    fetch(
-      `/.netlify/functions/route?routeId=${sanityRoute.shortName}&agency=${pageContext.agencySlug}`
-    )
+
+    let url = `/.netlify/functions/route?routeId=${sanityRoute.shortName}&agency=${pageContext.agencySlug}`
+
+    if (pageContext.agencySlug === 'transit-windsor' && !patterns) {
+      return;
+    }
+    if (pageContext.agencySlug === 'transit-windsor' && patterns) {
+      url = `/.netlify/functions/route?routeId=${sanityRoute.shortName}&agency=${pageContext.agencySlug}&patterns=${patterns.map(p => p.pid).join(',')}`
+    }
+
+    fetch(url)
       .then((r) => r.json())
       .then((d) => {
         if (pageContext.agencySlug === 'transit-windsor') {
-          setVehicles(d);
+          let asVehicles = d.map(v => {
+            return {
+              vid: v.name,
+              lat: v.lat.toString(),
+              lon: v.lng.toString(),
+              hdg: v.bearing,
+              rt: sanityRoute.shortName,
+              des: v.headsignText,
+              pid: v.patternId,
+              spd: v.velocity
+            }
+          })
+          setVehicles(asVehicles);
         }
         else {
           setVehicles(d["bustime-response"]["vehicle"]);
         }
       });
-  }, [now]);
+  }, [now, patterns]);
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled || !vehicles) return;
@@ -148,13 +168,26 @@ const Route = ({ data, pageContext }) => {
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled) return;
-    if (sanityAgency.name === 'Transit Windsor') return;
+
     fetch(
       `/.netlify/functions/patterns?routeId=${sanityRoute.shortName}&agency=${pageContext.agencySlug}`
     )
       .then((r) => r.json())
       .then((d) => {
-        setPatterns(d["bustime-response"]["ptr"]);
+        if (pageContext.agencySlug === 'transit-windsor') {
+          let filtered = d.filter(p => p.routeCode === sanityRoute.shortName)
+          let asPatterns = filtered.map(p => {
+            return {
+              pid: p.patternID,
+              rtdir: p.directionName.replace('BOUND', ''),
+              pt: []
+            }
+          })
+          setPatterns(asPatterns);
+        }
+        else {
+          setPatterns(d["bustime-response"]["ptr"]);
+        }
       });
   }, []);
 
@@ -322,7 +355,7 @@ const Route = ({ data, pageContext }) => {
 };
 
 export const query = graphql`
-  query RouteQuery($feedIndex: Int, $routeNo: String, $agencySlug: String) {
+  query RouteQuery($feedIndex: Int, $routeNo: String, $agencySlug: String, $serviceIds: [String!]) {
     route: sanityRoute(
       shortName: { eq: $routeNo }
       agency: { slug: { current: { eq: $agencySlug } } }
@@ -360,6 +393,7 @@ export const query = graphql`
       currentFeedIndex
       realTimeEnabled
       stopIdentifierField
+      serviceIds
       slug {
         current
       }
@@ -378,7 +412,7 @@ export const query = graphql`
         routeTextColor
         routeSortOrder
         feedIndex
-        trips: tripsByFeedIndexAndRouteIdList {
+        trips: tripsByFeedIndexAndRouteIdList(filter: {serviceId: {in: $serviceIds}}) {
           serviceId
           directionId
           tripId

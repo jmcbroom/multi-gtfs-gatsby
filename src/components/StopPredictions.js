@@ -20,6 +20,7 @@ const StopPredictions = ({
         className="AccordionRoot"
         type="single"
         defaultValue={null}
+        disabled={agency.slug.current === 'transit-windsor'}
         onValueChange={(value) => {
           setTrackedBus(value);
         }}

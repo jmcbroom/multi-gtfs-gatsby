@@ -4,7 +4,7 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { ThemeProvider } from "../hooks/ThemeContext";
 import NavMenu from "./NavMenu";
-import { useStaticQuery, graphql } from "gatsby"
+import { useStaticQuery, graphql } from "gatsby";
 
 /**
  * This is the layout component. It wraps everything, according to the gatsby-plugin-layout.
@@ -13,31 +13,30 @@ import { useStaticQuery, graphql } from "gatsby"
  * @returns
  */
 export default function Layout({ children }) {
-
   const data = useStaticQuery(graphql`
-  query {
-    allSanityAgency {
-      edges {
-        node {
-          currentFeedIndex
-          name
-          fullName
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          description: _rawDescription
-          slug {
-            current
+    query {
+      allSanityAgency {
+        edges {
+          node {
+            currentFeedIndex
+            name
+            fullName
+            color {
+              hex
+            }
+            textColor {
+              hex
+            }
+            description: _rawDescription
+            slug {
+              current
+            }
+            agencyType
           }
         }
       }
     }
-  }
-    `)
-
+  `);
 
   return (
     <ThemeProvider>
@@ -52,7 +51,10 @@ export default function Layout({ children }) {
           <div className="max-w-5xl py-2 mx-auto flex items-center justify-between">
             <Link to={`/`}>
               <h1 className="header font-bold text-gray-700 dark:text-gray-300 text-xl m-0">
-                transit<span className="text-gray-500 dark:text-gray-400">.det.city</span>
+                transit
+                <span className="text-gray-500 dark:text-gray-400">
+                  .det.city
+                </span>
               </h1>
             </Link>
             <NavMenu />
@@ -66,35 +68,45 @@ export default function Layout({ children }) {
         <footer className="mt-8 bg-primary-light dark:bg-primary-dark px-2 md:px-4 pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto gap-8 md:gap-0">
             <div className="flex flex-col justify-start gap-2">
-              <h4>
-                Transit agencies
-              </h4>
-              {
-                data.allSanityAgency.edges.map((a) => (
-                  <Link to={`/${a.node.slug.current}`}>
-                    {a.node.name}
+              <h4>Local bus systems</h4>
+              {data.allSanityAgency.edges
+                .filter((e) => e.node.agencyType == "local-bus")
+                .map((a) => (
+                  <Link
+                    to={`/${a.node.slug.current}`}
+                    key={a.node.slug.current}
+                  >
+                    <span className="">{a.node.name}</span>
                   </Link>
-                ))
-              }
+                ))}
             </div>
             <div className="flex flex-col justify-start gap-2">
-              <Link to={`/about`}>
-                About this site
-              </Link>
-              <Link to={`/contact-us`}>
-              <p>Feedback, comments, questions?</p>
-                </Link>
-              <div className="flex items-center justify-start gap-2">
-                <GitHubLogoIcon />
-                <span>GitHub: <a href="https://github.com/jmcbroom/multi-gtfs-gatsby" target="_blank">multi-gtfs-gatsby</a></span>
-              </div>
+              <h4>Site pages</h4>
+              <Link to={`/region-map`}>Regional transit map</Link>
+              <Link to={`/nearby`}>Transit near me</Link>
+              <Link to={`/about`}>About this site</Link>
+
             </div>
           </div>
-          <div className="w-full text-center mt-6 mb-4 text-gray-400">&copy; {new Date().getFullYear()}</div>
+          <div className="w-full text-center mt-6 mb-4 gap-6 text-gray-400 flex items-center justify-center">
+            <Link to={`/contact-us/`}>
+                <p>Feedback, comments, questions?</p>
+              </Link>
+            <div className="flex items-center justify-around gap-1">
+              <GitHubLogoIcon />
+              <span>
+                GitHub:{" "}
+                <a
+                  href="https://github.com/jmcbroom/multi-gtfs-gatsby"
+                  target="_blank"
+                  >
+                  multi-gtfs-gatsby
+                </a>
+              </span>
+            </div>
+          </div>
         </footer>
-
       </div>
     </ThemeProvider>
   );
 }
-  

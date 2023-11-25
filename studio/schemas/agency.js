@@ -2,6 +2,12 @@ export default {
   title: "Agency",
   name: "agency",
   type: "document",
+  groups: [
+    {
+      name: 'gtfsIds',
+      title: 'GTFS identifiers',
+    }
+  ],
   fields: [
     {
       name: "name",
@@ -24,12 +30,6 @@ export default {
         source: "name",
         maxLength: 96,
       },
-    },
-    {
-      name: "currentFeedIndex",
-      title: "Feed index",
-      description: "The currently valid GTFS feed index #",
-      type: "number"
     },
     {
       name: "agencyId",
@@ -76,6 +76,31 @@ export default {
       type: "blockContent"
     },
     {
+      name: "fareCurrency",
+      title: "Fare currency",
+      description: "The currency used for fares",
+      type: "string",
+      options: {
+        list: [
+          { title: "US dollar", value: "USD" },
+          { title: "Canadian dollar", value: "CAD" },
+        ]
+      }
+    },
+    {
+      name: "agencyType",
+      title: "Agency type",
+      description: "The type of transit agency",
+      type: "string",
+      options: {
+        list: [
+          { title: "Local bus", value: "local-bus" },
+          { title: "Rail", value: "rail" },
+          { title: "Express bus", value: "express-bus" }
+        ]
+      }
+    },
+    {
       name: "realTimeEnabled",
       title: "Real-time enabled",
       description: "Is real-time data available for this agency?",
@@ -85,7 +110,9 @@ export default {
     {
       name: "stopIdentifierField",
       title: "Stop identifier field",
-      description: "The field used to publicly identify stops for this agency",
+      description: `The field used to publicly identify stops for this agency.
+  
+        For example, SMART uses stop IDs, while DDOT uses stop codes.`,
       type: "string",
       validation: Rule => Rule.required(),
       options: {
@@ -94,6 +121,22 @@ export default {
           { title: "Stop code", value: "stopCode" },
         ],
       },
-    }
+      group: 'gtfsIds'
+    },
+    {
+      name: "serviceIds",
+      title: "Service IDs",
+      description: "The IDs of the services offered by this agency",
+      type: "array",
+      of: [{ type: "string" }],
+      group: 'gtfsIds'
+    },
+    {
+      name: "currentFeedIndex",
+      title: "Feed index",
+      description: "The currently valid GTFS feed index #",
+      type: "number",
+      group: 'gtfsIds'
+    },
   ]
 }

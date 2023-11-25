@@ -132,7 +132,7 @@ const Agency = ({ data, pageContext, location }) => {
           />
           <div className="px-2 md:px-0 gap-6 flex flex-col">
             <div>
-              <h4>Fares</h4>
+              <h4 className="grayHeader">Fares</h4>
               {fareAttributes?.map((fare, idx) => (
                 <p key={`${agencyData.agencyId}${idx}`}>
                   The{" "}
@@ -144,7 +144,7 @@ const Agency = ({ data, pageContext, location }) => {
             </div>
 
             <div>
-              <h4>Contact information</h4>
+              <h4 className="grayHeader">Contact information</h4>
               <p>
                 You can find {name}'s website at{" "}
                 <a href={agencyUrl}>{agencyUrl}</a>.
@@ -155,9 +155,8 @@ const Agency = ({ data, pageContext, location }) => {
               </p>
             </div>
             <div>
-              <h4>List of routes</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 py-2">
-
+              <h4 className="grayHeader">List of routes</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 py-2">
               {allRoutes.map((r) => (
                 <Link to={`/${pageContext.agencySlug}/route/${r.displayShortName}`} key={r.displayShortName}>
                 <RouteSlim {...r} />  

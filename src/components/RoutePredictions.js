@@ -4,6 +4,7 @@ import "../styles/accordion.css";
 import RoutePredictionItem from "./RoutePredictionItem";
 
 const RoutePredictions = ({ vehicles, setTrackedBus, predictions, now }) => {
+
   return (
     <div className="">
       <div className="grayHeader">{vehicles?.features?.length || `No`} bus{vehicles?.features?.length > 1 && `es`} currently being tracked </div>
@@ -16,7 +17,7 @@ const RoutePredictions = ({ vehicles, setTrackedBus, predictions, now }) => {
         }}
         collapsible
       >
-        {vehicles && predictions && vehicles.features.map((vehicle, idx) => {
+        {vehicles && vehicles.features.map((vehicle, idx) => {
           return <RoutePredictionItem vehicle={vehicle} now={now} predictions={predictions?.filter(p => p.vid === vehicle.properties.vid)} />;
         })}
         {!vehicles && (

@@ -11,7 +11,7 @@ const NavMenu = () => {
   return (
     <NavigationMenu.Root className="NavigationMenuRoot">
       <NavigationMenu.List className="NavigationMenuList">
-        {/* <NavigationMenu.Item>
+        <NavigationMenu.Item>
           <NavigationMenu.Trigger className="NavigationMenuTrigger">
             Buses <CaretDownIcon className="CaretDown" aria-hidden />
           </NavigationMenu.Trigger>
@@ -26,9 +26,12 @@ const NavMenu = () => {
               <ListItem to="/theride" title="The Ride">
                 Buses in Ann Arbor and Ypsilanti
               </ListItem>
+              <ListItem to="/transit-windsor" title="Transit Windsor">
+                Buses in Windsor, Ontario
+              </ListItem>
             </ul>
           </NavigationMenu.Content>
-        </NavigationMenu.Item> */}
+        </NavigationMenu.Item>
 
         {/* <NavigationMenu.Item className="NavigationMenuLink">
           <Link to="/region-map">Map</Link>

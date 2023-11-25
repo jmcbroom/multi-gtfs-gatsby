@@ -265,6 +265,14 @@ export const createVehicleFc = (vehicles, patterns, route, agency) => {
     // get the next stops from the pattern and distance traveled
     let nextStops = pattern.pt.filter((p) => p.pdist > v.pdist && p.stpid);
 
+    if (agency.slug.current === "transit-windsor") {
+      // get the next stop from the route direction
+      console.log(direction);
+      // let nextStop = direction.stops.find((s) => s.stopId === v.stpid);
+      // if (nextStop) {
+      //   nextStops = [nextStop];
+      // }
+    }
     // return a GeoJSON feature
     return {
       type: "Feature",
