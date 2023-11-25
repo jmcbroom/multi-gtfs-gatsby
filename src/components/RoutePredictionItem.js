@@ -63,7 +63,7 @@ const RoutePredictionItem = ({ vehicle, now, predictions }) => {
             <div className="flex flex-col justify-end">
               <span className="text-xs block text-right mr-2 text-gray-400">
                 {nextStop && (<>
-                <span>next stop, {predictions.length > 0 && (predictions[0].prdctdn === 'DUE' ? `now:` : ` in ${predictions[0].prdctdn}m:`)}</span>
+                <span>next stop, {predictions?.length > 0 && (predictions[0].prdctdn === 'DUE' ? `now:` : ` in ${predictions[0].prdctdn}m:`)}</span>
                 </>)}
               </span>
               <span className="text-sm mr-2 text-right">
@@ -73,29 +73,35 @@ const RoutePredictionItem = ({ vehicle, now, predictions }) => {
           </div>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="p-0 text-sm">
-        <span className="font-bold pb-1 block">Next major stops:</span>
-        <div className="gap-1 flex flex-col">
-          {predictions
-            .filter((prd) => [...timepoints].indexOf(prd.stpid) > -1)
-            .slice(0, 5)
-            .map((prediction, idx) => {
-              return (
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span>{prediction.stpnm}</span>
-                    <span className="text-xs text-gray-500 font-semibold">
-                      {dayjs(prediction.prdtm, "YYYYMMDD hh:mm").format(
-                        "h:mm a"
-                      )}
-                    </span>
+      {predictions ? (
+        <AccordionContent className="p-0 text-sm">
+          <span className="font-bold pb-1 block">Next major stops:</span>
+          <div className="gap-1 flex flex-col">
+            {predictions && predictions
+              .filter((prd) => [...timepoints].indexOf(prd.stpid) > -1)
+              .slice(0, 5)
+              .map((prediction, idx) => {
+                return (
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span>{prediction.stpnm}</span>
+                      <span className="text-xs text-gray-500 font-semibold">
+                        {dayjs(prediction.prdtm, "YYYYMMDD hh:mm").format(
+                          "h:mm a"
+                        )}
+                      </span>
+                    </div>
+                    <span className="text-base font-semibold">{predictionText(prediction.prdctdn)}</span>
                   </div>
-                  <span className="text-base font-semibold">{predictionText(prediction.prdctdn)}</span>
-                </div>
-              );
-            })}
-        </div>
+                );
+              })}
+          </div>
+        </AccordionContent>
+      ) : (
+        <AccordionContent className="p-0 text-sm">
+        <span className="font-bold pb-1 block">Showing on map</span>
       </AccordionContent>
+      )}
     </Accordion.Item>
   );
 };

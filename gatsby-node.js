@@ -26,6 +26,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
             agencyId
             name
             stopIdentifierField
+            serviceIds
             slug {
               current
             }
@@ -163,7 +164,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
             routeNo: r.routeShortName,
             feedIndex: r.feedIndex,
             agencySlug: a.slug.current,
-            initialTab: ''
+            initialTab: '',
+            serviceIds: a.serviceIds
           },
         });
         createPage({
@@ -173,7 +175,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
             routeNo: r.routeShortName,
             feedIndex: r.feedIndex,
             agencySlug: a.slug.current,
-            initialTab: 'map'
+            initialTab: 'map',
+            serviceIds: a.serviceIds
           },
         });
         createPage({
@@ -183,7 +186,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
             routeNo: r.routeShortName,
             feedIndex: r.feedIndex,
             agencySlug: a.slug.current,
-            initialTab: 'stops'
+            initialTab: 'stops',
+            serviceIds: a.serviceIds
           },
         });
         createPage({
@@ -193,7 +197,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
             routeNo: r.routeShortName,
             feedIndex: r.feedIndex,
             agencySlug: a.slug.current,
-            initialTab: 'schedule'
+            initialTab: 'schedule',
+            serviceIds: a.serviceIds
           },
         });
 

@@ -4,6 +4,7 @@ import React from "react"
 const ContactPage = () => {
 
   let labelClasses = "block text-gray-700 dark:text-gray-300 font-base mb-2"
+  let inputClasses = "appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:border-blue-500 dark:focus:border-purple-700 focus:outline-none dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
   return (
     <div className="flex flex-col items-center my-8 px-4 md:px-0">
       <form name="contact" data-netlify="true" method="POST" action="/thank-you/" className="w-full max-w-lg p-4">
@@ -13,7 +14,7 @@ const ContactPage = () => {
             Your Name:
           </label>
           <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className={inputClasses}
             id="name"
             type="text"
             name="name"
@@ -25,7 +26,7 @@ const ContactPage = () => {
             Your Email:
           </label>
           <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className={inputClasses}
             id="email"
             type="email"
             name="email"
@@ -37,7 +38,7 @@ const ContactPage = () => {
             Message:
           </label>
           <textarea
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className={inputClasses}
             id="message"
             name="message"
             rows="5"

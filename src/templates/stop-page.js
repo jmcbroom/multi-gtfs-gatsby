@@ -15,6 +15,10 @@ import { db } from "../db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { set } from "lodash";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime)
 
 const addFavoriteStop = (stop) => {
   db.stops.add(stop);
@@ -30,6 +34,7 @@ const removeFavoriteStop = (stopToRemove, favoriteStops) => {
 };
 
 const Stop = ({ data, pageContext }) => {
+
   const favoriteStops = useLiveQuery(() => db.stops.toArray());
 
   let gtfsAgency = data.postgres.agencies[0];
@@ -100,23 +105,91 @@ const Stop = ({ data, pageContext }) => {
     return () => clearInterval(tick);
   }, []);
 
+  // transit windsor-specific effect to fetch correct stop code
+  // TODO: remove/abstract this
+  const [twRoutes, setTwRoutes] = useState(null);
+  useEffect(() => {
+    if (sanityAgency.slug.current !== "transit-windsor") return;
+    else (
+      fetch(
+        `/.netlify/functions/patterns?agency=${pageContext.agencySlug}`
+        ).then((r) => r.json())
+      .then(d => {
+        setTwRoutes(d)
+      })
+    )
+  }, []);
+
+  const [twStopCode, setTwStopCode] = useState(null);
+  useEffect(() => {
+    if (sanityAgency.slug.current !== "transit-windsor") return;
+    else (
+      fetch(
+        `/.netlify/functions/stoplist?stopId=${stopId}&agency=${pageContext.agencySlug}`
+        ).then((r) => r.json())
+      .then(d => {
+        setTwStopCode(d[0].stopID)
+      })
+    )
+  }, []);
+
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled) return;
+    
+    // transit windsor-specific code: assign new stop code from API
+    // TODO: remove/abstract this
+    let stopToFetch = stopCode
+    if (sanityAgency.slug.current === "transit-windsor" && (!twStopCode || !twRoutes)) {
+      return;
+    }
+    if (sanityAgency.slug.current === "transit-windsor" && twStopCode && twRoutes) {
+      stopToFetch = twStopCode
+    }
+
     fetch(
-      `/.netlify/functions/stop?stopId=${stopCode}&agency=${pageContext.agencySlug}`
+      `/.netlify/functions/stop?stopId=${stopToFetch}&agency=${pageContext.agencySlug}`
     )
       .then((r) => r.json())
       .then((d) => {
+
+        // transit windsor-specific transformation code
+        // TODO: remove/abstract this
+        if (sanityAgency.slug.current === "transit-windsor") {
+          let trips = []
+          d.grpByPtrn.forEach(ptrn => {
+            let matchingPattern = twRoutes.find(r => r.patternID === ptrn.patternId)
+            if(!matchingPattern) return;
+            ptrn.predictions.forEach((prd, idx) => {
+              if(prd.predictionType !== 'Predicted') return;
+              let newPrd = {
+                prd: dayjs(prd.predictTime),
+                prdctdn: dayjs(prd.predictTime).diff(dayjs(), 'minute'),
+                rt: ptrn.routeCode,
+                rtdir: matchingPattern.directionName,
+                vid: `${ptrn.patternId}-${idx}`,
+              }
+              trips.push(newPrd)
+            })
+          })
+          trips = trips.sort((a, b) => a.prdctdn > b.prdctdn).filter(t => t.prdctdn < 90)
+          setPredictions(trips.slice(0, 7));
+        }
+
+        if (!d["bustime-response"]) return;
+
+        // All other agencies are handled here
         if (d["bustime-response"].prd && d["bustime-response"].prd.length > 0) {
           setPredictions(d["bustime-response"].prd.slice(0, 7));
         } else {
           return;
         }
+
       });
-  }, [now]);
+  }, [now, twStopCode, twRoutes]);
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled || !predictions) return;
+    if (sanityAgency.slug.current === "transit-windsor") return;
     fetch(
       `/.netlify/functions/vehicle?vehicleIds=${predictions
         .map((prd) => prd.vid)
@@ -263,6 +336,7 @@ export const query = graphql`
             directionDescription
             directionId
             directionTimepoints
+            
           }
         }
       }

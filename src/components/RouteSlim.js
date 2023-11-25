@@ -19,9 +19,9 @@ const RouteSlim = ({ routeShortName, displayShortName, routeLongName, routeColor
     4: 'w-10'
   }
 
-  let routeNumberClassName = `plex font-semibold text-sm text-center bg-white ${widths[displayShortName.length]}`
+  let routeNumberClassName = `plex flex items-center justify-around text-xs bg-white ${widths[displayShortName.length]} h-6`
   return (
-      <li className={"flex items-center justify-start gap-1"}>
+      <li className={"flex items-center justify-start gap-1.5"}>
         <span 
           className={routeNumberClassName}
           style={{background: `${routeColor}`, color: `${routeTextColor}`}}

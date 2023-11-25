@@ -5,7 +5,8 @@ exports.handler = function(event, context, callback) {
   let urls = {
     ddot: `http://myddotbus.com/bustime/api/v3/getpredictions?key=${process.env.DDOT_KEY}&format=json&stpid=${event.queryStringParameters.stopId}`,
     smart: `http://bustime.smartbus.org/bustime/api/v3/getpredictions?key=${process.env.SMART_KEY}&format=json&stpid=${event.queryStringParameters.stopId}`,
-    "theride": `http://rt.theride.org/bustime/api/v3/getpredictions?key=${process.env.THERIDE_KEY}&format=json&stpid=${event.queryStringParameters.stopId}`
+    "theride": `http://rt.theride.org/bustime/api/v3/getpredictions?key=${process.env.THERIDE_KEY}&format=json&stpid=${event.queryStringParameters.stopId}`,
+    "transit-windsor": `https://windsor.mytransitride.com/api/PredictionData?stopid=${event.queryStringParameters.stopId}&shouldLog=true`,
   }
 
   let url = urls[event.queryStringParameters.agency]
