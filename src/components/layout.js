@@ -61,16 +61,27 @@ export default function Layout({ children }) {
           </div>
         </header>
 
-        <div className="px-0 md:px-4">
+        <div className="px-0 md:px-4 mb-12">
           <div className="max-w-5xl mx-auto">{children}</div>
         </div>
 
         <footer className="mt-8 bg-primary-light dark:bg-primary-dark px-2 md:px-4 pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto gap-8 md:gap-0">
             <div className="flex flex-col justify-start gap-2">
-              <h4>Local bus systems</h4>
+              <h3>Local bus systems</h3>
               {data.allSanityAgency.edges
-                .filter((e) => e.node.agencyType == "local-bus")
+                .filter((e) => e.node.agencyType === "local-bus")
+                .map((a) => (
+                  <Link
+                    to={`/${a.node.slug.current}`}
+                    key={a.node.slug.current}
+                  >
+                    <span className="">{a.node.name}</span>
+                  </Link>
+                ))}
+              <h3 className="mt-4">Regional bus services</h3>
+              {data.allSanityAgency.edges
+                .filter((e) => e.node.agencyType !== "local-bus")
                 .map((a) => (
                   <Link
                     to={`/${a.node.slug.current}`}
@@ -81,14 +92,14 @@ export default function Layout({ children }) {
                 ))}
             </div>
             <div className="flex flex-col justify-start gap-2">
-              <h4>Site pages</h4>
+              <h3>Site pages</h3>
               <Link to={`/region-map`}>Regional transit map</Link>
               <Link to={`/nearby`}>Transit near me</Link>
               <Link to={`/about`}>About this site</Link>
 
             </div>
           </div>
-          <div className="w-full text-center mt-6 mb-4 gap-6 text-gray-400 flex items-center justify-center">
+          <div className="w-full text-center mt-12 mb-4 gap-6 text-gray-400 flex items-center justify-center">
             <Link to={`/contact-us/`}>
                 <p>Feedback, comments, questions?</p>
               </Link>
@@ -99,6 +110,7 @@ export default function Layout({ children }) {
                 <a
                   href="https://github.com/jmcbroom/multi-gtfs-gatsby"
                   target="_blank"
+                  rel="noreferrer"
                   >
                   multi-gtfs-gatsby
                 </a>

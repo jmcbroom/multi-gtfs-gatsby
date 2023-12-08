@@ -37,7 +37,7 @@ const DirectionPicker = ({ directions, direction, setDirection }) => {
               <span className="font-semibold">
                 {display[directions[dir].description]}
               </span>
-              <span className="text-sm leading-none text-gray-600 dark:text-zinc-500">
+              <span className="text-gray-600 dark:text-zinc-500 text-xs sm:text-sm">
                 to {directions[dir].headsigns[0]}
               </span>
             </label>

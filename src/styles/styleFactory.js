@@ -1,6 +1,6 @@
 import _ from "lodash";
-import light from "./mapLight.json";
 import dark from "./mapDark.json";
+import light from "./mapLight.json";
 
 let styles = _.cloneDeep({ light, dark });
 
@@ -84,7 +84,7 @@ for (const style in styles) {
       },
       paint: {
         "line-color": ["get", "routeTextColor"],
-        "line-opacity": style == "light" ? 0.55 : 0.35,
+        "line-opacity": style === "light" ? 0.55 : 0.35,
         "line-width": {
           base: 1.5,
           stops: [
@@ -132,7 +132,7 @@ for (const style in styles) {
       },
       paint: {
         "line-color": ["get", "routeTextColor"],
-        "line-opacity": style == "light" ? 0.55 : 0.35,
+        "line-opacity": style === "light" ? 0.55 : 0.35,
         "line-width": {
           base: 1.5,
           stops: [
@@ -180,7 +180,7 @@ for (const style in styles) {
       },
       paint: {
         "line-color": ["get", "routeTextColor"],
-        "line-opacity": style == "light" ? 0.55 : 0.35,
+        "line-opacity": style === "light" ? 0.55 : 0.35,
         "line-width": {
           base: 1.5,
           stops: [
@@ -226,7 +226,7 @@ for (const style in styles) {
       },
       paint: {
         "line-color": ["get", "routeTextColor"],
-        "line-opacity": style == "light" ? 0.55 : 0.35,
+        "line-opacity": style === "light" ? 0.55 : 0.35,
         "line-width": {
           base: 1.5,
           stops: [
@@ -739,7 +739,7 @@ for (const style in styles) {
       },
       paint: {
         "text-translate": [0, 0],
-        "text-halo-color": style == "light" ?
+        "text-halo-color": style === "light" ?
           "white" : "hsl(0, 0%, 25%)",
         "text-halo-width": 2,
         "text-opacity": {
@@ -751,7 +751,7 @@ for (const style in styles) {
             [15, 0],
           ],
         },
-        "text-color": style == "light" ?
+        "text-color": style === "light" ?
           "black" : "white",
       },
     },
@@ -821,11 +821,11 @@ for (const style in styles) {
       },
       paint: {
         "text-translate": [0, 0],
-        "text-halo-color": style == "light" ?
+        "text-halo-color": style === "light" ?
           "hsl(0, 0%, 100%)" :
           "hsl(0, 0%, 25%)",
         "text-halo-width": 2,
-        "text-color": style == "light" ?
+        "text-color": style === "light" ?
           "hsl(0, 0%, 0%)" :
           "hsl(0, 0%, 100%)",
         "text-opacity": {
@@ -979,11 +979,11 @@ for (const style in styles) {
       },
       paint: {
         "text-translate": [0, 0],
-        "text-halo-color": style == "light" ?
+        "text-halo-color": style === "light" ?
           "hsl(0, 0%, 100%)" :
           "hsl(0, 0%, 25%)",
         "text-halo-width": 4,
-        "text-color": style == "light" ?
+        "text-color": style === "light" ?
           "hsl(0, 0%, 0%)" :
           "hsl(0, 0%, 100%)",
         "text-opacity": {

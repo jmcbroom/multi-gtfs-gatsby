@@ -28,7 +28,6 @@ const Agency = ({ data, pageContext, location }) => {
   routes = routes
     .filter((r) => r.trips.totalCount > 0)
     .sort((a, b) => a.implicitSort - b.implicitSort);
-
   // match gtfsRoutes with the sanityRoutes
   routes.forEach((r) => {
     // find the matching sanityRoute
@@ -81,7 +80,7 @@ const Agency = ({ data, pageContext, location }) => {
       currency: fare.currencyType,
     }).format(fare.price);
 
-    if (fare.transfers == 0) {
+    if (fare.transfers === 0) {
       fare.formattedTransfers = "a single ride";
     } else {
       fare.formattedTransfers =
@@ -127,24 +126,26 @@ const Agency = ({ data, pageContext, location }) => {
           </Link>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
-          <PortableText
-            content={description} className="py-2 font-light text-lg"
-          />
-          <div className="px-2 md:px-0 gap-6 flex flex-col">
+          <PortableText content={description} className="pb-2 pt-1 px-2" />
+          <div className="gap-4 flex flex-col">
             <div>
               <h4 className="grayHeader">Fares</h4>
-              {fareAttributes?.map((fare, idx) => (
-                <p key={`${agencyData.agencyId}${idx}`}>
-                  The{" "}
-                  <span className="font-semibold">{fare.formattedPrice}</span>{" "}
-                  fare is valid for {fare.formattedTransfers}.
-                </p>
-              ))}
-              {fareContent && <PortableText content={fareContent} />}
+              <section>
+                {fareAttributes?.map((fare, idx) => (
+                  <p key={`${agencyData.agencyId}${idx}`}>
+                    The{" "}
+                    <span className="font-semibold">{fare.formattedPrice}</span>{" "}
+                    fare is valid for {fare.formattedTransfers}.
+                  </p>
+                ))}
+                {fareContent && <PortableText content={fareContent} />}
+              </section>
             </div>
 
             <div>
               <h4 className="grayHeader">Contact information</h4>
+              <section>
+
               <p>
                 You can find {name}'s website at{" "}
                 <a href={agencyUrl}>{agencyUrl}</a>.
@@ -153,13 +154,17 @@ const Agency = ({ data, pageContext, location }) => {
                 {name}'s customer service number is{" "}
                 <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.
               </p>
+              </section>
             </div>
             <div>
               <h4 className="grayHeader">List of routes</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 py-2">
-              {allRoutes.map((r) => (
-                <Link to={`/${pageContext.agencySlug}/route/${r.displayShortName}`} key={r.displayShortName}>
-                <RouteSlim {...r} />  
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 py-4 px-2">
+                {allRoutes.map((r) => (
+                  <Link
+                    to={`/${pageContext.agencySlug}/route/${r.displayShortName}`}
+                    key={r.displayShortName}
+                  >
+                    <RouteSlim {...r} />
                   </Link>
                 ))}
               </div>
@@ -168,9 +173,13 @@ const Agency = ({ data, pageContext, location }) => {
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="routes">
           <p className="grayHeader">List of bus routes</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 pt-4 max-h-screen overflow-auto">
             {routes.map((r) => (
-              <RouteHeader key={r.displayShortName} {...r} agency={agencyData} />
+              <RouteHeader
+                key={r.displayShortName}
+                {...r}
+                agency={agencyData}
+              />
             ))}
           </div>
         </Tabs.Content>

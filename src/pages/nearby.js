@@ -30,7 +30,7 @@ const NearbyPage = ({ data }) => {
   useEffect(() => {
     let tick = setInterval(() => {
       setNow(new Date());
-    }, 5000);
+    }, 30000);
     return () => clearInterval(tick);
   }, []);
 
@@ -89,13 +89,13 @@ const NearbyPage = ({ data }) => {
         );
       });
     }
-  }, [now]);
+  }, [now, stops]);
 
   let sanityAgencies = data.allSanityAgency.edges.map((edge) => edge.node);
   let gtfsAgencies = data.postgres.agencies;
   let combinedAgencies = sanityAgencies.map((sanityAgency) => {
     let gtfsAgency = gtfsAgencies.find(
-      (agency) => agency.feedIndex == sanityAgency.currentFeedIndex
+      (agency) => agency.feedIndex === sanityAgency.currentFeedIndex
     );
     return createAgencyData(gtfsAgency, sanityAgency);
   });
@@ -127,8 +127,8 @@ const NearbyPage = ({ data }) => {
     // match to the corresponding GTFS route
     let matching = gtfsRoutes.filter(
       (gr) =>
-        gr.feedIndex == sanityRoute.agency.currentFeedIndex &&
-        gr.routeShortName == sanityRoute.shortName
+        gr.feedIndex === sanityRoute.agency.currentFeedIndex &&
+        gr.routeShortName === sanityRoute.shortName
     );
     let routeData = createRouteData(matching[0], sanityRoute);
     allRoutes.push(routeData);
@@ -145,7 +145,6 @@ const NearbyPage = ({ data }) => {
         routeTextColor: routeData.routeTextColor,
         tripCount: routeData.trips.totalCount,
         mapPriority: routeData.mapPriority,
-        feedIndex: sanityRoute.agency.currentFeedIndex,
         agencySlug: sanityRoute.agency.slug.current,
       };
       allRouteFeatures.push(feature);
@@ -238,7 +237,7 @@ const NearbyPage = ({ data }) => {
     },
   };
 
-  routes = routes.sort((a, b) => b.mapPriority < a.mapPriority);
+  // routes = routes.sort((a, b) => b.mapPriority < a.mapPriority);
 
   return (
     <div>

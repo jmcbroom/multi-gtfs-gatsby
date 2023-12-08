@@ -1,14 +1,17 @@
-import React from "react";
-import { Link } from "gatsby";
-import { AccordionContent, AccordionTrigger } from "./AccordionTrigger";
 import * as Accordion from "@radix-ui/react-accordion";
 import dayjs from "dayjs";
+import React from "react";
+import { AccordionContent, AccordionTrigger } from "./AccordionTrigger";
+import RouteSlim from "./RouteSlim";
+import VehicleBadge from "./VehicleBadge";
 
 export const predictionText = (prdctdn) => {
+  let className = "text-sm font-bold mr-2 text-right";
+
   if (prdctdn === "DUE") {
-    return <span className="text-base font-bold">now</span>;
+    return <span className={className}>now</span>;
   } else {
-    return <span className="text-base font-bold">{prdctdn} min</span>;
+    return <span className={className}>{prdctdn} min</span>;
   }
 };
 
@@ -30,57 +33,50 @@ const PredictionListItem = ({
   agency,
   prediction,
   direction,
-  vehicle
+  vehicle,
 }) => {
-
   return (
-    <Accordion.Item
-      className="AccordionItem"
-      value={prediction.vid}
-    >
-      <AccordionTrigger >
+    <Accordion.Item className="AccordionItem" value={prediction.vid}>
+      <AccordionTrigger>
         <div className="flex items-center justify-between gap-2 text-xs flex-grow">
           <div className="flex items-center justify-between gap-2 w-full flex-grow">
-            <div className="flex items-center gap-2">
-              <span
-                className="w-6 h-6 text-2xs font-bold text-center justify-center items-center flex bg-white"
-                style={{
-                  background: `${routeColor}`,
-                  color: `${routeTextColor}`,
-                }}
-              >
-                {displayShortName}
-              </span>
-              <div className="flex flex-col justify-start text-left">
-                <span className="font-semibold text-sm">{routeLongName}</span>
-                <span className="text-sm">
-                  {direction.directionDescription?.replace("bound", "")} to{" "}
-                  {direction.directionHeadsign}
-                </span>
-              </div>
-            </div>
+            <RouteSlim
+              {...{
+                routeShortName,
+                displayShortName,
+                routeLongName,
+                routeColor,
+                routeTextColor,
+                agency,
+                direction,
+              }}
+            />
             <div className="flex flex-col justify-end">
-
-            <span className="text-base font-bold mr-2 text-right">
               {predictionText(prediction.prdctdn)}
-            </span>
-            <span className="text-xs block text-right mr-2 text-gray-400 -mt-1">
-              {prediction.prdctdn === "DUE" ? "arriving" : "away"}
-            </span>
+              <span className="text-xs block text-right mr-2 text-gray-400 -mt-1">
+                {prediction.prdctdn === "DUE" ? "arriving" : "away"}
+              </span>
             </div>
           </div>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="p-0 text-sm">
-        <span>
-          {vehicle && (
-            <ul className="list-disc list-inside">
-              <li>Arriving at {dayjs(prediction.prdtm, 'YYYYMMDD HH:MM').format('h:mm a')}</li>
-              <li>Bus number: {vehicle.vid}</li>
-            </ul>
-          )}
-          {!vehicle && <span>No vehicle information available.</span>}
-        </span>
+      <AccordionContent>
+        {vehicle && (
+          <div className="flex items-center justify-between text-sm text-gray-700 dark:text-zinc-400 pt-2">
+            <span>
+              arriving at{" "}
+              <span className="font-semibold">
+                {dayjs(prediction.prdtm, "YYYYMMDD HH:MM").format("h:mm a")}
+              </span>
+            </span>
+            <VehicleBadge busNumber={vehicle.vid} />
+          </div>
+        )}
+        {!vehicle && (
+          <span className="text-gray-600 dark:text-zinc-500 text-xs">
+            No vehicle information available.
+          </span>
+        )}
       </AccordionContent>
     </Accordion.Item>
   );

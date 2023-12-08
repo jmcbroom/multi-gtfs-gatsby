@@ -18,16 +18,16 @@ const NavMenu = () => {
           <NavigationMenu.Content className="NavigationMenuContent">
             <ul className="List one">
               <ListItem to="/ddot" title="DDOT">
-                Buses in the city of Detroit
+                City of Detroit
               </ListItem>
               <ListItem to="/smart" title="SMART">
-                Buses in Macomb, Oakland, Wayne counties
+                Macomb/Oakland/Wayne counties
               </ListItem>
               <ListItem to="/theride" title="The Ride">
-                Buses in Ann Arbor and Ypsilanti
+                Ann Arbor/Ypsilanti
               </ListItem>
               <ListItem to="/transit-windsor" title="Transit Windsor">
-                Buses in Windsor, Ontario
+                Windsor, Ontario
               </ListItem>
             </ul>
           </NavigationMenu.Content>

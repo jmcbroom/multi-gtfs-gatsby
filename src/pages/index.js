@@ -1,9 +1,8 @@
 import { Link, graphql } from "gatsby";
 import React from "react";
 import PortableText from "react-portable-text";
-import { createRouteData } from "../util";
-import AgencyHeader from "../components/AgencyHeader";
 import AgencySlimHeader from "../components/AgencySlimHeader";
+import { createRouteData } from "../util";
 
 /**
  * The home page.
@@ -12,7 +11,6 @@ import AgencySlimHeader from "../components/AgencySlimHeader";
 const IndexPage = ({ data }) => {
   let { agencies } = data.postgres;
   let sanityAgencies = data.allSanityAgency.edges.map((e) => e.node);
-  let { indexPageContent } = data.indexPage;
 
   let merged = sanityAgencies.map((sa) => {
     let filtered = agencies.filter(
@@ -45,31 +43,49 @@ const IndexPage = ({ data }) => {
   // sort agencies by their `name` property:
   let order = ["DDOT", "SMART", "TheRide", "Transit Windsor"];
 
-  merged = merged.sort((a, b) => {
-    return order.indexOf(a.name) - order.indexOf(b.name);
-  }).filter(a => a.agencyType === "local-bus");
+  let regionalServices = merged.filter((a) => a.agencyType !== "local-bus");
+
+  merged = merged
+    .sort((a, b) => {
+      return order.indexOf(a.name) - order.indexOf(b.name);
+    })
+    .filter((a) => a.agencyType === "local-bus");
 
   return (
-    <>
-      <PortableText
-          content={indexPageContent}
-          className="my-4 md:my-6 px-2 md:px-0.5"
-      />
-      <h2>Local bus systems</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-      {merged.map((a) => (
-        <div className="bg-gray-100 dark:bg-zinc-800">
-          <AgencySlimHeader agency={a} />
-          <div className="px-4 py-4">
-            <Link to={`/${a.slug.current}`} key={a.slug.current}>
-          <h2>{a.name}</h2>
-            </Link>
-          <PortableText content={a.description} className="" />
-          </div>
+    <div className="py-4 flex flex-col gap-4 md:gap-6">
+      <div>
+        <h2>Local bus systems</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {merged.map((a) => (
+            <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
+              <AgencySlimHeader agency={a} />
+              <div className="px-4 py-4">
+                <Link to={`/${a.slug.current}`} key={a.slug.current}>
+                  <h2>{a.name}</h2>
+                </Link>
+                <PortableText content={a.description} className="" />
+              </div>
+            </div>
+          ))}
         </div>
-        ))}
+      </div>
+      <div>
+        <h2>Regional bus services</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+          {regionalServices.map((a) => (
+            <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
+              <AgencySlimHeader agency={a} />
+              <div className="px-4 py-4">
+                <Link to={`/${a.slug.current}`} key={a.slug.current}>
+                  <h2>{a.name}</h2>
+                </Link>
+                <PortableText content={a.description} className="" />
+              </div>
+            </div>
+          ))}
         </div>
-    </>
+      </div>
+    </div>
   );
 };
 
