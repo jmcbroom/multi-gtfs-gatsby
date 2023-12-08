@@ -23,6 +23,7 @@ const RouteSlim = ({
     2: "w-8",
     3: "w-9",
     4: "w-10",
+    5: "w-12",
   };
 
   let routeNumberClassName = `plex flex items-center justify-around text-sm font-semibold bg-white ${
