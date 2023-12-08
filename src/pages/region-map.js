@@ -44,8 +44,8 @@ const RegionMapPage = ({ data }) => {
     // match to the corresponding GTFS route
     let matching = gtfsRoutes.filter(
       (gr) =>
-        gr.feedIndex == sanityRoute.agency.currentFeedIndex &&
-        gr.routeShortName == sanityRoute.shortName
+        gr.feedIndex === sanityRoute.agency.currentFeedIndex &&
+        gr.routeShortName === sanityRoute.shortName
     );
     let routeData = createRouteData(matching[0], sanityRoute);
 
@@ -62,7 +62,6 @@ const RegionMapPage = ({ data }) => {
         routeTextColor: routeData.routeTextColor,
         tripCount: routeData.trips.totalCount,
         mapPriority: routeData.mapPriority,
-        feedIndex: sanityRoute.agency.currentFeedIndex,
         agencySlug: sanityRoute.agency.slug.current,
       };
       allRouteFeatures.push(feature);
@@ -77,11 +76,15 @@ const RegionMapPage = ({ data }) => {
     features: allRouteFeatures,
   };
 
+  let bboxFc = Object.assign({}, routeFeatureCollection);
+
+  bboxFc.features = bboxFc.features.filter(ft => ft.properties.mapPriority < 4);
+
   const map = useRef();
   
   if (!theme) { return null; }
 
-  let mapInitialBbox = bbox(routeFeatureCollection);
+  let mapInitialBbox = bbox(bboxFc);
 
   if (routeFeatureCollection.features.length > 0) {
     style.sources.routes.data = routeFeatureCollection;
@@ -198,13 +201,13 @@ const RegionMapPage = ({ data }) => {
             </>
           ) : (
             <div>
-              <a className="font-bold" onClick={() => zoomToRoutes()}>
+              <button className="font-bold" onClick={() => zoomToRoutes()}>
                 Zoom in
-              </a>{" "}
+              </button>{" "}
               or{" "}
-              <a className="font-bold" onClick={() => geolocateOnMap()}>
+              <button className="font-bold" onClick={() => geolocateOnMap()}>
                 jump to your location
-              </a>{" "}
+              </button>{" "}
               to show more routes.
             </div>
           )}

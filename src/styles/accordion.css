@@ -52,8 +52,7 @@
 }
 
 .AccordionContentText {
-  @apply pt-4;
-  @apply px-2;
+  @apply pr-6;
 }
 
 .AccordionChevron {

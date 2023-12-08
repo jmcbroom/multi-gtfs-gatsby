@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 * {
-  font-family: "Archivo";
+  font-family: "Inter";
 }
 
 body {
@@ -48,41 +48,35 @@ select {
 }
 
 section {
-  @apply p-4;
+  @apply px-2;
 }
 
-h1,h2,h3,h4,label, input,.plex {
-  font-family: "IBM Plex Sans"; 
+h1,h2,h3,label, input,.plex {
+  /* font-family: "IBM Plex Sans";  */
+  font-family: "Inter"; 
 }
 
 label, input, textarea {
-  font-family: "IBM Plex Sans";
+  /* font-family: "IBM Plex Sans"; */
+  font-family: "Inter";
 }
 
 h1 {
-  @apply text-2xl;
+  @apply text-xl;
   @apply font-semibold;
   @apply mb-3;
 }
 
 h2 {
-  @apply text-xl;
+  @apply text-lg;
   @apply font-semibold;
   @apply mb-2;
 }
 
 h3 {
-  @apply text-lg;
-  @apply font-semibold;
-  @apply text-gray-600;
-  @apply mb-1;
-}
-
-h4 {
   @apply text-base;
   @apply font-semibold;
   @apply text-gray-600;
-  @apply dark:text-white;
   @apply mb-1;
 }
 
@@ -105,14 +99,14 @@ th {
 td {
   @apply bg-white;
   @apply text-sm;
-  @apply p-2;
+  @apply p-1.5;
 }
 
 .timetable-header {
   position: sticky;
   top: 0;
   z-index: 1;
-  min-width: 6rem;
+  min-width: 7rem;
 }
 
 .tabular {
@@ -147,7 +141,7 @@ footer {
   isolation: isolate;
 }
 
-.grayHeader {
+.grayHeader, h4 {
   @apply bg-gray-200;
   @apply dark:bg-zinc-800;
   @apply text-zinc-800;
@@ -156,7 +150,8 @@ footer {
   @apply px-2;
   @apply py-1;
   @apply text-sm;
-  font-family: "IBM Plex Sans";
+  /* font-family: "IBM Plex Sans"; */
+  font-family: "Inter";
 }
 
 .grayTitle {
@@ -169,4 +164,10 @@ footer {
   @apply py-2;
   @apply text-lg;
   @apply mt-2;
+}
+
+.sanityContent p, .sanityContent ul, .sanityContent ol {
+  @apply pl-4;
+  @apply md:pl-2;
+  @apply my-3;
 }

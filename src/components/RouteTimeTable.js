@@ -7,7 +7,7 @@ import { sortTripsByFrequentTimepoint } from "../util";
 
 const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
 
-  let {routeColor, feedIndex} = route;
+  let {routeColor} = route;
 
   // white routeColor needs to be gray
   if(routeColor === 'ffffff'){
@@ -32,6 +32,30 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
   // needed to add this filter back in... but it's interesting to think about letting users see all times.
   timepoints = timepoints.filter(tp => tp.timepoint)
 
+  // const initcap = (str) => {
+  //   return str.toLowerCase().replace(/(?:^|\s)\w/g, function(match) {
+  //     return match.toUpperCase();
+  //   });
+  // }
+
+  const shortenTimepointName = (timepointName) => {
+    let split = timepointName.split(' - ');
+    if (split.length > 1) {
+      timepointName = split[0]
+    }
+
+    // timepointName = initcap(timepointName);
+
+    // timepointName = timepointName.replace('Transit Center', 'TC');
+    // timepointName = timepointName.replace('Park & Ride', 'P&R');
+    // timepointName = timepointName.replace('Park And Ride', 'P&R');
+    // timepointName = timepointName.replace('Metro Airport', 'DTW');
+    // timepointName = timepointName.replace('Mcnamara', 'McNamara');
+    // timepointName = timepointName.replace('Wb', '');
+    // timepointName = timepointName.replace('+', '&')
+    return timepointName;
+  }
+
   return (
     <div className="mx-auto" style={{width: '100%', overflow: 'auto', maxHeight: '700px'}}>
     <table className="tabular mx-auto" style={{tableLayout: 'fixed'}}>
@@ -41,7 +65,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
             <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white dark:bg-black tabular">
               <div className="flex flex-col items-center justify-end h-24 bg-white dark:bg-black">
                 <Link to={`/${agency.slug.current}/stop/${s.stop[agency.stopIdentifierField]}`} className="leading-none text-sm font-bold mb-2 px-2">
-                  {s.stop.stopName}
+                  {shortenTimepointName(s.stop.stopName)}
                 </Link>
                 <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white dark:bg-black text-gray-700 dark:text-zinc-400" />
               </div>
@@ -73,7 +97,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
               if (filtered.length === 0) {
                 return (
                   <td key={`${t.id}-${i}-${j}`}
-                    className={`text-center timetable-entry bg-gray-100 dark:bg-zinc-900 text-gray-600 dark:text-zinc-600 border-r-2 border-dotted dark:border-zinc-700`}>
+                    className={`text-center bg-gray-100 dark:bg-zinc-900 text-gray-600 dark:text-zinc-600 border-r-2 border-dotted dark:border-zinc-700`}>
                     -
                   </td>
                 )
@@ -83,7 +107,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
                 let value = indices.indexOf(j)
                 return (
                   <td key={`${t.id}-${i}-${j}`}
-                    className={`text-center text-sm border-r-2 timetable-entry bg-white dark:bg-black`}>
+                    className={`text-center text-sm border-r-2 bg-white dark:bg-black`}>
                     <StopTimeLabel arrivalTime={filtered[value].arrivalTime} />
                   </td>
                 )
@@ -92,11 +116,11 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
                 <td key={`${t.id}-${i}-${j}`}
                   className={j < timepoints.length - 1 ?
                     `
-                    text-center text-sm border-r-2 border-opacity-25 border-dotted border-gray-700 dark:border-zinc-700 z-0 timetable-entry tabular 
+                    text-center text-sm border-r-2 border-opacity-25 border-dotted border-gray-700 dark:border-zinc-700 z-0 tabular 
                     ${filtered.length === 0 ? `bg-gray-100 dark:bg-zinc-900` : `bg-white dark:bg-black`} 
                     ` :
                     `
-                    text-center text-sm z-0 timetable-entry 
+                    text-center text-sm z-0 
                     ${filtered.length === 0 ? `bg-gray-100 dark:bg-zinc-900` : `bg-white dark:bg-black`} 
                     `
                     }>

@@ -4,7 +4,6 @@ import AgencyHeader from "../components/AgencyHeader";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import PortableText from "react-portable-text";
 import { createRouteData } from "../util";
-import { Link } from "gatsby";
 
 /**
  * The home page.
@@ -13,7 +12,6 @@ import { Link } from "gatsby";
 const AllAgenciesPage = ({ data }) => {
   let { agencies } = data.postgres;
   let sanityAgencies = data.allSanityAgency.edges.map((e) => e.node);
-  let { indexPageContent } = data.indexPage;
 
   let merged = sanityAgencies.map((sa) => {
     let filtered = agencies.filter(

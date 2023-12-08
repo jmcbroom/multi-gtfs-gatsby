@@ -11,7 +11,8 @@ const StopPredictions = ({
   agency,
   trackedBus,
   setTrackedBus,
-  vehicles
+  vehicles,
+  patterns
 }) => {
   return (
     <div>
@@ -27,7 +28,7 @@ const StopPredictions = ({
         collapsible
       >
         {predictions.map((prediction, idx) => {
-          let { route, direction } = matchPredictionToRoute(prediction, routes);
+          let { route, direction } = matchPredictionToRoute(prediction, routes, patterns);
           let vehicle;
           if(vehicles) {
             vehicle = matchPredictionToVehicle(prediction, vehicles);

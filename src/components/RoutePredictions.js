@@ -18,7 +18,10 @@ const RoutePredictions = ({ vehicles, setTrackedBus, predictions, now }) => {
         collapsible
       >
         {vehicles && vehicles.features.map((vehicle, idx) => {
-          return <RoutePredictionItem vehicle={vehicle} now={now} predictions={predictions?.filter(p => p.vid === vehicle.properties.vid)} />;
+          if (vehicle === undefined) {
+            return null
+          }
+          return <RoutePredictionItem vehicle={vehicle} predictions={predictions?.filter(p => p.vid === vehicle.properties.vid)} key={vehicle?.properties.vid || idx} />;
         })}
         {!vehicles && (
           <div className="p-2">No buses are being tracked right now.</div>

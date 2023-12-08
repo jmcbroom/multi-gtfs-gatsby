@@ -10,6 +10,7 @@ import _ from "lodash";
 import RouteHeader from "./RouteHeader";
 
 const AgencyMap = ({ routesFc, agency }) => {
+
   const routeFeatureCollection = routesFc;
 
   let [routes, setRoutes] = useState([]);
@@ -19,7 +20,11 @@ const AgencyMap = ({ routesFc, agency }) => {
   
   if (!theme) { return null; }
 
-  let mapInitialBbox = bbox(routeFeatureCollection);
+  let bboxFc = Object.assign({}, routeFeatureCollection);
+
+  bboxFc.features = bboxFc.features.filter(ft => ft.properties.mapPriority < 4);
+
+  let mapInitialBbox = bbox(bboxFc);
 
   let style = _.cloneDeep(mapboxStyles[theme]);
 
@@ -141,13 +146,13 @@ const AgencyMap = ({ routesFc, agency }) => {
             </>
           ) : (
             <div>
-              <a className="font-bold" onClick={() => zoomToRoutes()}>
+              <button className="font-bold" onClick={() => zoomToRoutes()}>
                 Zoom in
-              </a>{" "}
+              </button>{" "}
               or{" "}
-              <a className="font-bold" onClick={() => geolocateOnMap()}>
+              <button className="font-bold" onClick={() => geolocateOnMap()}>
                 jump to your location
-              </a>{" "}
+              </button>{" "}
               to show more routes.
             </div>
           )}

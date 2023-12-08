@@ -5,7 +5,6 @@ import React, { useRef } from "react";
 import mapboxStyles from "../styles/styleFactory";
 import _ from "lodash";
 import { useTheme } from "../hooks/ThemeContext";
-import { createRouteFc } from "../util";
 import bbox from "@turf/bbox";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 

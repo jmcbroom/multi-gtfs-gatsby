@@ -15,6 +15,7 @@ const ServicePicker = ({ services, service, setService }) => {
     weekday: `Weekday`,
     saturday: `Saturday`,
     sunday: `Sunday`,
+    weekend: `Weekend`
   };
 
   return (
@@ -33,7 +34,6 @@ const ServicePicker = ({ services, service, setService }) => {
             value={serviceDay}
             id={serviceDay}
             disabled={services[serviceDay].length === 0}
-            
           >
             <RadioGroup.Indicator className="radioGroupIndicator" />
           </RadioGroup.Item>

@@ -1,7 +1,8 @@
 .radioGroupRoot {
   @apply flex;
   @apply items-center;
-  @apply gap-4;
+  @apply gap-2;
+  @apply md:gap-4;
 }
 
 .radioGroupIcon {
@@ -14,8 +15,10 @@
   @apply border-gray-400;
   @apply bg-blue-100;
   @apply dark:bg-slate-400;
-  @apply w-6;
-  @apply h-6;
+  @apply w-4;
+  @apply h-4;
+  @apply sm:w-6;
+  @apply sm:h-6;
   @apply rounded-full;
   @apply shadow-slate-700;
   @apply hover:bg-blue-300;
@@ -39,19 +42,24 @@
   @apply h-full;
   @apply relative;
   @apply after:block;
-  @apply after:w-3;
-  @apply after:h-3;
+  @apply after:w-2;
+  @apply after:h-2;
+  @apply after:sm:w-3;
+  @apply after:sm:h-3;
   @apply after:rounded-lg;
   @apply after:bg-gray-600;
   @apply after:dark:bg-gray-700;
 }
 
 .radioGroupLabel {
-  @apply text-sm;
+  @apply text-xs;
+  @apply sm:text-sm;
   @apply text-opacity-100;
   @apply font-normal;
-  @apply pl-2;
-  @apply mr-4;
+  @apply pl-1;
+  @apply sm:pl-2;
+  @apply mr-3;
+  @apply sm:mr-4;
   @apply flex;
   @apply flex-col;
 }
