@@ -16,6 +16,9 @@ const RouteMap = ({
   agency,
   trackedBus,
   className = ``,
+  mapHeight = 500,
+  mapBearing = 0,
+  mapPadding = 30,
 }) => {
 
   const routeFeatureCollection = routeFc;
@@ -81,8 +84,9 @@ const RouteMap = ({
   const initialViewState = {
     bounds: mapInitialBbox,
     fitBoundsOptions: {
-      padding: 50,
-      maxZoom: 17,
+      padding: mapPadding,
+      bearing: mapBearing,
+      maxZoom: 17
     },
   };
 
@@ -99,8 +103,10 @@ const RouteMap = ({
     map.current?.fitBounds(initialViewState.bounds, initialViewState.fitBoundsOptions)
   }
 
+  console.log(mapHeight)
+
   return (
-    <div id="map" className={className} style={{ height: 500 }}>
+    <div id="map" className={className} style={{ height: mapHeight + 28 }}>
       <div className="grayHeader">Route map</div>
 
       <Mapbox
@@ -112,7 +118,9 @@ const RouteMap = ({
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        twoFingerDrag={true}
         interactiveLayerIds={["stops-points"]}
+        style={{ height: mapHeight }}
       >
         <NavigationControl showCompass={false} />
       </Mapbox>

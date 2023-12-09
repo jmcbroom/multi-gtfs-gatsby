@@ -29,7 +29,7 @@ const components = {
   }
 }
 
-const D2A2 = ({ data }) => {
+const MichiganFlyer = ({ data }) => {
   let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.agency;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
@@ -76,7 +76,16 @@ const D2A2 = ({ data }) => {
       data.agency.serviceIds.includes(sc.serviceId)
     )
   );
+  serviceDays = {
+    'daily': 'c_21150_b_29130_d_127'
+  }
+
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
+
+  delete tripsByServiceDay['weekday']
+  delete tripsByServiceDay['saturday']
+  delete tripsByServiceDay['sunday']
+  console.log(tripsByServiceDay)
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(
     trips,
@@ -95,20 +104,22 @@ const D2A2 = ({ data }) => {
 
   let routeData = createRouteData(gtfsRoute, sanityRoute);
 
-  tripsByServiceDay = {
-    weekday: tripsByServiceDay.weekday,
-    weekend: tripsByServiceDay.saturday,
-  };
-  tripsByServiceAndDirection = {
-    weekday: tripsByServiceAndDirection.weekday,
-    weekend: tripsByServiceAndDirection.saturday,
-  };
+  // tripsByServiceDay = {
+  //   weekday: tripsByServiceDay.weekday,
+  //   weekend: tripsByServiceDay.saturday,
+  // };
+  // tripsByServiceAndDirection = {
+  //   weekday: tripsByServiceAndDirection.weekday,
+  //   weekend: tripsByServiceAndDirection.saturday,
+  // };
 
-  let defaultService = "weekday";
+  let defaultService = "daily";
 
-  if (dayOfWeek() === "sunday" || dayOfWeek() === "saturday") {
-    defaultService = "weekend";
-  }
+  // if (dayOfWeek() === "sunday" || dayOfWeek() === "saturday") {
+  //   defaultService = "weekend";
+  // }
+
+
 
   const [service, setService] = useState(defaultService);
 
@@ -116,7 +127,7 @@ const D2A2 = ({ data }) => {
     <div>
       <Helmet>
         <title>{`${agencyData.name} ${routeData.displayShortName}: ${routeData.routeLongName}`}</title>
-        <meta property="og:url" content={`https://transit.det.city/d2a2/`} />
+        <meta property="og:url" content={`https://transit.det.city/michigan-flyer/`} />
         <meta property="og:type" content={`website`} />
         <meta
           property="og:title"
@@ -132,10 +143,10 @@ const D2A2 = ({ data }) => {
         <RouteHeader {...gtfsRoute} agency={null} />
       </div>
 
-      <PortableText
+      {sanityRoute.description && <PortableText
         className="prose prose-lg dark:prose-dark p-2"
-        content={sanityAgency.description}
-      />
+        content={sanityRoute.description}
+      />}
 
       <div id="schedule" className="grayHeader">Schedule</div>
       <div className="bg-gray-100 dark:bg-zinc-700 p-4">
@@ -144,10 +155,10 @@ const D2A2 = ({ data }) => {
           {...{ service, setService }}
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mt-4 md:gap-8 mb-4">
+      <div className="grid grid-cols-1 gap-0 mt-4 md:gap-8 mb-4">
         <div>
-          <div className="grayHeader -mb-10 z-20 block relative">
-            Eastbound to Detroit
+          <div className="grayHeader -mb-4 z-20 block relative">
+            Eastbound to DTW
           </div>
           <RouteTimeTable
             trips={tripsByServiceAndDirection}
@@ -158,8 +169,8 @@ const D2A2 = ({ data }) => {
           />
         </div>
         <div>
-          <div className="grayHeader -mb-10 z-20 block relative text-lg">
-            Westbound to Ann Arbor
+          <div className="grayHeader -mb-4 z-20 block relative text-lg">
+            Westbound to East Lansing
           </div>
           <RouteTimeTable
             trips={tripsByServiceAndDirection}
@@ -170,19 +181,14 @@ const D2A2 = ({ data }) => {
           />
         </div>
       </div>
-      <PortableText
-        className="mt-2 mb-4 sanityContent"
-        content={sanityRoute.description}
-        components={components}
-      />
     </div>
   );
 };
 
 export const query = graphql`
-  query D2A2Query {
+  query MichiganFlyerQuery {
     route: sanityRoute(
-      shortName: { eq: "D2A2" }
+      shortName: { eq: "Flyer" }
       agency: { slug: { current: { eq: "d2a2" } } }
     ) {
       color {
@@ -226,7 +232,7 @@ export const query = graphql`
       }
     }
     postgres {
-      routes: routesList(condition: { feedIndex: 26, routeShortName: "D2A2" }) {
+      routes: routesList(condition: { feedIndex: 26, routeShortName: "Flyer" }) {
         agencyId
         routeShortName
         routeLongName
@@ -239,7 +245,7 @@ export const query = graphql`
         feedIndex
         trips: tripsByFeedIndexAndRouteIdList(
           filter: {
-            serviceId: { in: ["c_67584_b_78112_d_31", "c_67584_b_78112_d_96"] }
+            serviceId: { in: ["c_21150_b_29130_d_127"] }
           }
         ) {
           serviceId
@@ -322,4 +328,4 @@ export const query = graphql`
   }
 `;
 
-export default D2A2;
+export default MichiganFlyer;

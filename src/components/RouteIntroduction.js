@@ -1,6 +1,6 @@
 import React from "react";
 import { formatArrivalTime, sortTripsByFrequentTimepoint } from "../util";
-import RouteStopsList from "./RouteStopsList";
+import RouteTimepoints from "./RouteTimepoints";
 
 const serviceDisplayText = {
   weekday: `weekdays`,
@@ -58,58 +58,12 @@ const whenItRuns = (trips) => {
   }
 };
 
-const whatDirectionItRuns = (route) => {
+export const whatDirectionItRuns = (route) => {
   let cardinalDirections = new Set(
     route.directions.map((dir) => dir.directionDescription)
     // .map((dir) => dir.replace("bound", ""))
   );
   return Array.from(cardinalDirections).sort().join(" and ");
-};
-
-const RouteIntroEndpoints = ({ agency, route, trips, headsigns }) => {
-  let directions = Object.keys(headsigns);
-
-  let endpoints = directions.map((d) => {
-    return headsigns[d].headsigns[0];
-  });
-
-  return (
-      <section>
-        <p className="text-lg">
-          The bus travels {whatDirectionItRuns(route)} between{" "}
-          {endpoints.map((e, idx) => (
-            <span key={e}>
-              <span className="font-semibold pl-1">{e}</span>
-              {idx === 0 && <span className="pl-1">{` and `}</span>}
-            </span>
-          ))}
-          .
-        </p>
-        <p className="text-lg py-2">
-          Here's a list of the major stops in each travel direction:
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-8">
-          {endpoints.map((end, idx) => (
-            <div key={end}>
-              <div className="grayHeader">
-                <span className="font-bold text-base">
-                  {headsigns[idx]?.description || `unknown`}
-                </span>
-                <span className="text-gray-600 font-normal text-base"> to {end}</span>
-              </div>
-              <RouteStopsList
-                longTrips={route.longTrips}
-                direction={idx}
-                routeColor={route.routeColor}
-                agency={agency}
-                timepointsOnly
-                small
-              />
-            </div>
-          ))}
-        </div>      </section>
-
-  );
 };
 
 const RouteIntroRunTimes = ({ route, trips, headsigns }) => {
@@ -185,6 +139,9 @@ const RouteIntroRunTimes = ({ route, trips, headsigns }) => {
 const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
   let services = Object.keys(trips);
   let directions = Object.keys(headsigns);
+  let endpoints = directions.map((d) => {
+    return headsigns[d].headsigns[0];
+  });
 
   return (
     <div className="gap-6 flex flex-col p-0 py-4">
@@ -204,12 +161,28 @@ const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
 
       <div>
         <h4 className="underline-title grayHeader">Where does this bus go?</h4>
-        <RouteIntroEndpoints
+        <section>
+
+        <p className="text-lg">
+        The bus travels {whatDirectionItRuns(route)} between{" "}
+        {endpoints.map((e, idx) => (
+          <span key={e}>
+            <span className="font-semibold pl-1">{e}</span>
+            {idx === 0 && <span className="pl-1">{` and `}</span>}
+          </span>
+        ))}
+        .
+      </p>
+      <p className="text-lg py-2">
+        Here's a list of the major stops in each travel direction:
+      </p>
+        </section>
+        <RouteTimepoints
           agency={agency}
           route={route}
           trips={trips}
           headsigns={headsigns}
-        />
+        /> 
       </div>
 
       <table className="w-auto border-collapse mt-4 w-100 hidden">

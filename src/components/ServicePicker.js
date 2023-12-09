@@ -15,7 +15,8 @@ const ServicePicker = ({ services, service, setService }) => {
     weekday: `Weekday`,
     saturday: `Saturday`,
     sunday: `Sunday`,
-    weekend: `Weekend`
+    weekend: `Weekend`,
+    daily: `Daily`
   };
 
   return (

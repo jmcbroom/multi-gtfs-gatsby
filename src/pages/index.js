@@ -83,6 +83,29 @@ const IndexPage = ({ data }) => {
               </div>
             </div>
           ))}
+          <div className="bg-gray-100 dark:bg-zinc-800">
+            <AgencySlimHeader agency={{
+              slug: { current: "michigan-flyer" },
+              name: "Michigan Flyer",
+              description: "The Michigan Flyer-AirRide bus service provides motorcoach transportation between Ann Arbor, East Lansing, and Detroit Metro Airport.",
+              agencyType: "other",
+              agencyUrl: "https://michiganflyer.com/",
+              agencyLang: "en",
+              agencyPhone: "517-333-0400",
+              agencyFareUrl: "https://michiganflyer.com/fares",
+              agencyEmail: "",
+              color: { hex: "#674A72" }, 
+              textColor: { hex: "#ffffff" }
+            }} />
+            <div className="p-4">
+              <Link to={`/michigan-flyer`} key="michigan-flyer">
+                <h2>Michigan Flyer</h2>
+              </Link>
+              <p>
+                The Michigan Flyer bus provides service between Ann Arbor, East Lansing, and DTW Airport.
+                </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
