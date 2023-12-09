@@ -103,8 +103,6 @@ const RouteMap = ({
     map.current?.fitBounds(initialViewState.bounds, initialViewState.fitBoundsOptions)
   }
 
-  console.log(mapHeight)
-
   return (
     <div id="map" className={className} style={{ height: mapHeight + 28 }}>
       <div className="grayHeader">Route map</div>

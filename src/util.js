@@ -314,8 +314,6 @@ export const createVehicleFc = (vehicles, patterns, route, agency) => {
             .indexOf(pattern?.rtdir.toLowerCase()) > -1
       ) || "unknown";
 
-    console.log(pattern, direction)
-
     if (direction === undefined || direction === "unknown") {
       // special case for DDOT 3
       if (v.des === "Downtown" && v.rt === "3") {
