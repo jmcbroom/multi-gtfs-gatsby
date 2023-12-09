@@ -13,6 +13,8 @@ import journeyPart from "./journeyPart";
 import journey from "./journey";
 import journeyPartDestTime from "./journeyPartDestTime";
 
+import bikeshare from "./bikeshare";
+
 export default [
   blockContent,
 
@@ -29,5 +31,8 @@ export default [
   journeyPart,
   journeyPartDestTime,
   extRouteDirection,
-  fareAttribute
+  fareAttribute,
+
+  // GBFS
+  bikeshare,
 ];

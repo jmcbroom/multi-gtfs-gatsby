@@ -10,18 +10,33 @@ import {Link} from 'gatsby';
  * @param {Number} routeColor 
  * @param {Number} routeTextColor 
  */
-const RouteHeader = ({ routeShortName, routeLongName, routeColor='#000', routeTextColor='#fff', agency }) => {
+const RouteHeader = ({ routeShortName, displayShortName, routeLongName, routeColor='#000', routeTextColor='#fff', agency, className }) => {
 
+  let widths = {
+    1: 'w-10',
+    2: 'w-10',
+    3: 'w-12',
+    4: 'w-16',
+    5: 'w-20',
+  }
+
+
+  let url = `/${displayShortName.toLowerCase()}`
+  if(agency){
+    url = `/${agency.slug.current}/route/${displayShortName}`
+  }
+
+  let routeNumberClassName = `font-bold text-center py-2 text-lg bg-white ${widths[displayShortName.length]}`
   return (
-    <Link to={`/${agency.slug.current}/route/${routeShortName}`}>
-      <li className="flex items-center justify-start gap-2">
+    <Link to={url}>
+      <li className={"flex items-center justify-start gap-2 " + className}>
         <span 
-          className="w-10 font-extrabold text-center py-2 bg-white" 
+          className={routeNumberClassName}
           style={{background: `${routeColor}`, color: `${routeTextColor}`}}
         >
-          {routeShortName}
+          {displayShortName}
         </span>
-        <span>
+        <span className='font-semibold'>
           {routeLongName}
         </span>
       </li>

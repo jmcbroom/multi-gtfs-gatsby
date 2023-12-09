@@ -3,7 +3,8 @@ import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState } from "react";
 import Mapbox, { GeolocateControl, NavigationControl } from "react-map-gl";
-import mapboxStyle from "../styles/styleFactory";
+import { useTheme } from "../hooks/ThemeContext";
+import mapboxStyles from "../styles/styleFactory";
 import { createRouteData } from "../util";
 import { navigate } from "gatsby";
 import bbox from "@turf/bbox";
@@ -11,7 +12,9 @@ import _ from "lodash";
 import RouteHeader from "../components/RouteHeader";
 
 const RegionMapPage = ({ data }) => {
-  let style = _.cloneDeep(mapboxStyle);
+  const { theme } = useTheme();
+  
+  let style = _.cloneDeep(mapboxStyles[theme]);
 
   let [routes, setRoutes] = useState([]);
 
@@ -41,8 +44,8 @@ const RegionMapPage = ({ data }) => {
     // match to the corresponding GTFS route
     let matching = gtfsRoutes.filter(
       (gr) =>
-        gr.feedIndex == sanityRoute.agency.currentFeedIndex &&
-        gr.routeShortName == sanityRoute.shortName
+        gr.feedIndex === sanityRoute.agency.currentFeedIndex &&
+        gr.routeShortName === sanityRoute.shortName
     );
     let routeData = createRouteData(matching[0], sanityRoute);
 
@@ -52,13 +55,13 @@ const RegionMapPage = ({ data }) => {
       let feature = JSON.parse(direction.directionShape)[0];
       feature.properties = {
         feedIndex: routeData.feedIndex,
-        routeShortName: routeData.routeShortName,
+        routeShortName: routeData.displayShortName,
+        displayShortName: routeData.displayShortName,
         routeLongName: routeData.routeLongName,
         routeColor: routeData.routeColor,
         routeTextColor: routeData.routeTextColor,
         tripCount: routeData.trips.totalCount,
         mapPriority: routeData.mapPriority,
-        feedIndex: sanityRoute.agency.currentFeedIndex,
         agencySlug: sanityRoute.agency.slug.current,
       };
       allRouteFeatures.push(feature);
@@ -73,9 +76,15 @@ const RegionMapPage = ({ data }) => {
     features: allRouteFeatures,
   };
 
-  const map = useRef();
+  let bboxFc = Object.assign({}, routeFeatureCollection);
 
-  let mapInitialBbox = bbox(routeFeatureCollection);
+  bboxFc.features = bboxFc.features.filter(ft => ft.properties.mapPriority < 4);
+
+  const map = useRef();
+  
+  if (!theme) { return null; }
+
+  let mapInitialBbox = bbox(bboxFc);
 
   if (routeFeatureCollection.features.length > 0) {
     style.sources.routes.data = routeFeatureCollection;
@@ -93,7 +102,7 @@ const RegionMapPage = ({ data }) => {
     })[0];
     if (route) {
       navigate(
-        `/${route.properties.agencySlug}/route/${route.properties.routeShortName}`
+        `/${route.properties.agencySlug}/route/${route.properties.displayShortName}`
       );
     }
   };
@@ -158,8 +167,8 @@ const RegionMapPage = ({ data }) => {
 
   return (
     <div>
-      <p className="underline-title">Regional transit map</p>
-      <div id="map" style={{ height: 450 }}>
+      <p className="grayHeader">Regional transit map</p>
+      <div id="map" style={{ height: 550 }}>
         <Mapbox
           ref={map}
           mapLib={MapboxGL}
@@ -177,10 +186,10 @@ const RegionMapPage = ({ data }) => {
       </div>
 
       <>
-        <div className="underline-title my-2">{`${
+        <div className="grayHeader my-2">{`${
           routes.length > 0 ? routes.length : `No`
         } routes shown on the map`}</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
           {routes.length > 0 ? (
             <>
               {routes.map((r) => (
@@ -192,13 +201,13 @@ const RegionMapPage = ({ data }) => {
             </>
           ) : (
             <div>
-              <a className="font-bold" onClick={() => zoomToRoutes()}>
+              <button className="font-bold" onClick={() => zoomToRoutes()}>
                 Zoom in
-              </a>{" "}
+              </button>{" "}
               or{" "}
-              <a className="font-bold" onClick={() => geolocateOnMap()}>
+              <button className="font-bold" onClick={() => geolocateOnMap()}>
                 jump to your location
-              </a>{" "}
+              </button>{" "}
               to show more routes.
             </div>
           )}
@@ -255,6 +264,7 @@ export const query = graphql`
         node {
           longName
           shortName
+          displayShortName
           agency {
             currentFeedIndex
             slug {

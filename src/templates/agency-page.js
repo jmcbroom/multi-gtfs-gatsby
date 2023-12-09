@@ -1,28 +1,33 @@
-import React from "react";
-import { graphql } from "gatsby";
-import RouteHeader from "../components/RouteHeader";
-import AgencyHeader from "../components/AgencyHeader";
-import AgencyMap from "../components/AgencyMap";
-import PortableText from "react-portable-text";
-import { createAgencyData, createRouteData } from "../util";
-import AgencySlimHeader from "../components/AgencySlimHeader";
 import * as Tabs from "@radix-ui/react-tabs";
+import { graphql, Link } from "gatsby";
+import React from "react";
+import PortableText from "react-portable-text";
+import AgencyMap from "../components/AgencyMap";
+import AgencySlimHeader from "../components/AgencySlimHeader";
+import RouteHeader from "../components/RouteHeader";
+import RouteSlim from "../components/RouteSlim";
+import { createAgencyData, createRouteData } from "../util";
 
-const Agency = ({ data, pageContext }) => {
+const Agency = ({ data, pageContext, location }) => {
   let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.allSanityAgency.edges[0].node;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
 
-  let { agencyUrl, agencyPhone, routes, description, name, fareAttributes, fareContent } = agencyData;
+  let {
+    agencyUrl,
+    agencyPhone,
+    routes,
+    description,
+    name,
+    fareAttributes,
+    fareContent,
+  } = agencyData;
 
   // let's not display any routes that don't have scheduled trips.
   let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
   routes = routes
     .filter((r) => r.trips.totalCount > 0)
     .sort((a, b) => a.implicitSort - b.implicitSort);
-
-
-  
   // match gtfsRoutes with the sanityRoutes
   routes.forEach((r) => {
     // find the matching sanityRoute
@@ -32,132 +37,158 @@ const Agency = ({ data, pageContext }) => {
 
     // let's override the route attributes with those from Sanity
     if (matching.length === 1) {
-      r = createRouteData(r, matching[0])
+      r = createRouteData(r, matching[0]);
     }
   });
 
+  let allRoutes = Object.assign([], routes);
+
   // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
-  let allRouteFeatures = []
-  routes.forEach(route => {
+  let allRouteFeatures = [];
 
-    route.directions.forEach(direction => {
+  routes.forEach((route) => {
+    if (!route.directions) {
+      console.log(route);
+    }
+    route.directions.forEach((direction) => {
+      let feature = JSON.parse(direction.directionShape)[0];
 
-      let feature = JSON.parse(direction.directionShape)[0]
-      
       feature.properties = {
-          routeColor: route.routeColor,
-          routeLongName: route.routeLongName,
-          routeShortName: route.routeShortName,
-          routeTextColor: route.routeTextColor,
-          mapPriority: route.mapPriority,
-          direction: direction.directionDescription,
-          directionId: direction.directionId
-      }
+        routeColor: route.routeColor,
+        routeLongName: route.routeLongName,
+        routeShortName: route.routeShortName,
+        displayShortName: route.displayShortName,
+        routeTextColor: route.routeTextColor,
+        mapPriority: route.mapPriority,
+        direction: direction.directionDescription,
+        directionId: direction.directionId,
+      };
 
-      allRouteFeatures.push(feature)
-    })
-  })
+      allRouteFeatures.push(feature);
+    });
+  });
+
   let allRouteFc = {
     type: "FeatureCollection",
-    features: allRouteFeatures
-  }
+    features: allRouteFeatures,
+  };
 
   // generate human-readable text for fare info
   fareAttributes = fareAttributes?.map((fare) => {
-    fare.formattedPrice = new Intl.NumberFormat('en-US', {
-      style: 'currency', currency: fare.currencyType
+    fare.formattedPrice = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: fare.currencyType,
     }).format(fare.price);
-    
-    if (fare.transfers == 0) {
-      fare.formattedTransfers = 'a single ride';
+
+    if (fare.transfers === 0) {
+      fare.formattedTransfers = "a single ride";
     } else {
-      fare.formattedTransfers = (fare.transferDuration <= 60**2 * 24) ?
-        `${Math.floor(fare.transferDuration / 60**2)} hour` :
-        `${Math.floor(fare.transferDuration / 60**2 / 24)} day`;
-        
-      fare.formattedTransfers +=
-        fare.formattedTransfers.startsWith('1 ') ? '' : 's';
-      
-      fare.formattedTransfers += ' with ';
-      
-      fare.formattedTransfers += fare.transfers ?
-        (fare.transfers + ' transfer' + fare.transfers == 1 ? '' : 's' ) :
-        fare.transfers === 0 ?
-        'no transfers' :
-        'unlimited tranfers';
+      fare.formattedTransfers =
+        fare.transferDuration <= 60 ** 2 * 24
+          ? `${Math.floor(fare.transferDuration / 60 ** 2)} hour`
+          : `${Math.floor(fare.transferDuration / 60 ** 2 / 24)} day`;
+
+      fare.formattedTransfers += fare.formattedTransfers.startsWith("1 ")
+        ? ""
+        : "s";
+
+      fare.formattedTransfers += " with ";
+
+      fare.formattedTransfers += fare.transfers
+        ? fare.transfers + " transfer" + (fare.transfers === 1 ? "" : "s")
+        : fare.transfers === 0
+        ? "no transfers"
+        : "unlimited transfers";
     }
-    
+
     return fare;
   });
 
   return (
-    <>
+    <div className="py-4">
       <AgencySlimHeader agency={agencyData} />
-      <Tabs.Root className="tabRoot" defaultValue="home">
+      <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
         <Tabs.List className="tabList" aria-label="Manage your account">
-          <Tabs.Trigger className="tabTrigger" value="home">
-            Home
-          </Tabs.Trigger>
-          <Tabs.Trigger className="tabTrigger" value="routes">
-            Routes
-          </Tabs.Trigger>
-          <Tabs.Trigger className="tabTrigger" value="map">
-            Map
-          </Tabs.Trigger>
+          <Link to={`/${pageContext.agencySlug}`}>
+            <Tabs.Trigger className="tabTrigger" value="">
+              Home
+            </Tabs.Trigger>
+          </Link>
+          <Link to={`/${pageContext.agencySlug}/routes`}>
+            <Tabs.Trigger className="tabTrigger" value="routes">
+              Routes
+            </Tabs.Trigger>
+          </Link>
+          <Link to={`/${pageContext.agencySlug}/map`}>
+            <Tabs.Trigger className="tabTrigger" value="map">
+              Map
+            </Tabs.Trigger>
+          </Link>
         </Tabs.List>
-        <Tabs.Content className="tabContent" value="home">
-          <p className="underline-title">Agency information</p>
-          <div className="px-2 md:px-0">
-
-          <PortableText content={description} />
-
-          <h4>Fares</h4>
-          {fareAttributes?.map((fare, idx) => (
-            <p key={`${agencyData.agencyId}${idx}`}>
-              The <span className="font-semibold">{fare.formattedPrice}</span> fare is valid for {fare.formattedTransfers}.
-            </p>
-          ))}
-          {fareContent && <PortableText content={fareContent} />}
-
-          <h4>Contact information</h4>
-          <p>You can find {name}'s website at <a href={agencyUrl}>{agencyUrl}</a>.</p>
-          <p>{name}'s customer service number is <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.</p>
+        <Tabs.Content className="tabContent" value="">
+          <PortableText content={description} className="pb-2 pt-1 px-2" />
+          <div className="gap-4 flex flex-col">
+            <div>
+              <h4 className="grayHeader">Fares</h4>
+              <section>
+                {fareAttributes?.map((fare, idx) => (
+                  <p key={`${agencyData.agencyId}${idx}`}>
+                    The{" "}
+                    <span className="font-semibold">{fare.formattedPrice}</span>{" "}
+                    fare is valid for {fare.formattedTransfers}.
+                  </p>
+                ))}
+                {fareContent && <PortableText content={fareContent} />}
+              </section>
             </div>
 
+            <div>
+              <h4 className="grayHeader">Contact information</h4>
+              <section>
+
+              <p>
+                You can find {name}'s website at{" "}
+                <a href={agencyUrl}>{agencyUrl}</a>.
+              </p>
+              <p>
+                {name}'s customer service number is{" "}
+                <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.
+              </p>
+              </section>
+            </div>
+            <div>
+              <h4 className="grayHeader">List of routes</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 py-4 px-2">
+                {allRoutes.map((r) => (
+                  <Link
+                    to={`/${pageContext.agencySlug}/route/${r.displayShortName}`}
+                    key={r.displayShortName}
+                  >
+                    <RouteSlim {...r} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="routes">
-          <p className="underline-title">List of bus routes</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 md:px-0 max-h-screen overflow-auto">
+          <p className="grayHeader">List of bus routes</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 pt-4 max-h-screen overflow-auto">
             {routes.map((r) => (
-              <RouteHeader key={r.routeShortName} {...r} agency={agencyData} />
+              <RouteHeader
+                key={r.displayShortName}
+                {...r}
+                agency={agencyData}
+              />
             ))}
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="map">
-          <p className="underline-title">System map</p>
+          <p className="grayHeader">System map</p>
           <AgencyMap agency={agencyData} routesFc={allRouteFc} />
         </Tabs.Content>
       </Tabs.Root>
-      {/* 
-      <section className="flex flex-col sm:flex-row items-center justify-start gap-4 mb-4">
-        <div className="flex items-center justify-between">
-          <Link to={agencyUrl}>
-            <FontAwesomeIcon icon={faLink} />
-            <span className="ml-2">Website</span>
-          </Link>
-        </div>
-        <div className="flex items-center justify-between">
-          <a href={`tel:+1${agencyPhone}`}>
-            <FontAwesomeIcon icon={faPhone} />
-            <span className="ml-2">Phone: {agencyPhone}</span>
-          </a>
-        </div>
-      </section>
-      <h3>Fare information</h3>
-      <p>...</p>
-      <h3>Bus routes</h3>
-      */}
-    </>
+    </div>
   );
 };
 
@@ -175,7 +206,9 @@ export const query = graphql`
         bikesPolicyUrl
         feedIndex
         agencyId
-        routes: routesByFeedIndexAndAgencyIdList(orderBy: ROUTE_SORT_ORDER_ASC) {
+        routes: routesByFeedIndexAndAgencyIdList(
+          orderBy: ROUTE_SORT_ORDER_ASC
+        ) {
           feedIndex
           routeShortName
           routeLongName
@@ -199,7 +232,9 @@ export const query = graphql`
             serviceId
           }
         }
-        fareAttributes: fareAttributesByFeedIndexAndAgencyIdList(orderBy: [ PRICE_ASC, TRANSFER_DURATION_DESC ]) {
+        fareAttributes: fareAttributesByFeedIndexAndAgencyIdList(
+          orderBy: [PRICE_ASC, TRANSFER_DURATION_DESC]
+        ) {
           price
           transfers
           transferDuration
@@ -207,11 +242,14 @@ export const query = graphql`
         }
       }
     }
-    allSanityRoute(filter: { agency: { slug: { current: { eq: $agencySlug } } } }) {
+    allSanityRoute(
+      filter: { agency: { slug: { current: { eq: $agencySlug } } } }
+    ) {
       edges {
         node {
           longName
           shortName
+          displayShortName
           routeColor: color {
             hex
           }

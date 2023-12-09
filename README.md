@@ -1,6 +1,6 @@
 # multi-gtfs-gatsby
 
-building a web site that can display ddot.info-like timetables for many agencies at once
+building a web site that can display ddot.info-like timetables for many agencies at once. you can find an example site at https://transit.det.city
 
 ## developing the main site
 

@@ -11,3 +11,5 @@ jupyter/
 .netlify
 
 yarn-error.log
+.vscode
+*_routes.ndjson

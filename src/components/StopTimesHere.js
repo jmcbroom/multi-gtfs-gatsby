@@ -1,40 +1,12 @@
-import React, { useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
-import StopTimeLabel from "./StopTimeLabel";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
-import classNames from "classnames";
 import _ from "lodash";
+import React, { useState } from "react";
 import "../styles/accordion.css";
 import { dayOfWeek, getTripsByServiceDay } from "../util";
-import RouteListItem from "./RouteListItem";
+import { AccordionContent, AccordionTrigger } from "./AccordionTrigger";
 import ServicePicker from "./ServicePicker";
-
-const AccordionTrigger = React.forwardRef(
-  ({ children, className, ...props }, forwardedRef) => (
-    <Accordion.Header className="AccordionHeader">
-      <Accordion.Trigger
-        className={classNames("AccordionTrigger", className)}
-        {...props}
-        ref={forwardedRef}
-      >
-        {children}
-        <ChevronDownIcon className="AccordionChevron" aria-hidden />
-      </Accordion.Trigger>
-    </Accordion.Header>
-  )
-);
-
-const AccordionContent = React.forwardRef(
-  ({ children, className, ...props }, forwardedRef) => (
-    <Accordion.Content
-      className={classNames("AccordionContent", className)}
-      {...props}
-      ref={forwardedRef}
-    >
-      <div className="AccordionContentText">{children}</div>
-    </Accordion.Content>
-  )
-);
+import StopTimeLabel from "./StopTimeLabel";
+import RouteSlim from "./RouteSlim";
 
 const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
   let timesByRoute = _.groupBy(times, "trip.route.routeShortName");
@@ -52,57 +24,54 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
   let [service, setService] = useState(defaultService);
 
-  
-  routes = routes.sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName)).sort((a, b) => a.mapPriority > b.mapPriority);
-  let defaultRoute = routes.length > 0 ? routes[0].routeShortName : "none";
-
-  console.log(timesByRoute[routes[0].routeShortName][service]);
-
   return (
     <div>
-      <div className="underline-title mb-2">Routes that stop here</div>
+      <div className="grayHeader">Routes that stop here</div>
       <Accordion.Root
         className="AccordionRoot"
         type="single"
-        defaultValue={defaultRoute}
+        defaultValue={null}
         collapsible
       >
         {routes.map((route, idx) => {
           return (
             <Accordion.Item
-              key={route.routeShortName}
+              key={route.displayShortName}
               className="AccordionItem"
-              value={route.routeShortName}
+              value={route.displayShortName}
             >
               <AccordionTrigger>
-                <RouteListItem {...route} agency={agency} className="px-2" />
+                <RouteSlim {...route} agency={agency} className="px-2" />
               </AccordionTrigger>
               <AccordionContent>
+                <div className="flex flex-col gap-2 mt-2">
+
                 <ServicePicker
                   services={timesByRoute[route.routeShortName]}
                   service={service}
                   setService={setService}
-                />
-                <p className="py-1">
+                  />
+                <span className="text-gray-500 text-sm py-1">
                   {timesByRoute[route.routeShortName][service].length > 0
                     ? `Buses arrive here at:`
                     : `There is no service on this route on ${
-                        service.startsWith("s")
-                          ? `${service.slice(0,1).toUpperCase()}${service.slice(1)}s.`
-                          : `weekday`
-                      }`}
-                </p>
+                      service.startsWith("s")
+                      ? `${service.slice(0,1).toUpperCase()}${service.slice(1)}s.`
+                      : `weekday`
+                    }`}
+                </span>
 
-                <ul className="columns-4 sm:columns-5 gap-0 border-l-2 border-dotted border-grey-700 text-center">
+                <ul className="columns-3 sm:columns-4 md:columns-5 gap-0 border-l-2 border-dotted border-grey-700 dark:border-zinc-700 text-center list-none ml-0">
                   {timesByRoute[route.routeShortName][service].map((trip) => (
                     <li
-                      className="border-r-2 border-dotted border-grey-700 tabular"
-                      key={trip.tripId}
+                    className="border-r-2 border-dotted border-grey-700 dark:border-zinc-700 tabular"
+                    key={trip.tripId}
                     >
                       <StopTimeLabel arrivalTime={trip.arrivalTime} />
                     </li>
                   ))}
                 </ul>
+                </div>
               </AccordionContent>
             </Accordion.Item>
           );

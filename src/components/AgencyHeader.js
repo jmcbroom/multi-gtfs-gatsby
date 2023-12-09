@@ -15,7 +15,7 @@ const AgencyHeader = ({ agency }) => {
       <h2 className="text-lg md:text-xl mb-0">
         {name}
       </h2>
-      <span className="text-sm leading-none text-gray-500">{fullName}</span>
+      <span className="text-sm leading-none text-gray-500 dark:text-zinc-500 plex">{fullName}</span>
     </Link>
   )
 }

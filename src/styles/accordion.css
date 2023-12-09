@@ -1,23 +1,26 @@
-/* reset */
-button,
-h3 {
-  all: unset;
-}
-
 .AccordionRoot {
   @apply w-full;
+  @apply flex;
+  @apply flex-col;
 }
 
 .AccordionItem {
   overflow: hidden;
   @apply px-2;
   @apply md:px-0;
+  @apply p-2;
+  @apply border-l-2;
+  @apply border-gray-100;
+  @apply dark:border-zinc-900;
 }
 
-.AccordionItem:focus-within {
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 0 0 2px var(--mauve12);
+.AccordionItem[data-state='open'] {
+  @apply border-l-2;
+  @apply bg-gray-50;
+  @apply dark:bg-zinc-900;
+  @apply dark:bg-opacity-80;
+  @apply border-gray-200;
+  @apply dark:border-zinc-800;
 }
 
 .AccordionHeader {
@@ -32,8 +35,6 @@ h3 {
   justify-content: space-between;
   font-size: 15px;
   line-height: 1;
-  @apply pr-3;
-  @apply mb-1;
 }
 
 .AccordionTrigger:hover {
@@ -51,7 +52,7 @@ h3 {
 }
 
 .AccordionContentText {
-  @apply p-4;
+  @apply pr-6;
 }
 
 .AccordionChevron {

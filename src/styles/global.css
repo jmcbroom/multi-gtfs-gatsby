@@ -4,10 +4,32 @@
 @tailwind utilities;
 
 * {
-  font-family: "Archivo";
+  font-family: "Inter";
 }
 
-a {
+body {
+  @apply text-black;
+  @apply text-opacity-90;
+  @apply dark:bg-black;
+  @apply dark:text-white;
+  @apply dark:text-opacity-80;
+}
+
+button {
+  /* reset */
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+a,
+button {
+  @apply text-black;
+  @apply dark:text-white;
+  @apply text-opacity-90;
   text-decoration: none;
 }
 
@@ -26,31 +48,41 @@ select {
 }
 
 section {
-  @apply p-4;
+  @apply px-2;
 }
 
-.header {
-  font-family: "IBM Plex Sans";
+h1,h2,h3,label, input,.plex {
+  /* font-family: "IBM Plex Sans";  */
+  font-family: "Inter"; 
+}
+
+label, input, textarea {
+  /* font-family: "IBM Plex Sans"; */
+  font-family: "Inter";
+}
+
+h1 {
+  @apply text-xl;
+  @apply font-semibold;
+  @apply mb-3;
 }
 
 h2 {
-  @apply text-xl;
+  @apply text-lg;
   @apply font-semibold;
   @apply mb-2;
 }
 
 h3 {
-  @apply text-lg;
+  @apply text-base;
   @apply font-semibold;
   @apply text-gray-600;
   @apply mb-1;
 }
 
-h4 {
-  @apply text-base;
-  @apply font-semibold;
-  @apply text-gray-600;
-  @apply mb-1;
+ul {
+  @apply list-disc;
+  @apply ml-6;
 }
 
 p {
@@ -67,19 +99,29 @@ th {
 td {
   @apply bg-white;
   @apply text-sm;
-  @apply p-2;
+  @apply p-1.5;
 }
 
 .timetable-header {
   position: sticky;
   top: 0;
   z-index: 1;
-  min-width: 6rem;
+  min-width: 7rem;
 }
 
 .tabular {
   font-family: "Inter";
   font-feature-settings: "tnum" 1;
+}
+
+.fill-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.fill-page > footer {
+  margin-top: auto;
 }
 
 footer {
@@ -88,7 +130,44 @@ footer {
 
 .underline-title {
   @apply text-gray-600;
+  @apply dark:text-zinc-400;
   @apply border-b-2;
+  @apply dark:border-zinc-800;
   @apply px-2;
   @apply md:px-0;
+}
+
+#map {
+  isolation: isolate;
+}
+
+.grayHeader, h4 {
+  @apply bg-gray-200;
+  @apply dark:bg-zinc-800;
+  @apply text-zinc-800;
+  @apply dark:text-gray-200;
+  @apply font-semibold;
+  @apply px-2;
+  @apply py-1;
+  @apply text-sm;
+  /* font-family: "IBM Plex Sans"; */
+  font-family: "Inter";
+}
+
+.grayTitle {
+  @apply bg-gray-100;
+  @apply dark:bg-zinc-700;
+  @apply text-zinc-700;
+  @apply dark:text-gray-100;
+  @apply font-semibold;
+  @apply px-2;
+  @apply py-2;
+  @apply text-lg;
+  @apply mt-2;
+}
+
+.sanityContent p, .sanityContent ul, .sanityContent ol {
+  @apply pl-4;
+  @apply md:pl-2;
+  @apply my-3;
 }

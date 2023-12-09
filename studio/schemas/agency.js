@@ -2,6 +2,12 @@ export default {
   title: "Agency",
   name: "agency",
   type: "document",
+  groups: [
+    {
+      name: 'gtfsIds',
+      title: 'GTFS identifiers',
+    }
+  ],
   fields: [
     {
       name: "name",
@@ -26,10 +32,11 @@ export default {
       },
     },
     {
-      name: "currentFeedIndex",
-      title: "Feed index",
-      description: "The currently valid GTFS feed index #",
-      type: "number"
+      name: "agencyId",
+      title: "Agency ID",
+      description: "The ID of the transit agency -- this is usually 1",
+      type: "string",
+      default: "1"
     },
     {
       name: "color",
@@ -67,6 +74,71 @@ export default {
       title: "Fare content",
       description: "Extended information about this agency's fare rules",
       type: "blockContent"
-    }
+    },
+    {
+      name: "fareCurrency",
+      title: "Fare currency",
+      description: "The currency used for fares",
+      type: "string",
+      options: {
+        list: [
+          { title: "US dollar", value: "USD" },
+          { title: "Canadian dollar", value: "CAD" },
+        ]
+      }
+    },
+    {
+      name: "agencyType",
+      title: "Agency type",
+      description: "The type of transit agency",
+      type: "string",
+      options: {
+        list: [
+          { title: "Local bus", value: "local-bus" },
+          { title: "Rail", value: "rail" },
+          { title: "Express bus", value: "express-bus" },
+          { title: "Streetcar", value: "streetcar" },
+          { title: "Monorail", value: "monorail" },
+        ]
+      }
+    },
+    {
+      name: "realTimeEnabled",
+      title: "Real-time enabled",
+      description: "Is real-time data available for this agency?",
+      type: "boolean",
+      validation: Rule => Rule.required()
+    },
+    {
+      name: "stopIdentifierField",
+      title: "Stop identifier field",
+      description: `The field used to publicly identify stops for this agency.
+  
+        For example, SMART uses stop IDs, while DDOT uses stop codes.`,
+      type: "string",
+      validation: Rule => Rule.required(),
+      options: {
+        list: [
+          { title: "Stop ID", value: "stopId" },
+          { title: "Stop code", value: "stopCode" },
+        ],
+      },
+      group: 'gtfsIds'
+    },
+    {
+      name: "serviceIds",
+      title: "Service IDs",
+      description: "The IDs of the services offered by this agency",
+      type: "array",
+      of: [{ type: "string" }],
+      group: 'gtfsIds'
+    },
+    {
+      name: "currentFeedIndex",
+      title: "Feed index",
+      description: "The currently valid GTFS feed index #",
+      type: "number",
+      group: 'gtfsIds'
+    },
   ]
 }

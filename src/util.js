@@ -1,10 +1,14 @@
 /**
  * Convert the GraphQL arrivalTime to a human-readable string.
- * @param {arrivalTime} time 
- * @param {boolean} showAp 
- * @returns 
+ * @param {arrivalTime} time
+ * @param {boolean} showAp
+ * @returns
  */
-export const formatArrivalTime = (time, showAp=true, twentyFourHr=false) => {
+export const formatArrivalTime = (
+  time,
+  showAp = true,
+  twentyFourHr = false
+) => {
   let hour = time.hours;
   let minutes = time.minutes ? time.minutes.toString().padStart(2, "0") : "00";
   let ap = "am";
@@ -15,7 +19,9 @@ export const formatArrivalTime = (time, showAp=true, twentyFourHr=false) => {
     hour = time.hours;
     ap = "am";
   } else if (time.hours > 12 && time.hours < 24) {
-    if (!twentyFourHr) { hour = time.hours - 12; }
+    if (!twentyFourHr) {
+      hour = time.hours - 12;
+    }
     ap = "pm";
   } else if (time.hours % 12 === 0) {
     hour = 12;
@@ -24,7 +30,7 @@ export const formatArrivalTime = (time, showAp=true, twentyFourHr=false) => {
     hour = time.hours - 24;
     ap = "am";
   }
-  
+
   if (twentyFourHr) {
     hour = time.hours ? time.hours.toString().padStart(2, "0") : "00";
   }
@@ -46,16 +52,18 @@ export const sortTripsByFrequentTimepoint = (trips) => {
   const timepoints = mostTimepointsTrip.stopTimes;
 
   // sort by frequency
-  let stopIdOccurences = trips.map(t => t.stopTimes.map(s => s.stop.stopId));
+  let stopIdOccurences = trips.map((t) =>
+    t.stopTimes.map((s) => s.stop.stopId)
+  );
 
   let defaultTimepoint = 0;
 
   // we iterate through the timepoints and find the most frequent one
   timepoints
-    .map(t => t.stop.stopId)
+    .map((t) => t.stop.stopId)
     .some((tp, j) => {
-      let included = stopIdOccurences.map(sio => sio.includes(tp));
-      if (included.every(i => i)) {
+      let included = stopIdOccurences.map((sio) => sio.includes(tp));
+      if (included.every((i) => i)) {
         defaultTimepoint = tp;
         return true;
       } else {
@@ -64,52 +72,100 @@ export const sortTripsByFrequentTimepoint = (trips) => {
     });
 
   let sorted = trips.sort((a, b) => {
-    let aStopTime = a.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0]?.arrivalTime || 0;
-    let bStopTime = b.stopTimes.filter(st => st.stop.stopId === defaultTimepoint)[0]?.arrivalTime || 0;
+    let aStopTime =
+      a.stopTimes.filter((st) => st.stop.stopId === defaultTimepoint)[0]
+        ?.arrivalTime || 0;
+    let bStopTime =
+      b.stopTimes.filter((st) => st.stop.stopId === defaultTimepoint)[0]
+        ?.arrivalTime || 0;
 
-    return aStopTime.hours * 60 + aStopTime.minutes - (bStopTime.hours * 60 + bStopTime.minutes);
+    return (
+      aStopTime.hours * 60 +
+      aStopTime.minutes -
+      (bStopTime.hours * 60 + bStopTime.minutes)
+    );
   });
 
   return {
     trips: sorted,
-    timepoints: timepoints
+    timepoints: timepoints,
   };
-}
+};
 
 /**
  * Convert GTFS service calendars into the specific days of the week.
  * @param {*} serviceCalendars: an array of a feed's Calendars, describing which days of the week are applicable for that service
  * @returns an object whose keys are `weekday`, `saturday`, `sunday` and the corresponding serviceId values
  */
-export const getServiceDays = ( serviceCalendars ) => {
+export const getServiceDays = (serviceCalendars) => {
   // let's figure out which service ID is which
   let serviceDays = {
     weekday: null,
     saturday: null,
-    sunday: null
-  }
+    sunday: null,
+  };
 
-  let weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+  let weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"];
 
-  serviceCalendars.forEach(sc => {
+  serviceCalendars.forEach((sc) => {
     // evaluate all weekdays of the service calendar
-    let weekdayMatches = weekdays.map(day => sc[day] === 1) 
+    let weekdayMatches = weekdays.map((day) => sc[day] === 1);
 
     // all weekdayMatches are true => assign weekday
-    if (weekdayMatches.every(e => e) && sc.saturday === 0 && sc.sunday === 0) {
-      serviceDays.weekday = sc.serviceId
+    if (
+      weekdayMatches.every((e) => e) &&
+      sc.saturday === 0 &&
+      sc.sunday === 0
+    ) {
+      serviceDays.weekday = sc.serviceId;
     }
     // all weekdayMatches are false + match only Sat or Sun
-    if (weekdayMatches.every(e => !e) && sc.saturday === 1 && sc.sunday === 0) {
-      serviceDays.saturday = sc.serviceId
+    if (
+      weekdayMatches.every((e) => !e) &&
+      sc.saturday === 1 &&
+      sc.sunday === 0
+    ) {
+      serviceDays.saturday = sc.serviceId;
     }
-    if (weekdayMatches.every(e => !e) && sc.sunday === 1 && sc.saturday === 0) {
-      serviceDays.sunday = sc.serviceId
-    }    
-  })
+    if (
+      weekdayMatches.every((e) => !e) &&
+      sc.sunday === 1 &&
+      sc.saturday === 0
+    ) {
+      serviceDays.sunday = sc.serviceId;
+    }
+
+    // all weekdayMatches are false + match both Sat and Sun
+    if (
+      weekdayMatches.every((e) => !e) &&
+      sc.sunday === 1 &&
+      sc.saturday === 1
+    ) {
+      serviceDays.saturday = sc.serviceId;
+      serviceDays.sunday = sc.serviceId;
+    }
+
+    if (
+      weekdayMatches.every((e) => e) &&
+      sc.sunday === 1 &&
+      sc.saturday === 1
+    ) {
+      serviceDays.weekday = sc.serviceId;
+      serviceDays.saturday = sc.serviceId;
+      serviceDays.sunday = sc.serviceId;
+    }
+    
+  });
+
+  // if there's still no weekday match, assign the wednesday serviceCalendar
+  if (!serviceDays.weekday) {
+    serviceDays.weekday = serviceCalendars.find(
+      (sc) => sc.wednesday === 1
+    ).serviceId;
+  }
 
   return serviceDays;
-}
+};
 
 /**
  * Group a route's trips by the serviceDay (weekday/sat/sun)
@@ -118,20 +174,21 @@ export const getServiceDays = ( serviceCalendars ) => {
  * @returns a grouping of trips by weekday, saturday, sunday
  */
 export const getTripsByServiceDay = (trips, serviceDays) => {
-
   let tripsByServiceDay = {
-    'weekday': [],
-    'saturday': [],
-    'sunday': []
-  }
+    weekday: [],
+    saturday: [],
+    sunday: [],
+  };
 
-  Object.keys(serviceDays).forEach(day => {
-    let thisDayTrips = trips.filter(trip => trip.serviceId === serviceDays[day])
-    tripsByServiceDay[day] = thisDayTrips
-  })
+  Object.keys(serviceDays).forEach((day) => {
+    let thisDayTrips = trips.filter(
+      (trip) => trip.serviceId === serviceDays[day]
+    );
+    tripsByServiceDay[day] = thisDayTrips;
+  });
 
-  return tripsByServiceDay
-}
+  return tripsByServiceDay;
+};
 
 /**
  * Group a route's trips by service day & direction
@@ -140,25 +197,32 @@ export const getTripsByServiceDay = (trips, serviceDays) => {
  * @param {*} headsignsByDirectionId: an object whose keys are directionId and values an array of distinct tripHeadsigns in that direction
  * @returns a nested object whose top keys are serviceDays (weekday/saturday/sunday), intermediate keys the directionId, and values are the trips which fall in that filter
  */
-export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDirectionId) => {
+export const getTripsByServiceAndDirection = (
+  trips,
+  serviceDays,
+  headsignsByDirectionId
+) => {
+  let tripsByServiceAndDirection = {};
 
-  let tripsByServiceAndDirection = {}
-
-  Object.keys(serviceDays).forEach(day => {
-    tripsByServiceAndDirection[day] = {}
-    Object.keys(headsignsByDirectionId).forEach(dir => {
-      let filteredTrips = trips.filter(trip => (trip.serviceId) === serviceDays[day] && trip.directionId === parseInt(dir))
+  Object.keys(serviceDays).forEach((day) => {
+    tripsByServiceAndDirection[day] = {};
+    Object.keys(headsignsByDirectionId).forEach((dir) => {
+      let filteredTrips = trips.filter(
+        (trip) =>
+          trip.serviceId === serviceDays[day] &&
+          trip.directionId === parseInt(dir)
+      );
       if (filteredTrips.length > 0) {
-        tripsByServiceAndDirection[day][dir] = sortTripsByFrequentTimepoint(filteredTrips).trips
+        tripsByServiceAndDirection[day][dir] =
+          sortTripsByFrequentTimepoint(filteredTrips).trips;
+      } else {
+        tripsByServiceAndDirection[day][dir] = [];
       }
-      else {
-        tripsByServiceAndDirection[day][dir] = []
-      }
-    })
-  })
+    });
+  });
 
-  return tripsByServiceAndDirection
-}
+  return tripsByServiceAndDirection;
+};
 
 /**
  * Get distinct tripHeadsigns for each directionId of a route
@@ -166,28 +230,31 @@ export const getTripsByServiceAndDirection = (trips, serviceDays, headsignsByDir
  * @returns an object whose keys are directionIds and values an array of distinct tripHeadsigns
  */
 export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
-  let headsignsByDirectionId = {}
-  const directions = [...new Set(trips.map(trip => trip.directionId))].sort()
-  directions.forEach(dir => {
-    let tripsThisDirection = trips.filter(trip => trip.directionId === dir)
+  let headsignsByDirectionId = {};
+  const directions = [...new Set(trips.map((trip) => trip.directionId))].sort();
+  directions.forEach((dir) => {
+    let tripsThisDirection = trips.filter((trip) => trip.directionId === dir);
     // get th unique tripHeadsigns
-    let headsigns = [...new Set(tripsThisDirection.map(trip => trip.tripHeadsign))]
-    headsignsByDirectionId[dir] = { headsigns: headsigns }
-  })
+    let headsigns = [
+      ...new Set(tripsThisDirection.map((trip) => trip.tripHeadsign)),
+    ];
+    headsignsByDirectionId[dir] = { headsigns: headsigns };
+  });
 
-  if(sanityRoute) {
+  if (sanityRoute) {
     sanityRoute.directions.forEach((dir, idx) => {
-      let directionId = dir.directionId
+      let directionId = dir.directionId;
       if (dir.directionHeadsign) {
         headsignsByDirectionId[directionId].headsigns = [dir.directionHeadsign];
       }
       if (dir.directionDescription) {
-        headsignsByDirectionId[directionId].description = dir.directionDescription;
+        headsignsByDirectionId[directionId].description =
+          dir.directionDescription;
       }
     });
   }
-  return headsignsByDirectionId
-}
+  return headsignsByDirectionId;
+};
 
 /**
  * Create a GeoJSON FeatureCollection from the GTFS and Sanity representations of a route.
@@ -195,31 +262,139 @@ export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
  * @param {*} gtfsRoute: the Postgres data about the route
  * @returns GeoJSON feature collection
  */
-export const createRouteFc = (sanityRoute, gtfsRoute) => { 
-
+export const createRouteFc = (sanityRoute, gtfsRoute) => {
   // iterate through the extendedRouteDirections
-  let features = sanityRoute.directions.map(direction => {
-
+  let features = sanityRoute.directions.map((direction) => {
     // parse the directionShape GeoJSON feature
-    let feature = JSON.parse(direction.directionShape)[0]
+    let feature = JSON.parse(direction.directionShape)[0];
 
     // attach the GTFS attributes to properties
-    feature.properties = {...gtfsRoute}
+    feature.properties = { ...gtfsRoute };
 
     // add two pieces of extendedRouteDir info
-    feature.properties.directionDescription = direction.directionDescription
-    feature.properties.directionId = direction.directionId
+    feature.properties.directionDescription = direction.directionDescription;
+    feature.properties.directionId = direction.directionId;
 
-    return feature
-  })
+    return feature;
+  });
 
   let featureCollection = {
     type: "FeatureCollection",
-    features: features
-  }
+    features: features,
+  };
 
-  return featureCollection
-}
+  return featureCollection;
+};
+
+/**
+ * Create a GeoJSON FeatureCollection of vehicles
+ * from the BusTime API response and the Sanity route directions
+ * @param {*} vehicles: an array of vehicle objects
+ * @param {*} patterns: an array of pattern objects
+ * @param {*} route: the Sanity route object
+ * @param {*} agency: the agency object
+ * @returns GeoJSON feature collection
+ */
+
+export const createVehicleFc = (vehicles, patterns, route, agency) => {
+  // Create a GeoJSON FeatureCollection of vehicles
+  // from the BusTime API response and the Sanity route directions
+  if (!vehicles || !patterns || !route) return null;
+
+  // create a GeoJSON feature for each vehicle
+  let features = vehicles.map((v) => {
+    // find the pattern and direction for this vehicle
+    let pattern = patterns.find((p) => p.pid === v.pid);
+
+    let direction =
+      route.directions.find(
+        (d) =>
+          d.directionDescription
+            .toLowerCase()
+            .indexOf(pattern?.rtdir.toLowerCase()) > -1
+      ) || "unknown";
+
+    if (direction === undefined || direction === "unknown") {
+      // special case for DDOT 3
+      if (v.des === "Downtown" && v.rt === "3") {
+        direction = route.directions.find(
+          (d) => d.directionDescription.toLowerCase().indexOf("east") > -1
+        );
+        pattern = patterns.find((p) => p.rtdir === "EAST");
+      }
+      // special case for DDOT 3
+      if (v.rt === "18") {
+        direction = route.directions.find(
+          (d) => d.directionDescription.toLowerCase().indexOf("west") > -1
+        );
+        pattern = patterns.find((p) => p.rtdir === "WEST");
+      }
+
+      if (v.rt === "29") {
+        direction = route.directions.find(
+          (d) => d.directionDescription.toLowerCase().indexOf("north") > -1
+        );
+        pattern = patterns.find((p) => p.rtdir === "NORTH");
+      }
+
+      if (agency.slug.current === "theride") {
+        // fallback to first point
+        let newDirection = route.directions.find((d) => {
+          let parsedShape = JSON.parse(d.directionShape);
+          let firstPoint = parsedShape[0]['geometry']['coordinates'][0][0].toFixed(3);
+          let firstVidPtLon = pattern.pt[0].lon.toFixed(3)
+          if (firstPoint === firstVidPtLon) {
+            return true
+          }
+          else {
+            let lastPoint = parsedShape[parsedShape.length - 1]['geometry']['coordinates'][0][0].toFixed(3);
+            let lastVidPtLon = pattern.pt[pattern.pt.length - 1].lon.toFixed(3)
+            if (lastPoint === lastVidPtLon) {
+              return true
+            }
+          }
+        })
+        if (newDirection) {
+          direction = newDirection
+        }
+      }
+    }
+
+    // get the next stops from the pattern and distance traveled
+    let nextStops = pattern?.pt.filter((p) => p.pdist > v.pdist && p.stpid);
+
+    if (agency.slug.current === "transit-windsor") {
+      // get the next stop from the route direction
+      // let nextStop = direction.stops.find((s) => s.stopId === v.stpid);
+      // if (nextStop) {
+      //   nextStops = [nextStop];
+      // }
+    }
+    // return a GeoJSON feature
+    return {
+      type: "Feature",
+      properties: {
+        ...v,
+        ...route,
+        agency: agency.slug.current,
+        description: direction.directionDescription || `unknown`,
+        headsign: direction.directionHeadsign || `unknown`,
+        nextStop: nextStops ? nextStops[0] : null,
+        nextStops: nextStops ? nextStops : null,
+        bearing: parseInt(v.hdg),
+      },
+      geometry: {
+        type: "Point",
+        coordinates: [parseFloat(v.lon), parseFloat(v.lat)],
+      },
+    };
+  });
+
+  return {
+    type: "FeatureCollection",
+    features: features,
+  };
+};
 
 /**
  * Create a GeoJSON FeatureCollection from the GTFS and Sanity representations of a route.
@@ -228,98 +403,177 @@ export const createRouteFc = (sanityRoute, gtfsRoute) => {
  * @param {boolean} timepointsOnly: filter the collection down to timepoints
  * @returns GeoJSON feature collection of timepoints
  */
-export const createStopsFc = (sanityRoute, trips, timepointsOnly=false, shortFormat=true) => {
-
+export const createStopsFc = (
+  sanityRoute,
+  trips,
+  timepointsOnly = false,
+  shortFormat = true
+) => {
   // store GeoJSON features here to include with the featureCollection
-  let features = []
+  let features = [];
 
   // iterate through each direction on weekday service
-  Object.keys(trips.weekday).forEach(key => {
-
+  Object.keys(trips.weekday).forEach((key) => {
     // get the timepoints from the trip with the most timepoints
     const mostTimepointsTrip = trips.weekday[key].sort((a, b) => {
       return b.stopTimes.length - a.stopTimes.length;
     })[0];
-    
+
     let stops = mostTimepointsTrip.stopTimes
-      .filter(st => !timepointsOnly || st.timepoint === 1)
-      .map(st => st.stop);
+      .filter((st) => !timepointsOnly || st.timepoint === 1)
+      .map((st) => st.stop);
 
-    stops.forEach(stop => {
-
+    stops.forEach((stop) => {
       // create a new GeoJSON feature
       let stopFeature = {
         type: "Feature",
         geometry: {
           type: "Point",
-          coordinates: [stop.stopLon, stop.stopLat]
+          coordinates: [stop.stopLon, stop.stopLat],
         },
         properties: {
-          ...stop
-        }
-      }
+          ...stop,
+        },
+      };
 
       // strip out the name of the route, for shorter map labels
       // ex, on DDOT 39, timepoint `Puritan & Livernois` => `Livernois`
-      if(shortFormat) {
-        stopFeature.properties.stopName = stopFeature.properties.stopName.replace(`${sanityRoute.longName} & `, '')
+      if (shortFormat) {
+        stopFeature.properties.stopName =
+          stopFeature.properties.stopName.replace(
+            `${sanityRoute.longName} & `,
+            ""
+          );
       }
 
-      features.push(stopFeature)
-
-    })
-  })
+      features.push(stopFeature);
+    });
+  });
 
   return {
     type: "FeatureCollection",
-    features: features
-  }
-}
+    features: features,
+  };
+};
 
 /**
  * Blend GTFS and Sanity data about an agency.
- * 
- * @param {} gtfsAgency 
- * @param {*} sanityAgency 
- * @returns 
+ *
+ * @param {} gtfsAgency
+ * @param {*} sanityAgency
+ * @returns
  */
 export const createAgencyData = (gtfsAgency, sanityAgency) => {
+  if (!sanityAgency) return gtfsAgency;
 
-  gtfsAgency.slug = sanityAgency.slug
-  gtfsAgency.content = sanityAgency.content
-  gtfsAgency.description = sanityAgency.description
-  gtfsAgency.name = sanityAgency.name
-  gtfsAgency.color = sanityAgency.color
-  gtfsAgency.textColor = sanityAgency.textColor
-  gtfsAgency.fareAttributes = sanityAgency.fareAttributes?.length ?
-    sanityAgency.fareAttributes : gtfsAgency.fareAttributes
-  gtfsAgency.fareContent = sanityAgency.fareContent
-  
-  return gtfsAgency
+  gtfsAgency.slug = sanityAgency.slug;
+  gtfsAgency.content = sanityAgency.content;
+  gtfsAgency.description = sanityAgency.description;
+  gtfsAgency.name = sanityAgency.name;
+  gtfsAgency.color = sanityAgency.color;
+  gtfsAgency.textColor = sanityAgency.textColor;
+  gtfsAgency.fareAttributes = sanityAgency.fareAttributes?.length
+    ? sanityAgency.fareAttributes
+    : gtfsAgency.fareAttributes;
+  gtfsAgency.fareContent = sanityAgency.fareContent;
+  gtfsAgency.realTimeEnabled = sanityAgency.realTimeEnabled;
+  gtfsAgency.stopIdentifierField = sanityAgency.stopIdentifierField;
 
-}
+  return gtfsAgency;
+};
 
 /**
  * Blend GTFS and Sanity data about a given route.
- * @param {*} gtfsRoute 
- * @param {*} sanityRoute 
- * @returns 
+ * @param {*} gtfsRoute
+ * @param {*} sanityRoute
+ * @returns
  */
 export const createRouteData = (gtfsRoute, sanityRoute) => {
-  gtfsRoute.routeLongName = sanityRoute.longName
-  gtfsRoute.routeColor = sanityRoute.routeColor?.hex || sanityRoute.color?.hex
-  gtfsRoute.routeTextColor = sanityRoute.routeTextColor?.hex || sanityRoute.textColor?.hex
-  gtfsRoute.mapPriority = sanityRoute.mapPriority
-  gtfsRoute.directions = sanityRoute.directions
-  return gtfsRoute
-}
+  if (!sanityRoute) return gtfsRoute;
+  gtfsRoute.routeLongName = sanityRoute.longName;
+  gtfsRoute.routeColor = sanityRoute.routeColor?.hex || sanityRoute.color?.hex;
+  gtfsRoute.routeTextColor =
+    sanityRoute.routeTextColor?.hex || sanityRoute.textColor?.hex;
+  gtfsRoute.mapPriority = sanityRoute.mapPriority;
+  gtfsRoute.directions = sanityRoute.directions;
+  gtfsRoute.displayShortName =
+    sanityRoute.displayShortName || gtfsRoute.routeShortName;
+  return gtfsRoute;
+};
 
 /**
  * Is it currently weekday/saturday/sunday?
  */
 export const dayOfWeek = () => {
-  let dow = new Date().getDay()
-  if(dow === 0) { return `sunday` }
-  if(dow === 6) { return `saturday` }
-  return `weekday`
-}
+  let dow = new Date().getDay();
+  if (dow === 0) {
+    return `sunday`;
+  }
+  if (dow === 6) {
+    return `saturday`;
+  }
+  return `weekday`;
+};
+
+export const matchPredictionToRoute = (prediction, routes, patterns) => {
+  let route = routes.filter(
+    (r) =>
+      r.routeShortName === prediction.rt && r.feedIndex === prediction.agency
+  )[0];
+
+  let direction = route.directions.filter(
+    (direction) =>
+      direction.directionDescription.toLowerCase().slice(0, 3) ===
+      prediction.rtdir.toLowerCase().slice(0, 3)
+  )[0];
+
+  // Slightly insane workaround for TheRide
+  if (!direction && patterns && patterns['bustime-response'] && patterns['bustime-response']['ptr']) {
+    patterns['bustime-response']['ptr'].forEach((ptrn) => {
+      ptrn.pt.forEach((pt) => {
+        if (pt.stpid === prediction.stpid) {
+          route.directions.forEach((dir) => {
+            let firstPoint = JSON.parse(dir.directionShape)[0]['geometry']['coordinates'][0][0].toFixed(3);
+            let firstVidPtLon = ptrn.pt[0].lon.toFixed(3)
+            if (firstPoint === firstVidPtLon) {
+              direction = dir
+            }
+          })
+        }
+      })
+    })
+  }
+
+  return { route, direction };
+};
+
+export const matchPredictionToVehicle = (prediction, vehicles) => {
+  let vehicle = vehicles.find((v) => v.vid === prediction.vid);
+  return vehicle;
+};
+
+export const createAllStopsFc = ({ allStops, agencies }) => {
+  let allStopsFc = {
+    type: "FeatureCollection",
+    features: [],
+  };
+
+  allStops.forEach((stop) => {
+    let agency = agencies.find((a) => a.currentFeedIndex === stop.feedIndex);
+    let feature = {
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [stop.stopLon, stop.stopLat],
+      },
+      properties: {
+        stopId: stop.stopId,
+        stopName: stop.stopName,
+        stopCode: stop.stopCode,
+        agencySlug: agency.slug.current,
+      },
+    };
+    allStopsFc.features.push(feature);
+  });
+  return allStopsFc;
+};
