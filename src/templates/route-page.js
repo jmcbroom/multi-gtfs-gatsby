@@ -65,10 +65,14 @@ const Route = ({ data, pageContext }) => {
         }
       });
       trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
-    })
+    });
   });
 
-  let serviceDays = getServiceDays(serviceCalendars.filter(sc => data.agency.serviceIds.includes(sc.serviceId)));
+  let serviceDays = getServiceDays(
+    serviceCalendars.filter((sc) =>
+      data.agency.serviceIds.includes(sc.serviceId)
+    )
+  );
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(
@@ -118,20 +122,24 @@ const Route = ({ data, pageContext }) => {
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled) return;
 
-    let url = `/.netlify/functions/route?routeId=${sanityRoute.shortName}&agency=${sanityAgency.slug.current}`
+    let url = `/.netlify/functions/route?routeId=${sanityRoute.shortName}&agency=${sanityAgency.slug.current}`;
 
-    if (sanityAgency.slug.current === 'transit-windsor' && !patterns) {
+    if (sanityAgency.slug.current === "transit-windsor" && !patterns) {
       return;
     }
-    if (sanityAgency.slug.current === 'transit-windsor' && patterns) {
-      url = `/.netlify/functions/route?routeId=${sanityRoute.shortName}&agency=${sanityAgency.slug.current}&patterns=${patterns.map(p => p.pid).join(',')}`
+    if (sanityAgency.slug.current === "transit-windsor" && patterns) {
+      url = `/.netlify/functions/route?routeId=${
+        sanityRoute.shortName
+      }&agency=${sanityAgency.slug.current}&patterns=${patterns
+        .map((p) => p.pid)
+        .join(",")}`;
     }
 
     fetch(url)
       .then((r) => r.json())
       .then((d) => {
-        if (sanityAgency.slug.current === 'transit-windsor') {
-          let asVehicles = d.map(v => {
+        if (sanityAgency.slug.current === "transit-windsor") {
+          let asVehicles = d.map((v) => {
             return {
               vid: v.name,
               lat: v.lat.toString(),
@@ -140,20 +148,25 @@ const Route = ({ data, pageContext }) => {
               rt: sanityRoute.shortName,
               des: v.headsignText,
               pid: v.patternId,
-              spd: v.velocity
-            }
-          })
+              spd: v.velocity,
+            };
+          });
           setVehicles(asVehicles);
-        }
-        else {
+        } else {
           setVehicles(d["bustime-response"]["vehicle"]);
         }
       });
-  }, [now, patterns, sanityRoute.shortName, sanityAgency.realTimeEnabled, sanityAgency.slug]);
+  }, [
+    now,
+    patterns,
+    sanityRoute.shortName,
+    sanityAgency.realTimeEnabled,
+    sanityAgency.slug,
+  ]);
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled || !vehicles) return;
-    if (sanityAgency.slug.current === 'transit-windsor') return;
+    if (sanityAgency.slug.current === "transit-windsor") return;
 
     fetch(
       `/.netlify/functions/predictions?vehicleId=${vehicles
@@ -174,18 +187,17 @@ const Route = ({ data, pageContext }) => {
     )
       .then((r) => r.json())
       .then((d) => {
-        if (sanityAgency.slug.current === 'transit-windsor') {
-          let filtered = d.filter(p => p.routeCode === sanityRoute.shortName)
-          let asPatterns = filtered.map(p => {
+        if (sanityAgency.slug.current === "transit-windsor") {
+          let filtered = d.filter((p) => p.routeCode === sanityRoute.shortName);
+          let asPatterns = filtered.map((p) => {
             return {
               pid: p.patternID,
-              rtdir: p.directionName.replace('BOUND', ''),
-              pt: []
-            }
-          })
+              rtdir: p.directionName.replace("BOUND", ""),
+              pt: [],
+            };
+          });
           setPatterns(asPatterns);
-        }
-        else {
+        } else {
           setPatterns(d["bustime-response"]["ptr"]);
         }
       });
@@ -213,8 +225,7 @@ const Route = ({ data, pageContext }) => {
       </Helmet>
 
       <div className="mt-4">
-
-      <AgencySlimHeader agency={agencyData} />
+        <AgencySlimHeader agency={agencyData} />
       </div>
 
       <div className="bg-gray-300 dark:bg-zinc-900">
@@ -254,7 +265,7 @@ const Route = ({ data, pageContext }) => {
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
           <div className="md:grid md:grid-cols-2 gap-2 pb-6">
-            {agencyData.realTimeEnabled &&
+            {agencyData.realTimeEnabled && (
               <RoutePredictions
                 vehicles={createVehicleFc(
                   vehicles,
@@ -266,7 +277,7 @@ const Route = ({ data, pageContext }) => {
                 setTrackedBus={setTrackedBus}
                 now={now}
               />
-            }
+            )}
             {sanityRoute && (
               <RouteMap
                 routeFc={createRouteFc(sanityRoute, gtfsRoute)}
@@ -355,7 +366,12 @@ const Route = ({ data, pageContext }) => {
 };
 
 export const query = graphql`
-  query RouteQuery($feedIndex: Int, $routeNo: String, $agencySlug: String, $serviceIds: [String!]) {
+  query RouteQuery(
+    $feedIndex: Int
+    $routeNo: String
+    $agencySlug: String
+    $serviceIds: [String!]
+  ) {
     route: sanityRoute(
       shortName: { eq: $routeNo }
       agency: { slug: { current: { eq: $agencySlug } } }
@@ -412,7 +428,9 @@ export const query = graphql`
         routeTextColor
         routeSortOrder
         feedIndex
-        trips: tripsByFeedIndexAndRouteIdList(filter: {serviceId: {in: $serviceIds}}) {
+        trips: tripsByFeedIndexAndRouteIdList(
+          filter: { serviceId: { in: $serviceIds } }
+        ) {
           serviceId
           directionId
           tripId

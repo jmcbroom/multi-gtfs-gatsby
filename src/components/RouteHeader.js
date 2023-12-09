@@ -16,7 +16,8 @@ const RouteHeader = ({ routeShortName, displayShortName, routeLongName, routeCol
     1: 'w-10',
     2: 'w-10',
     3: 'w-12',
-    4: 'w-16'
+    4: 'w-16',
+    5: 'w-20',
   }
 
 

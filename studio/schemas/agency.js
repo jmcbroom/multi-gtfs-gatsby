@@ -96,7 +96,9 @@ export default {
         list: [
           { title: "Local bus", value: "local-bus" },
           { title: "Rail", value: "rail" },
-          { title: "Express bus", value: "express-bus" }
+          { title: "Express bus", value: "express-bus" },
+          { title: "Streetcar", value: "streetcar" },
+          { title: "Monorail", value: "monorail" },
         ]
       }
     },

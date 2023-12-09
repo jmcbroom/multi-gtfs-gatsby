@@ -10,7 +10,7 @@ const AgencySlimHeader = ({ agency }) => {
   const { slug, name, color, textColor } = agency;
 
   return (
-    <div className="px-2 py-1" style={{background: color.hex, opacity: 0.65}}>
+    <div className="px-3 md:px-2 py-1" style={{background: color.hex, opacity: 0.65}}>
       <Link to={`/${slug.current}/`}>
         <span className="text-left text-sm font-bold" style={{color: textColor.hex}}>
           {name}

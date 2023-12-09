@@ -1,15 +1,16 @@
 import { graphql } from "gatsby";
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
-import RouteHeader from "../components/RouteHeader";
-import RouteTimeTable from "../components/RouteTimeTable";
-import ServicePicker from "../components/ServicePicker";
-
 import PortableText from "react-portable-text";
+import RouteHeader from "../components/RouteHeader";
+import RouteTimepoints from "../components/RouteTimepoints";
+import RouteMap from "../components/RouteMap";
 import "../styles/tabs.css";
 import {
   createAgencyData,
   createRouteData,
+  createRouteFc,
+  createStopsFc,
   dayOfWeek,
   getHeadsignsByDirectionId,
   getServiceDays,
@@ -17,19 +18,7 @@ import {
   getTripsByServiceDay
 } from "../util";
 
-const components = {
-  marks: {
-    link: ({value, children}) => {
-      // Read https://css-tricks.com/use-target_blank/
-      const { blank, href } = value
-      return blank ?
-        <a href={href} target="_blank" rel="noreferrer">{children} something</a>
-        : <a href={href} target="_blank" rel="noreferrer">{children} something2</a>
-    }
-  }
-}
-
-const D2A2 = ({ data }) => {
+const PeopleMover = ({ data }) => {
   let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.agency;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
@@ -53,21 +42,48 @@ const D2A2 = ({ data }) => {
     trips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
       trip.stopTimes.forEach((st, idx) => {
-        if (timepoints.includes(st.stop[agencyData.stopIdentifierField])) {
-          st.timepoint = 1;
-        }
+        st.timepoint = 1;
       });
       trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
+      // remove "Southbound/Northbound" from stop names
+      trip.stopTimes.forEach((st) => {
+        if (st.stop.stopName.includes("Southbound")) {
+          st.stop.stopName = st.stop.stopName
+            .replace(" - Southbound", "")
+            .trim();
+        }
+        if (st.stop.stopName.includes("Northbound")) {
+          st.stop.stopName = st.stop.stopName
+            .replace(" - Northbound", "")
+            .trim();
+        }
+        st.stop.stopName = st.stop.stopName.replace("St", "").trim();
+        st.stop.stopName = st.stop.stopName.replace("Ave", "").trim();
+      });
     });
 
+    // same for longTrips
     longTrips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
       trip.stopTimes.forEach((st, idx) => {
-        if (timepoints.includes(st.stop[agencyData.stopIdentifierField])) {
-          st.timepoint = 1;
-        }
+        st.timepoint = 1;
       });
       trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
+      // remove "Southbound/Northbound" from stop names
+      trip.stopTimes.forEach((st) => {
+        if (st.stop.stopName.includes("Southbound")) {
+          st.stop.stopName = st.stop.stopName
+            .replace(" - Southbound", "")
+            .trim();
+        }
+        if (st.stop.stopName.includes("Northbound")) {
+          st.stop.stopName = st.stop.stopName
+            .replace(" - Northbound", "")
+            .trim();
+        }
+        st.stop.stopName = st.stop.stopName.replace("St", "").trim();
+        st.stop.stopName = st.stop.stopName.replace("Ave", "").trim();
+      });
     });
   });
 
@@ -116,7 +132,7 @@ const D2A2 = ({ data }) => {
     <div>
       <Helmet>
         <title>{`${agencyData.name} ${routeData.displayShortName}: ${routeData.routeLongName}`}</title>
-        <meta property="og:url" content={`https://transit.det.city/d2a2/`} />
+        <meta property="og:url" content={`https://transit.det.city/qline/`} />
         <meta property="og:type" content={`website`} />
         <meta
           property="og:title"
@@ -137,53 +153,47 @@ const D2A2 = ({ data }) => {
         content={sanityAgency.description}
       />
 
-      <div id="schedule" className="grayHeader">Schedule</div>
-      <div className="bg-gray-100 dark:bg-zinc-700 p-4">
-        <ServicePicker
-          services={tripsByServiceDay}
-          {...{ service, setService }}
-        />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mt-4 md:gap-8 mb-4">
-        <div>
-          <div className="grayHeader -mb-10 z-20 block relative">
-            Eastbound to Detroit
-          </div>
-          <RouteTimeTable
-            trips={tripsByServiceAndDirection}
-            route={gtfsRoute}
-            agency={agencyData}
-            service={service}
-            direction={0}
-          />
-        </div>
-        <div>
-          <div className="grayHeader -mb-10 z-20 block relative text-lg">
-            Westbound to Ann Arbor
-          </div>
-          <RouteTimeTable
-            trips={tripsByServiceAndDirection}
-            route={gtfsRoute}
-            agency={agencyData}
-            service={service}
-            direction={1}
-          />
-        </div>
-      </div>
-      <PortableText
-        className="mt-2 mb-4 sanityContent"
-        content={sanityRoute.description}
-        components={components}
+      <RouteMap
+        routeFc={createRouteFc(sanityRoute, gtfsRoute)}
+        stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
+        timepointsFc={createStopsFc(
+          sanityRoute,
+          tripsByServiceAndDirection,
+          true
+        )}
+        vehicleFc={null}
+        agency={agencyData}
+        trackedBus={null}
+        mapHeight={450}
+        mapBearing={-30}
+        mapPadding={15}
       />
+
+      <h4 className="underline-title grayHeader mt-4">
+        Where does the People Mover stop?
+      </h4>
+      <p className="py-2">
+        The People Mover travels in a counterclockwise loop around downtown Detroit.
+      </p>
+      <RouteTimepoints
+        agency={agencyData}
+        route={routeData} 
+        trips={tripsByServiceAndDirection}
+        headsigns={headsignsByDirectionId}
+      />
+      <PortableText
+        className="prose prose-lg dark:prose-dark p-2 mt-4 flex gap-2 flex-col"
+        content={sanityRoute.description}
+        />
     </div>
   );
 };
 
 export const query = graphql`
-  query D2A2Query {
+  query PeopleMoverQuery {
     route: sanityRoute(
-      shortName: { eq: "D2A2" }
-      agency: { slug: { current: { eq: "d2a2" } } }
+      shortName: { eq: "DPM" }
+      agency: { slug: { current: { eq: "people-mover" } } }
     ) {
       color {
         hex
@@ -208,7 +218,7 @@ export const query = graphql`
         directionShape
       }
     }
-    agency: sanityAgency(slug: { current: { eq: "d2a2" } }) {
+    agency: sanityAgency(slug: { current: { eq: "people-mover" } }) {
       name
       color {
         hex
@@ -226,7 +236,9 @@ export const query = graphql`
       }
     }
     postgres {
-      routes: routesList(condition: { feedIndex: 26, routeShortName: "D2A2" }) {
+      routes: routesList(
+        condition: { feedIndex: 32, routeShortName: "DPM" }
+      ) {
         agencyId
         routeShortName
         routeLongName
@@ -239,7 +251,7 @@ export const query = graphql`
         feedIndex
         trips: tripsByFeedIndexAndRouteIdList(
           filter: {
-            serviceId: { in: ["c_67584_b_78112_d_31", "c_67584_b_78112_d_96"] }
+            serviceId: { in: ["friday", "saturday", "sunday", "weekday"] }
           }
         ) {
           serviceId
@@ -290,7 +302,7 @@ export const query = graphql`
           direction
         }
       }
-      agencies: agenciesList(condition: { feedIndex: 26 }) {
+      agencies: agenciesList(condition: { feedIndex: 32 }) {
         agencyName
         agencyUrl
         agencyTimezone
@@ -322,4 +334,4 @@ export const query = graphql`
   }
 `;
 
-export default D2A2;
+export default PeopleMover;
