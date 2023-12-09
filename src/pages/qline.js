@@ -1,23 +1,21 @@
 import { graphql } from "gatsby";
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
-import RouteHeader from "../components/RouteHeader";
-import RouteTimeTable from "../components/RouteTimeTable";
-import ServicePicker from "../components/ServicePicker";
-import RouteMap from "../components/RouteMap";
 import PortableText from "react-portable-text";
+import RouteHeader from "../components/RouteHeader";
+import RouteTimepoints from "../components/RouteTimepoints";
+import RouteMap from "../components/RouteMap";
 import "../styles/tabs.css";
 import {
   createAgencyData,
   createRouteData,
   createRouteFc,
   createStopsFc,
-  createVehicleFc,
   dayOfWeek,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
-  getTripsByServiceDay,
+  getTripsByServiceDay
 } from "../util";
 
 const Qline = ({ data }) => {
@@ -47,14 +45,45 @@ const Qline = ({ data }) => {
         st.timepoint = 1;
       });
       trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
+      // remove "Southbound/Northbound" from stop names
+      trip.stopTimes.forEach((st) => {
+        if (st.stop.stopName.includes("Southbound")) {
+          st.stop.stopName = st.stop.stopName
+            .replace(" - Southbound", "")
+            .trim();
+        }
+        if (st.stop.stopName.includes("Northbound")) {
+          st.stop.stopName = st.stop.stopName
+            .replace(" - Northbound", "")
+            .trim();
+        }
+        st.stop.stopName = st.stop.stopName.replace("St", "").trim();
+        st.stop.stopName = st.stop.stopName.replace("Ave", "").trim();
+      });
     });
 
+    // same for longTrips
     longTrips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
       trip.stopTimes.forEach((st, idx) => {
         st.timepoint = 1;
       });
       trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
+      // remove "Southbound/Northbound" from stop names
+      trip.stopTimes.forEach((st) => {
+        if (st.stop.stopName.includes("Southbound")) {
+          st.stop.stopName = st.stop.stopName
+            .replace(" - Southbound", "")
+            .trim();
+        }
+        if (st.stop.stopName.includes("Northbound")) {
+          st.stop.stopName = st.stop.stopName
+            .replace(" - Northbound", "")
+            .trim();
+        }
+        st.stop.stopName = st.stop.stopName.replace("St", "").trim();
+        st.stop.stopName = st.stop.stopName.replace("Ave", "").trim();
+      });
     });
   });
 
@@ -120,7 +149,7 @@ const Qline = ({ data }) => {
       </div>
 
       <PortableText
-        className="prose prose-lg dark:prose-dark mt-2 p-2"
+        className="prose prose-lg dark:prose-dark p-2"
         content={sanityAgency.description}
       />
 
@@ -135,7 +164,26 @@ const Qline = ({ data }) => {
         vehicleFc={null}
         agency={agencyData}
         trackedBus={null}
+        mapHeight={625}
+        mapBearing={-27.5}
       />
+
+      <h4 className="underline-title grayHeader mt-4">
+        Where does the streetcar stop?
+      </h4>
+      <p className="py-2">
+        The streetcar travels north and south between Congress St and Grand Blvd.
+      </p>
+      <RouteTimepoints
+        agency={agencyData}
+        route={routeData}
+        trips={tripsByServiceAndDirection}
+        headsigns={headsignsByDirectionId}
+      />
+      <PortableText
+        className="prose prose-lg dark:prose-dark p-2 mt-4"
+        content={sanityRoute.description}
+        />
     </div>
   );
 };

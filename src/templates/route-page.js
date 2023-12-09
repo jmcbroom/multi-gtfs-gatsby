@@ -193,6 +193,11 @@ const Route = ({ data, pageContext }) => {
 
   let [trackedBus, setTrackedBus] = useState(null);
 
+  console.log(                vehicles,
+    patterns,
+    routeData,
+    agencyData)
+
   return (
     <div>
       <Helmet>
