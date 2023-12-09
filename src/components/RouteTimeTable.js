@@ -1,12 +1,11 @@
 import React from "react";
 import { Link } from "gatsby";
 import StopTimeLabel from "./StopTimeLabel";
-import { faChevronCircleRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronCircleRight, faPlane } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { sortTripsByFrequentTimepoint } from "../util";
 
 const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
-
   let {routeColor} = route;
 
   // white routeColor needs to be gray
@@ -65,6 +64,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
             <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white dark:bg-black tabular">
               <div className="flex flex-col items-center justify-end h-24 bg-white dark:bg-black">
                 <Link to={`/${agency.slug.current}/stop/${s.stop[agency.stopIdentifierField]}`} className="leading-none text-sm font-bold mb-2 px-2">
+                  {(s.stop.stopName.includes("DTW") || s.stop.stopName.includes("METRO AIRPORT")) && <FontAwesomeIcon icon={faPlane} size="normal" className="mx-1" />}
                   {shortenTimepointName(s.stop.stopName)}
                 </Link>
                 <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white dark:bg-black text-gray-700 dark:text-zinc-400" />
@@ -72,8 +72,8 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
               <div style={{
                 position: 'absolute',
                 right: k === 0 ? -10 : null,
-                height: ".5em",
-                bottom: ".5em",
+                height: ".6em",
+                bottom: ".3em",
                 zIndex: 1,
                 width: (k === 0 || k + 1 === timepoints.length) ? "55%" : "100%",
                 backgroundColor: `${routeColor === 'FFFFFF' ? '5f6369' : routeColor}`,

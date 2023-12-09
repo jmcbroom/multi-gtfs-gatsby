@@ -144,6 +144,17 @@ export const getServiceDays = (serviceCalendars) => {
       serviceDays.saturday = sc.serviceId;
       serviceDays.sunday = sc.serviceId;
     }
+
+    if (
+      weekdayMatches.every((e) => e) &&
+      sc.sunday === 1 &&
+      sc.saturday === 1
+    ) {
+      serviceDays.weekday = sc.serviceId;
+      serviceDays.saturday = sc.serviceId;
+      serviceDays.sunday = sc.serviceId;
+    }
+    
   });
 
   // if there's still no weekday match, assign the wednesday serviceCalendar
@@ -294,6 +305,7 @@ export const createVehicleFc = (vehicles, patterns, route, agency) => {
   let features = vehicles.map((v) => {
     // find the pattern and direction for this vehicle
     let pattern = patterns.find((p) => p.pid === v.pid);
+
     let direction =
       route.directions.find(
         (d) =>
@@ -317,20 +329,34 @@ export const createVehicleFc = (vehicles, patterns, route, agency) => {
         );
         pattern = patterns.find((p) => p.rtdir === "WEST");
       }
-      // fallback to first point
-      let newDirection = route.directions.find((d) => {
-        let parsedShape = JSON.parse(d.directionShape);
-        let firstPoint = parsedShape[0]['geometry']['coordinates'][0][0].toFixed(3);
-        let firstVidPtLon = pattern.pt[0].lon.toFixed(3)
-        if (firstPoint === firstVidPtLon) {
-          return true
+
+      if (v.rt === "29") {
+        direction = route.directions.find(
+          (d) => d.directionDescription.toLowerCase().indexOf("north") > -1
+        );
+        pattern = patterns.find((p) => p.rtdir === "NORTH");
+      }
+
+      if (agency.slug.current === "theride") {
+        // fallback to first point
+        let newDirection = route.directions.find((d) => {
+          let parsedShape = JSON.parse(d.directionShape);
+          let firstPoint = parsedShape[0]['geometry']['coordinates'][0][0].toFixed(3);
+          let firstVidPtLon = pattern.pt[0].lon.toFixed(3)
+          if (firstPoint === firstVidPtLon) {
+            return true
+          }
+          else {
+            let lastPoint = parsedShape[parsedShape.length - 1]['geometry']['coordinates'][0][0].toFixed(3);
+            let lastVidPtLon = pattern.pt[pattern.pt.length - 1].lon.toFixed(3)
+            if (lastPoint === lastVidPtLon) {
+              return true
+            }
+          }
+        })
+        if (newDirection) {
+          direction = newDirection
         }
-        else {
-          return false
-        }
-      })
-      if (newDirection) {
-        direction = newDirection
       }
     }
 

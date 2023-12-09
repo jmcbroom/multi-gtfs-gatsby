@@ -42,6 +42,7 @@ const RoutePredictionItem = ({ vehicle, predictions }) => {
     let direction = vehicle.properties.directions.find(
       (d) => d.directionHeadsign === vehicle.properties.headsign
     );
+    if (!direction) { return null }
     let stopsFromTrips = vehicle.properties.trips
       .filter((t) => t.directionId === direction.directionId)
       .map((trip) => trip.stopTimes.map((st) => st.stop))
