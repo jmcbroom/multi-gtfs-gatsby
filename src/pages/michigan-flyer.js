@@ -85,7 +85,6 @@ const MichiganFlyer = ({ data }) => {
   delete tripsByServiceDay['weekday']
   delete tripsByServiceDay['saturday']
   delete tripsByServiceDay['sunday']
-  console.log(tripsByServiceDay)
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(
     trips,
