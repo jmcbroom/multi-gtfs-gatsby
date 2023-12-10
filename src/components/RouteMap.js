@@ -20,6 +20,7 @@ const RouteMap = ({
   mapHeight = 500,
   mapBearing = 0,
   mapPadding = 30,
+  mapOffset=[0, 0]
 }) => {
 
   const routeFeatureCollection = routeFc;
@@ -89,6 +90,7 @@ const RouteMap = ({
     fitBoundsOptions: {
       padding: mapPadding,
       bearing: mapBearing,
+      offset: mapOffset,
       maxZoom: 17
     },
   };

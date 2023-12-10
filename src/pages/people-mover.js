@@ -167,20 +167,21 @@ const PeopleMover = ({ data }) => {
         clickStops={false}
         mapHeight={450}
         mapBearing={-30}
-        mapPadding={15}
+        mapPadding={-20}
+        mapOffset={[0, 20]}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2">
-      <div>
+      <div className="sanityContent">
 
       <h4 className="underline-title grayHeader mt-4">
         Where does the People Mover stop?
       </h4>
-      <p className="py-2">
+      <p>
         The People Mover travels in a counterclockwise loop around downtown Detroit.
       </p>
-      <p className="py-2">
-        Trains arrive at stops every 5 (minutes).
+      <p>
+        Trains arrive at stops every 5 minutes.
       </p>
         <PortableText
           content={sanityRoute.description}

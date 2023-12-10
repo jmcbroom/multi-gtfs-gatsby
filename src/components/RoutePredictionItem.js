@@ -8,7 +8,7 @@ import _ from "lodash";
 import VehicleBadge from "./VehicleBadge";
 import nearestPoint from "@turf/nearest-point";
 
-const RoutePredictionItem = ({ vehicle, predictions }) => {
+const RoutePredictionItem = ({ vehicle, predictions, vehicleType }) => {
   if (!vehicle) {
     return null;
   }
@@ -139,7 +139,7 @@ const RoutePredictionItem = ({ vehicle, predictions }) => {
                 })}
           </div>
           <div className="flex items-end justify-between text-sm pt-2 content-end flex-row-reverse">
-            <VehicleBadge busNumber={vehicle.properties.vid} />
+            <VehicleBadge vehicleType={vehicleType} busNumber={vehicle.properties.vid} />
           </div>
         </AccordionContent>
       ) : (
@@ -162,7 +162,7 @@ const RoutePredictionItem = ({ vehicle, predictions }) => {
                 </div>
               )
             }
-            <VehicleBadge busNumber={vehicle.properties.vid} />
+            <VehicleBadge vehicleType={vehicleType} busNumber={vehicle.properties.vid} />
           </div>
         </AccordionContent>
       )}

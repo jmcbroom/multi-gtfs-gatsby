@@ -20,7 +20,6 @@ const RouteHeader = ({ routeShortName, displayShortName, routeLongName, routeCol
     5: 'w-20',
   }
 
-
   let url = `/${displayShortName.toLowerCase()}`
   if(agency){
     url = `/${agency.slug.current}/route/${displayShortName}`

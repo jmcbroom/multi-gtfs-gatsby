@@ -79,9 +79,13 @@ export default function Layout({ children }) {
                     <span className="">{a.node.name}</span>
                   </Link>
                 ))}
-              <h3 className="mt-4">Regional bus services</h3>
+              <h3 className="mt-4">Downtown transit services</h3>
               {data.allSanityAgency.edges
-                .filter((e) => e.node.agencyType !== "local-bus")
+                .filter(
+                  (e) =>
+                    e.node.agencyType !== "local-bus" &&
+                    e.node.agencyType !== "express-bus"
+                )
                 .map((a) => (
                   <Link
                     to={`/${a.node.slug.current}`}
@@ -90,32 +94,39 @@ export default function Layout({ children }) {
                     <span className="">{a.node.name}</span>
                   </Link>
                 ))}
-            </div>
-            <div className="flex flex-col justify-start gap-2">
-              <h3>Site pages</h3>
-              <Link to={`/region-map`}>Regional transit map</Link>
-              <Link to={`/nearby`}>Transit near me</Link>
-              <Link to={`/about`}>About this site</Link>
 
+              <h3 className="mt-4">Regional bus services</h3>
+              {data.allSanityAgency.edges
+                .filter((e) => e.node.agencyType === "express-bus")
+                .map((a) => (
+                  <Link
+                    to={`/${a.node.slug.current}`}
+                    key={a.node.slug.current}
+                  >
+                    <span className="">{a.node.name}</span>
+                  </Link>
+                ))}
+              <Link to={`/michigan-flyer`}>
+                <span className="">Michigan Flyer</span>
+              </Link>
+            </div>
+
+            <div className="flex flex-col justify-start gap-4">
+              <div className="flex flex-col justify-start gap-2">
+                <h3>Other pages</h3>
+                <Link to={`/region-map`}>Regional transit map</Link>
+                <Link to={`/nearby`}>Transit near me</Link>
+              </div>
+              <div className="flex flex-col justify-start gap-2">
+                <h3>This site</h3>
+                <Link to={`/about`}>About this site</Link>
+                <Link to={`/contact-us`}>Feedback, comments, questions?</Link>
+                <a href="https://github.com/jmcbroom/multi-gtfs-gatsby" className="flex items-center gap-2" target="_blank" rel="noreferrer">multi-gtfs-gatsby <GitHubLogoIcon /></a>
+              </div>
             </div>
           </div>
-          <div className="w-full text-center mt-12 mb-4 gap-6 text-gray-400 flex items-center justify-center">
-            <Link to={`/contact-us/`}>
-                <p>Feedback, comments, questions?</p>
-              </Link>
-            <div className="flex items-center justify-around gap-1">
-              <GitHubLogoIcon />
-              <span>
-                GitHub:{" "}
-                <a
-                  href="https://github.com/jmcbroom/multi-gtfs-gatsby"
-                  target="_blank"
-                  rel="noreferrer"
-                  >
-                  multi-gtfs-gatsby
-                </a>
-              </span>
-            </div>
+          <div className="w-full text-center mt-12 mb-4 gap-6 text-gray-400 flex items-center justify-center border-t border-dotted pt-4 border-gray-400 dark:border-gray-200">
+            {new Date().getFullYear()} - transit.det.city
           </div>
         </footer>
       </div>

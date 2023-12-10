@@ -26,7 +26,7 @@ export const RouteTimepoints = ({ agency, route, trips, headsigns, link=true }) 
             <span className="font-bold text-base">
               {headsigns[idx]?.description || `unknown`}
             </span>
-            <span className="text-gray-600 font-normal text-base"> {adverbs[headsigns[idx]?.description || `to`]} {end}</span>
+            <span className="text-gray-600 dark:text-gray-400 font-normal text-base"> {adverbs[headsigns[idx]?.description || `to`]} {end}</span>
           </div>
           <RouteStopsList
             longTrips={route.longTrips}

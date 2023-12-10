@@ -554,7 +554,7 @@ let stopLayers = [
     interactive: true,
     filter: ["==", "$type", "Point"],
     layout: {
-      "icon-image": "bus",
+      "icon-image": ["get", "vehicleIcon"],
       "icon-size": {
         stops: [
           [8, 0.75],
@@ -905,7 +905,7 @@ for (const style in styles) {
       interactive: true,
       filter: ["==", "$type", "Point"],
       layout: {
-        "icon-image": "bus",
+        "icon-image": ["get", "vehicleIcon"],
         "icon-size": {
           stops: [
             [8, 0.75],
