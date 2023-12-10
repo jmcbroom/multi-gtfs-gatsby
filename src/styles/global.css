@@ -77,6 +77,7 @@ h3 {
   @apply text-base;
   @apply font-semibold;
   @apply text-gray-600;
+  @apply dark:text-zinc-500;
   @apply mb-1;
 }
 

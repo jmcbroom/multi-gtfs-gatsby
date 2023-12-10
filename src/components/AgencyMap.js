@@ -141,7 +141,7 @@ const AgencyMap = ({ routesFc, agency }) => {
           {routes.length > 0 ? (
             <>
               {routes.map((r) => (
-                <RouteHeader {...r} agency={agency} />
+                <RouteHeader {...r} agency={agency} key={r.routeShortName} />
               ))}
             </>
           ) : (

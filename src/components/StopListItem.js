@@ -3,21 +3,21 @@ import React from "react";
 
 const StopListItem = ({ stopTime, feedIndex, routeColor, agency, small = false, link=true }) => {
   let liStyle = {
-    borderColor: `#${routeColor}`
+    borderColor: `${routeColor}`
   };
 
-  // let normalStopStyle = {
-  //   borderColor: `#${routeColor}`,
-  //   backgroundColor: `white`,
-  // };
+  let normalStopStyle = {
+    borderColor: `${routeColor}`,
+    backgroundColor: `white`,
+  };
 
-  // let timepointStyle = {
-  //   borderColor: `black`,
-  //   backgroundColor: `black`,
-  // };
+  let timepointStyle = {
+    borderColor: `black`,
+    backgroundColor: `black`,
+  };
   
-  const normalStopClass = `bg-white dark:bg-black`;
-  const timepointClass = `border-black dark:border-white bg-black dark:bg-white`;
+  const normalStopClass = `bg-white dark:bg-black border-black dark:border-gray-200`;
+  const timepointClass = `border-black dark:border-white bg-gray-800 dark:bg-white`;
 
   return (
     <div
@@ -27,7 +27,7 @@ const StopListItem = ({ stopTime, feedIndex, routeColor, agency, small = false, 
     >
       <span
         className={
-          `${(small ? `w-3 h-3 -ml-2` : `w-5 h-5 -ml-3`)} rounded-full border-4 ${(stopTime.timepoint ? timepointClass : normalStopClass)}`
+          `${(small ? `w-3 h-3 -ml-2` : `w-5 h-5 -ml-3`)} rounded-full border-2 ${(stopTime.timepoint ? timepointClass : normalStopClass)}`
         }
       ></span>
       {link ? 

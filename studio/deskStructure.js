@@ -1,4 +1,4 @@
-import { FaBus, FaCity, FaLongArrowAltRight, FaMap, FaBiking } from "react-icons/fa";
+import { FaBus, FaCity, FaLongArrowAltRight, FaMap, FaBiking, FaComment } from "react-icons/fa";
 
 export default S =>
   S.list()
@@ -35,4 +35,9 @@ export default S =>
       S.listItem().title("Homepage content").child(
         S.editor().id("indexPage").schemaType("indexPage").title("Site content").documentId("index-page-content")
       ),
+      S.divider(),
+      S.listItem()
+        .title("User feedback")
+        .icon(FaComment)
+        .child(S.documentTypeList("comment")),
     ]);
