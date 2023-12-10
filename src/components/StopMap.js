@@ -84,6 +84,7 @@ const StopMap = ({
             name: trackedVehicle.vid,
             routeColor: matchingRoute.properties.routeColor,
             routeTextColor: matchingRoute.properties.routeTextColor,
+            vehicleIcon: "bus",
           },
         });
       }
