@@ -4,7 +4,8 @@ import "../styles/accordion.css";
 import RoutePredictionItem from "./RoutePredictionItem";
 
 const RoutePredictions = ({ vehicles, setTrackedBus, predictions, now }) => {
-
+  
+  console.log(vehicles)
   return (
     <div className="">
       <div className="grayHeader">{vehicles?.features?.length || `No`} bus{vehicles?.features?.length > 1 && `es`} currently being tracked </div>

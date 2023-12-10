@@ -70,9 +70,26 @@ const IndexPage = ({ data }) => {
         </div>
       </div>
       <div>
-        <h2>Other transit services</h2>
+        <h2>Downtown transit services</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-          {otherServices.map((a) => (
+
+        {otherServices.filter((a) => ["qline", "people-mover"].indexOf(a.slug.current) > -1).map((a) => (
+            <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
+            <AgencySlimHeader agency={a} />
+            <div className="px-4 py-4">
+              <Link to={`/${a.slug.current}`} key={a.slug.current}>
+                <h2>{a.name}</h2>
+              </Link>
+              <PortableText content={a.description} className="" />
+            </div>
+          </div>
+        ))}
+        </div>
+      </div>
+      <div>
+        <h2>Regional bus services</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+          {otherServices.filter((a) => ["d2a2"].indexOf(a.slug.current) > -1).map((a) => (
             <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
               <AgencySlimHeader agency={a} />
               <div className="px-4 py-4">

@@ -177,12 +177,15 @@ const RouteIntroduction = ({ agency, route, trips, headsigns }) => {
         Here's a list of the major stops in each travel direction:
       </p>
         </section>
+        <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-8">
         <RouteTimepoints
           agency={agency}
           route={route}
           trips={trips}
           headsigns={headsigns}
         /> 
+
+        </div>
       </div>
 
       <table className="w-auto border-collapse mt-4 w-100 hidden">
