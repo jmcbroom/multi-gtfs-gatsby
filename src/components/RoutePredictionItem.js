@@ -48,7 +48,7 @@ const RoutePredictionItem = ({ vehicle, predictions }) => {
       .map((trip) => trip.stopTimes.map((st) => st.stop))
       .flat();
 
-    let uniqueStops = _.uniqBy(stopsFromTrips, "stopCode");
+    let uniqueStops = _.uniqBy(stopsFromTrips, "stopId");
 
     let featureCollection = {
       type: "FeatureCollection",
@@ -91,11 +91,11 @@ const RoutePredictionItem = ({ vehicle, predictions }) => {
                 {nextStop && (
                   <>
                     <span>
-                      next stop,{" "}
+                      next stop{" "}
                       {predictions?.length > 0 &&
                         (predictions[0].prdctdn === "DUE"
-                          ? `now:`
-                          : ` in ${predictions[0].prdctdn}m:`)}
+                          ? `, now:`
+                          : `, in ${predictions[0].prdctdn}m:`)}
                     </span>
                   </>
                 )}
@@ -145,7 +145,7 @@ const RoutePredictionItem = ({ vehicle, predictions }) => {
       ) : (
         <AccordionContent>
           <div className="flex items-end justify-between text-sm pt-2">
-            {nearest && (
+            {nearest && vehicle.properties.agency === 'transit-windsor' && (
               <div className="text-gray-700 dark:text-zinc-300 flex flex-col">
                 <span>near stop:</span>{" "}
                 <span className="font-semibold">
@@ -153,6 +153,15 @@ const RoutePredictionItem = ({ vehicle, predictions }) => {
                 </span>
               </div>
             )}
+            {
+              vehicle.properties.agency === 'qline' && (
+                <div>
+                  <span className="font-normal text-gray-500">
+                    {vehicle.properties.status}
+                  </span>
+                </div>
+              )
+            }
             <VehicleBadge busNumber={vehicle.properties.vid} />
           </div>
         </AccordionContent>

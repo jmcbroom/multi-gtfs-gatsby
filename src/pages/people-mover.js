@@ -164,10 +164,14 @@ const PeopleMover = ({ data }) => {
         vehicleFc={null}
         agency={agencyData}
         trackedBus={null}
+        clickStops={false}
         mapHeight={450}
         mapBearing={-30}
         mapPadding={15}
       />
+
+      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div>
 
       <h4 className="underline-title grayHeader mt-4">
         Where does the People Mover stop?
@@ -175,16 +179,26 @@ const PeopleMover = ({ data }) => {
       <p className="py-2">
         The People Mover travels in a counterclockwise loop around downtown Detroit.
       </p>
+      <p className="py-2">
+        Trains arrive at stops every 5 (minutes).
+      </p>
+        <PortableText
+          content={sanityRoute.description}
+          />
+      </div>
+      <div>
+
+      <div className="p-4">
       <RouteTimepoints
         agency={agencyData}
         route={routeData} 
         trips={tripsByServiceAndDirection}
         headsigns={headsignsByDirectionId}
-      />
-      <PortableText
-        className="prose prose-lg dark:prose-dark p-2 mt-4 flex gap-2 flex-col"
-        content={sanityRoute.description}
+        link={false}
         />
+        </div>
+        </div>
+        </div>
     </div>
   );
 };

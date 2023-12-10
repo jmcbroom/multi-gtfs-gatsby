@@ -16,6 +16,7 @@ const RouteMap = ({
   agency,
   trackedBus,
   className = ``,
+  clickStops=true,
   mapHeight = 500,
   mapBearing = 0,
   mapPadding = 30,
@@ -64,6 +65,8 @@ const RouteMap = ({
   }
 
   const handleClick = (e) => {
+    if(!clickStops) { return };
+
     let stop = map.current.queryRenderedFeatures(e.point, {
       layers: ["stops-points"],
     })[0];
@@ -117,7 +120,7 @@ const RouteMap = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         twoFingerDrag={true}
-        interactiveLayerIds={["stops-points"]}
+        interactiveLayerIds={clickStops ? ["stops-points"] : []}
         style={{ height: mapHeight }}
       >
         <NavigationControl showCompass={false} />
