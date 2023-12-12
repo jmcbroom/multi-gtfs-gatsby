@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@100;200;300;400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -51,16 +51,6 @@ section {
   @apply px-2;
 }
 
-h1,h2,h3,label, input,.plex {
-  /* font-family: "IBM Plex Sans";  */
-  font-family: "Inter"; 
-}
-
-label, input, textarea {
-  /* font-family: "IBM Plex Sans"; */
-  font-family: "Inter";
-}
-
 h1 {
   @apply text-xl;
   @apply font-semibold;
@@ -76,8 +66,8 @@ h2 {
 h3 {
   @apply text-base;
   @apply font-semibold;
-  @apply text-gray-600;
-  @apply dark:text-zinc-500;
+  @apply text-gray-700;
+  @apply dark:text-zinc-400;
   @apply mb-1;
 }
 
@@ -129,24 +119,15 @@ footer {
   @apply font-light;
 }
 
-.underline-title {
-  @apply text-gray-600;
-  @apply dark:text-zinc-400;
-  @apply border-b-2;
-  @apply dark:border-zinc-800;
-  @apply px-2;
-  @apply md:px-0;
-}
-
 #map {
   isolation: isolate;
 }
 
-.grayHeader, h4 {
+.grayHeader, h4, .sanityContent h4 {
   @apply bg-gray-200;
   @apply dark:bg-zinc-800;
-  @apply text-zinc-800;
-  @apply dark:text-gray-200;
+  /* @apply text-zinc-800;
+  @apply dark:text-gray-200; */
   @apply font-semibold;
   @apply px-2;
   @apply py-1;

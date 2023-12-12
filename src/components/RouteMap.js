@@ -17,7 +17,6 @@ const RouteMap = ({
   trackedBus,
   className = ``,
   clickStops=true,
-  mapHeight = 500,
   mapBearing = 0,
   mapPadding = 30,
   mapOffset=[0, 0]
@@ -61,7 +60,7 @@ const RouteMap = ({
   if (timepointsFeatureCollection.features.length > 0) {
     style.sources.timepoints.data = timepointsFeatureCollection;
   }
-  if (vehicleFc?.features.length > 0) {
+  if (vehicleFc?.features?.length > 0) {
     style.sources.vehicles.data = vehicleFc;
   }
 
@@ -109,7 +108,7 @@ const RouteMap = ({
   }
 
   return (
-    <div id="map" className={className} style={{ height: mapHeight + 28 }}>
+    <div id="map" className={`h-64 sm:h-72 md:h-96 lg:h-128 mb-8`}>
       <div className="grayHeader">Route map</div>
 
       <Mapbox
@@ -123,7 +122,6 @@ const RouteMap = ({
         onMouseLeave={handleMouseLeave}
         twoFingerDrag={true}
         interactiveLayerIds={clickStops ? ["stops-points"] : []}
-        style={{ height: mapHeight }}
       >
         <NavigationControl showCompass={false} />
       </Mapbox>

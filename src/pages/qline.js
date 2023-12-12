@@ -19,6 +19,7 @@ import {
 } from "../util";
 import supabase from "../supabaseClient";
 import RoutePredictions from "../components/RoutePredictions";
+import { set } from "lodash";
 
 const Qline = ({ data }) => {
   let gtfsAgency = data.postgres.agencies[0];
@@ -36,6 +37,22 @@ const Qline = ({ data }) => {
 
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
+
+  let [realtime, setRealtime] = useState(null);
+
+  const realtimeChannel = supabase
+    .channel("qline_vehicle_position")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "gtfsrt",
+      },
+      (payload) => {
+        setRealtime(payload.new);
+      }
+    )
+    .subscribe();
 
   sanityRoute.directions.forEach((dir, idx) => {
     // get timepoints for each direction
@@ -132,98 +149,86 @@ const Qline = ({ data }) => {
 
   const [vehicles, setVehicles] = useState(null);
 
-  const [now, setNow] = useState(new Date());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  let vehicleFc;
   useEffect(() => {
     // Function to fetch data from the public table
     const fetchData = async () => {
       try {
         // Replace 'YOUR_TABLE_NAME' with the actual name of your public table
         const { data, error } = await supabase
-          .from("qline_vehicle_positions")
-          .select("*")
-          .limit(1)
-          .order("created_at", { ascending: false });
+          .from("last_qline_vehicle_position")
+          .select("*");
 
         if (error) {
           throw error;
         }
 
-        let vehicles = data[0].data.entity;
-
-        if (!vehicles) {
-          return;
-        }
-
-        console.log(data[0].data.entity);
-
-        vehicleFc = {
-          type: "FeatureCollection",
-          features: data[0].data.entity?.filter(e => e.vehicle.trip).map((v) => {
-            let trip = trips.find((t) => t.tripId === v.vehicle.trip?.tripId);
-
-            let direction = sanityRoute.directions.find(
-              (d) => d.directionId === trip.directionId
-            );
-
-            const statuses = {
-              IN_TRANSIT_TO: `moving at ${v.vehicle.position.speed.toFixed(
-                0
-              )} mph`,
-              STOPPED_AT: `stopped`,
-            };
-
-            return {
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: [
-                  v.vehicle.position.longitude,
-                  v.vehicle.position.latitude,
-                ],
-              },
-              properties: {
-                agency: "qline",
-                hdg: v.vehicle.position.bearing,
-                bearing: v.vehicle.position.bearing,
-                vid: v.vehicle.vehicle.id,
-                feedIndex: 32,
-                routeColor: "#EF4D2E",
-                routeTextColor: "#ffffff",
-                trips: [trip],
-                directions: [direction],
-                routeShortName: `QLINE`,
-                displayShortName: `QLINE`,
-                vehicleIcon: "rail-light",
-                description: direction.directionDescription,
-                headsign: direction.directionHeadsign,
-                nextStop: {
-                  stpnm:
-                    trip.stopTimes[v.vehicle.currentStopSequence - 1]?.stop
-                      ?.stopName || null,
-                },
-                status: statuses[v.vehicle.currentStatus],
-              },
-            };
-          }),
-        };
-
-        setVehicles(vehicleFc);
+        setRealtime(data[0]);
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
     };
 
     fetchData();
-  }, [now]);
+  }, []);
+  
+  useEffect(() => {
+    if (!realtime) {
+      return;
+    }
+    let vehicleFc = {
+      type: "FeatureCollection",
+      features: realtime?.data.entity
+        ?.filter((e) => e.vehicle.trip)
+        .map((v) => {
+          let trip = trips.find((t) => t.tripId === v.vehicle.trip?.tripId);
+
+          let direction = sanityRoute.directions.find(
+            (d) => d.directionId === trip.directionId
+          );
+
+          const statuses = {
+            IN_TRANSIT_TO: `moving at ${v.vehicle.position.speed.toFixed(
+              0
+            )} mph`,
+            STOPPED_AT: `stopped`,
+          };
+
+          return {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [
+                v.vehicle.position.longitude,
+                v.vehicle.position.latitude,
+              ],
+            },
+            properties: {
+              agency: "qline",
+              hdg: v.vehicle.position.bearing,
+              bearing: v.vehicle.position.bearing,
+              vid: v.vehicle.vehicle.id,
+              feedIndex: 32,
+              routeColor: "#EF4D2E",
+              routeTextColor: "#ffffff",
+              trips: [trip],
+              directions: [direction],
+              routeShortName: `QLINE`,
+              displayShortName: `QLINE`,
+              vehicleIcon: "rail-light",
+              description: direction.directionDescription,
+              headsign: direction.directionHeadsign,
+              nextStop: {
+                stpnm:
+                  trip.stopTimes[v.vehicle.currentStopSequence - 1]?.stop
+                    ?.stopName || null,
+              },
+              status: statuses[v.vehicle.currentStatus],
+            },
+          };
+        }),
+    };
+    setVehicles(vehicleFc);
+  }, [realtime]);
 
   const [trackedBus, setTrackedBus] = useState(null);
 
@@ -258,50 +263,51 @@ const Qline = ({ data }) => {
             className="prose prose-lg dark:prose-dark sanityContent"
             content={sanityRoute.description}
           />
-          <RoutePredictions
-            vehicles={vehicles}
-            predictions={null}
-            setTrackedBus={setTrackedBus}
-            now={now}
-            routeType={gtfsRoute.routeType}
-          />
         </div>
+        <div>
+
         <RouteMap
           routeFc={createRouteFc(sanityRoute, gtfsRoute)}
           stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
           timepointsFc={createStopsFc(
             sanityRoute,
             tripsByServiceAndDirection,
+            true,
+            true,
             true
-          )}
-          vehicleFc={vehicles}
-          agency={agencyData}
-          trackedBus={trackedBus}
-          clickStops={false}
-          mapHeight={625}
-          mapBearing={0}
-          mapPadding={30}
-        />
+            )}
+            vehicleFc={vehicles}
+            agency={agencyData}
+            trackedBus={trackedBus}
+            clickStops={false}
+            mapHeight={425}
+            mapBearing={0}
+            mapPadding={30}
+            />
+            <RoutePredictions
+              vehicles={vehicles}
+              predictions={null}
+              setTrackedBus={setTrackedBus}
+              routeType={gtfsRoute.routeType}
+              />
+              </div>
       </div>
 
       <div className="sanityContent mt-4">
-
-      <h4 className="">
-        Where does the streetcar stop?
-      </h4>
-      <p className="py-2">
-        The streetcar travels north and south between Congress St and Grand
-        Blvd.
-      </p>
+        <h4>Where does the streetcar stop?</h4>
+        <p>
+          The streetcar travels north and south between Congress St and Grand
+          Blvd.
+        </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-      <RouteTimepoints
-        agency={agencyData}
-        route={routeData}
-        trips={tripsByServiceAndDirection}
-        headsigns={headsignsByDirectionId}
-        link={false}
-      />
+        <RouteTimepoints
+          agency={agencyData}
+          route={routeData}
+          trips={tripsByServiceAndDirection}
+          headsigns={headsignsByDirectionId}
+          link={false}
+        />
       </div>
     </div>
   );

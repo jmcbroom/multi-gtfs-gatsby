@@ -6,18 +6,18 @@ const StopListItem = ({ stopTime, feedIndex, routeColor, agency, small = false, 
     borderColor: `${routeColor}`
   };
 
-  let normalStopStyle = {
-    borderColor: `${routeColor}`,
-    backgroundColor: `white`,
-  };
+  // let normalStopStyle = {
+  //   borderColor: `${routeColor}`,
+  //   backgroundColor: `white`,
+  // };
 
-  let timepointStyle = {
-    borderColor: `black`,
-    backgroundColor: `black`,
-  };
+  // let timepointStyle = {
+  //   borderColor: `black`,
+  //   backgroundColor: `black`,
+  // };
   
-  const normalStopClass = `bg-white dark:bg-black border-black dark:border-gray-200`;
-  const timepointClass = `border-black dark:border-white bg-gray-800 dark:bg-white`;
+  const normalStopClass = `border-3 bg-white dark:bg-black border-black dark:border-gray-200`;
+  const timepointClass = `border-black border-3 bg-gray-800 dark:border-gray-300 dark:bg-gray-700`;
 
   return (
     <div

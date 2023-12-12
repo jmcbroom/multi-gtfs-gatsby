@@ -1,3 +1,9 @@
+import bearing from "@turf/bearing";
+import centroid from "@turf/centroid";
+import nearestPoint from "@turf/nearest-point";
+import nearestPointOnLine from "@turf/nearest-point-on-line";
+import _ from "lodash";
+
 /**
  * Convert the GraphQL arrivalTime to a human-readable string.
  * @param {arrivalTime} time
@@ -384,7 +390,7 @@ export const createVehicleFc = (vehicles, patterns, route, agency) => {
         nextStop: nextStops ? nextStops[0] : null,
         nextStops: nextStops ? nextStops : null,
         bearing: parseInt(v.hdg),
-        vehicleIcon: "bus"
+        vehicleIcon: "bus",
       },
       geometry: {
         type: "Point",
@@ -410,9 +416,12 @@ export const createStopsFc = (
   sanityRoute,
   trips,
   timepointsOnly = false,
-  shortFormat = true
+  shortFormat = true,
+  dedupe = false
 ) => {
   // store GeoJSON features here to include with the featureCollection
+
+  // get all the stops from the trips
   let features = [];
 
   // iterate through each direction on weekday service
@@ -426,6 +435,12 @@ export const createStopsFc = (
       .filter((st) => !timepointsOnly || st.timepoint === 1)
       .map((st) => st.stop);
 
+    let direction = sanityRoute.directions.find(
+      (d) => d.directionId === parseInt(key)
+    );
+
+    let directionFeature = JSON.parse(direction.directionShape)[0];
+
     stops.forEach((stop) => {
       // create a new GeoJSON feature
       let stopFeature = {
@@ -436,22 +451,78 @@ export const createStopsFc = (
         },
         properties: {
           ...stop,
+          offset: [0, 1.5],
+          anchor: "top",
+          justify: "center"
         },
       };
+
+      let stopLabelBearing = bearing(
+        nearestPointOnLine(directionFeature.geometry, stopFeature.geometry),
+        stopFeature.geometry
+      );
+      
+      if (stopLabelBearing < 0 && stopLabelBearing > -90) {
+        stopFeature.properties.offset = [-0.75, 0];
+        stopFeature.properties.anchor = "bottom";
+        stopFeature.properties.justify = "center";
+      }
+      if (stopLabelBearing < -90 && stopLabelBearing > -180) {
+        stopFeature.properties.offset = [-0.75, 0];
+        stopFeature.properties.anchor = "right";
+        stopFeature.properties.justify = "right";
+      }
+
+      if (stopLabelBearing > 0 && stopLabelBearing < 45) {
+        stopFeature.properties.offset = [0, -0.75];
+        stopFeature.properties.anchor = "bottom";
+        stopFeature.properties.justify = "center";
+      }
+      if (stopLabelBearing > 45 && stopLabelBearing < 90) {
+        stopFeature.properties.offset = [0.5, -0.5];
+        stopFeature.properties.anchor = "left";
+        stopFeature.properties.justify = "left";
+      }
+      if (stopLabelBearing > 90 && stopLabelBearing < 135) {
+        stopFeature.properties.offset = [0.25, 0.5];
+        stopFeature.properties.anchor = "left";
+        stopFeature.properties.justify = "left";
+      }
+      if (stopLabelBearing > 135 && stopLabelBearing < 180) {
+        stopFeature.properties.offset = [0, 0.75];
+        stopFeature.properties.anchor = "top";
+        stopFeature.properties.justify = "center";
+      }
+
+      // console.log(nearestPoint(stopFeature.geometry, directionFeature.geometry))
 
       // strip out the name of the route, for shorter map labels
       // ex, on DDOT 39, timepoint `Puritan & Livernois` => `Livernois`
       if (shortFormat) {
-        stopFeature.properties.stopName =
-          stopFeature.properties.stopName.replace(
-            `${sanityRoute.longName} & `,
-            ""
-          );
+        // stopFeature.properties.stopName =
+        //   stopFeature.properties.stopName.replace(
+        //     `${sanityRoute.longName} & `,
+        //     ""
+        //   );
       }
 
       features.push(stopFeature);
     });
   });
+
+  if (dedupe) {
+    let groupedByName = _.groupBy(features, (f) => f.properties.stopName)
+  
+    features = Object.keys(groupedByName).map((k) => {
+      
+      let feature = groupedByName[k][0]
+      
+      feature.geometry = centroid({"type": 'FeatureCollection', "features": groupedByName[k]}).geometry
+
+      return feature
+
+    })
+  }
 
   return {
     type: "FeatureCollection",
