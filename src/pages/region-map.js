@@ -107,7 +107,6 @@ const RegionMapPage = ({ data }) => {
       ],
     })[0];
     if (route) {
-      console.log(route)
       navigate(route.properties.link);
     }
   };
@@ -170,7 +169,6 @@ const RegionMapPage = ({ data }) => {
 
   routes = routes.sort((a,b) => b.mapPriority < a.mapPriority)
 
-  console.log(routes)
   return (
     <div>
       <p className="grayHeader">Regional transit map</p>

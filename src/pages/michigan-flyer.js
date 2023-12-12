@@ -122,7 +122,6 @@ const MichiganFlyer = ({ data }) => {
 
   const [service, setService] = useState(defaultService);
 
-  console.log(sanityRoute)
   return (
     <div>
       <Helmet>

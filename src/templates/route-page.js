@@ -285,6 +285,8 @@ const Route = ({ data, pageContext }) => {
                 timepointsFc={createStopsFc(
                   sanityRoute,
                   tripsByServiceAndDirection,
+                  true,
+                  true,
                   true
                 )}
                 vehicleFc={createVehicleFc(
@@ -313,6 +315,8 @@ const Route = ({ data, pageContext }) => {
               timepointsFc={createStopsFc(
                 sanityRoute,
                 tripsByServiceAndDirection,
+                true,
+                true,
                 true
               )}
               vehicleFc={createVehicleFc(
