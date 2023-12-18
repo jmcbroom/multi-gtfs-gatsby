@@ -14,9 +14,13 @@ import journey from "./journey";
 import journeyPartDestTime from "./journeyPartDestTime";
 
 import bikeshare from "./bikeshare";
+import comment from "./comment";
 
 export default [
   blockContent,
+
+  // user feedback
+  comment,
 
   // content pages
   indexPage,

@@ -15,7 +15,7 @@ import {
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
-  getTripsByServiceDay
+  getTripsByServiceDay,
 } from "../util";
 
 const PeopleMover = ({ data }) => {
@@ -159,32 +159,46 @@ const PeopleMover = ({ data }) => {
         timepointsFc={createStopsFc(
           sanityRoute,
           tripsByServiceAndDirection,
+          true,
+          true,
           true
         )}
         vehicleFc={null}
         agency={agencyData}
         trackedBus={null}
+        clickStops={false}
         mapHeight={450}
-        mapBearing={-30}
-        mapPadding={15}
+        mapBearing={-29}
+        mapPadding={25}
+        mapOffset={[5, 10]}
       />
 
-      <h4 className="underline-title grayHeader mt-4">
-        Where does the People Mover stop?
-      </h4>
-      <p className="py-2">
-        The People Mover travels in a counterclockwise loop around downtown Detroit.
-      </p>
-      <RouteTimepoints
-        agency={agencyData}
-        route={routeData} 
-        trips={tripsByServiceAndDirection}
-        headsigns={headsignsByDirectionId}
-      />
-      <PortableText
-        className="prose prose-lg dark:prose-dark p-2 mt-4 flex gap-2 flex-col"
-        content={sanityRoute.description}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        <div className="sanityContent">
+          <h4 className="grayHeader mt-4">
+            Where does the People Mover stop?
+          </h4>
+          <p>
+            The People Mover travels in a counterclockwise loop around downtown
+            Detroit.
+          </p>
+          <p>Trains arrive at stops every 5 minutes.</p>
+          <PortableText
+            content={sanityRoute.description}
+          />
+        </div>
+        <div>
+          <div className="p-4">
+            <RouteTimepoints
+              agency={agencyData}
+              route={routeData}
+              trips={tripsByServiceAndDirection}
+              headsigns={headsignsByDirectionId}
+              link={false}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -236,9 +250,7 @@ export const query = graphql`
       }
     }
     postgres {
-      routes: routesList(
-        condition: { feedIndex: 32, routeShortName: "DPM" }
-      ) {
+      routes: routesList(condition: { feedIndex: 32, routeShortName: "DPM" }) {
         agencyId
         routeShortName
         routeLongName

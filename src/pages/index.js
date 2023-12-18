@@ -61,7 +61,7 @@ const IndexPage = ({ data }) => {
               <AgencySlimHeader agency={a} />
               <div className="p-3 md:p-4">
                 <Link to={`/${a.slug.current}`} key={a.slug.current}>
-                  <h2>{a.name}</h2>
+                  <h3>{a.name}</h3>
                 </Link>
                 <PortableText content={a.description} className="" />
               </div>
@@ -70,14 +70,31 @@ const IndexPage = ({ data }) => {
         </div>
       </div>
       <div>
-        <h2>Other transit services</h2>
+      <h2 className="pl-3 md:pl-0">Downtown transit services</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-          {otherServices.map((a) => (
+
+        {otherServices.filter((a) => ["qline", "people-mover"].indexOf(a.slug.current) > -1).map((a) => (
+            <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
+            <AgencySlimHeader agency={a} />
+            <div className="px-4 py-4">
+              <Link to={`/${a.slug.current}`} key={a.slug.current}>
+                <h3>{a.name}</h3>
+              </Link>
+              <PortableText content={a.description} className="" />
+            </div>
+          </div>
+        ))}
+        </div>
+      </div>
+      <div>
+      <h2 className="pl-3 md:pl-0">Regional bus services</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+          {otherServices.filter((a) => ["d2a2"].indexOf(a.slug.current) > -1).map((a) => (
             <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
               <AgencySlimHeader agency={a} />
               <div className="px-4 py-4">
                 <Link to={`/${a.slug.current}`} key={a.slug.current}>
-                  <h2>{a.name}</h2>
+                  <h3>{a.name}</h3>
                 </Link>
                 <PortableText content={a.description} className="" />
               </div>
@@ -99,7 +116,7 @@ const IndexPage = ({ data }) => {
             }} />
             <div className="p-4">
               <Link to={`/michigan-flyer`} key="michigan-flyer">
-                <h2>Michigan Flyer</h2>
+                <h3>Michigan Flyer</h3>
               </Link>
               <p>
                 The Michigan Flyer bus provides service between Ann Arbor, East Lansing, and DTW Airport.

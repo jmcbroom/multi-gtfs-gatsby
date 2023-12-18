@@ -150,10 +150,10 @@ const Agency = ({ data, pageContext, location }) => {
                 You can find {name}'s website at{" "}
                 <a href={agencyUrl}>{agencyUrl}</a>.
               </p>
-              <p>
+              {agencyPhone && agencyPhone.length > 6 && agencyPhone !== '1111111' && <p>
                 {name}'s customer service number is{" "}
                 <a href={`tel:${agencyPhone}`}>{agencyPhone}</a>.
-              </p>
+              </p>}
               </section>
             </div>
             <div>
