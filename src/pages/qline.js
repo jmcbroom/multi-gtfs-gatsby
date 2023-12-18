@@ -1,5 +1,5 @@
 import { graphql } from "gatsby";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import PortableText from "react-portable-text";
 import RouteHeader from "../components/RouteHeader";
@@ -15,8 +15,11 @@ import {
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
-  getTripsByServiceDay
+  getTripsByServiceDay,
 } from "../util";
+import supabase from "../supabaseClient";
+import RoutePredictions from "../components/RoutePredictions";
+import { set } from "lodash";
 
 const Qline = ({ data }) => {
   let gtfsAgency = data.postgres.agencies[0];
@@ -34,6 +37,22 @@ const Qline = ({ data }) => {
 
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
+
+  let [realtime, setRealtime] = useState(null);
+
+  const realtimeChannel = supabase
+    .channel("qline_vehicle_position")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "gtfsrt",
+      },
+      (payload) => {
+        setRealtime(payload.new);
+      }
+    )
+    .subscribe();
 
   sanityRoute.directions.forEach((dir, idx) => {
     // get timepoints for each direction
@@ -128,6 +147,91 @@ const Qline = ({ data }) => {
 
   const [service, setService] = useState(defaultService);
 
+  const [vehicles, setVehicles] = useState(null);
+
+  useEffect(() => {
+    // Function to fetch data from the public table
+    const fetchData = async () => {
+      try {
+        // Replace 'YOUR_TABLE_NAME' with the actual name of your public table
+        const { data, error } = await supabase
+          .from("last_qline_vehicle_position")
+          .select("*");
+
+        if (error) {
+          throw error;
+        }
+
+        setRealtime(data[0]);
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
+  
+  useEffect(() => {
+    if (!realtime) {
+      return;
+    }
+    let vehicleFc = {
+      type: "FeatureCollection",
+      features: realtime?.data.entity
+        ?.filter((e) => e.vehicle.trip)
+        .map((v) => {
+          let trip = trips.find((t) => t.tripId === v.vehicle.trip?.tripId);
+
+          let direction = sanityRoute.directions.find(
+            (d) => d.directionId === trip.directionId
+          );
+
+          const statuses = {
+            IN_TRANSIT_TO: `moving at ${v.vehicle.position.speed.toFixed(
+              0
+            )} mph`,
+            STOPPED_AT: `stopped`,
+          };
+
+          return {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [
+                v.vehicle.position.longitude,
+                v.vehicle.position.latitude,
+              ],
+            },
+            properties: {
+              agency: "qline",
+              hdg: v.vehicle.position.bearing,
+              bearing: v.vehicle.position.bearing,
+              vid: v.vehicle.vehicle.id,
+              feedIndex: 32,
+              routeColor: "#EF4D2E",
+              routeTextColor: "#ffffff",
+              trips: [trip],
+              directions: [direction],
+              routeShortName: `QLINE`,
+              displayShortName: `QLINE`,
+              vehicleIcon: "rail-light",
+              description: direction.directionDescription,
+              headsign: direction.directionHeadsign,
+              nextStop: {
+                stpnm:
+                  trip.stopTimes[v.vehicle.currentStopSequence - 1]?.stop
+                    ?.stopName || null,
+              },
+              status: statuses[v.vehicle.currentStatus],
+            },
+          };
+        }),
+    };
+    setVehicles(vehicleFc);
+  }, [realtime]);
+
+  const [trackedBus, setTrackedBus] = useState(null);
+
   return (
     <div>
       <Helmet>
@@ -153,37 +257,58 @@ const Qline = ({ data }) => {
         content={sanityAgency.description}
       />
 
-      <RouteMap
-        routeFc={createRouteFc(sanityRoute, gtfsRoute)}
-        stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
-        timepointsFc={createStopsFc(
-          sanityRoute,
-          tripsByServiceAndDirection,
-          true
-        )}
-        vehicleFc={null}
-        agency={agencyData}
-        trackedBus={null}
-        mapHeight={625}
-        mapBearing={-27.5}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div>
+          <PortableText
+            className="prose prose-lg dark:prose-dark sanityContent"
+            content={sanityRoute.description}
+          />
+        </div>
+        <div>
 
-      <h4 className="underline-title grayHeader mt-4">
-        Where does the streetcar stop?
-      </h4>
-      <p className="py-2">
-        The streetcar travels north and south between Congress St and Grand Blvd.
-      </p>
-      <RouteTimepoints
-        agency={agencyData}
-        route={routeData}
-        trips={tripsByServiceAndDirection}
-        headsigns={headsignsByDirectionId}
-      />
-      <PortableText
-        className="prose prose-lg dark:prose-dark p-2 mt-4"
-        content={sanityRoute.description}
+        <RouteMap
+          routeFc={createRouteFc(sanityRoute, gtfsRoute)}
+          stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
+          timepointsFc={createStopsFc(
+            sanityRoute,
+            tripsByServiceAndDirection,
+            true,
+            true,
+            true
+            )}
+            vehicleFc={vehicles}
+            agency={agencyData}
+            trackedBus={trackedBus}
+            clickStops={false}
+            mapHeight={425}
+            mapBearing={0}
+            mapPadding={30}
+            />
+            <RoutePredictions
+              vehicles={vehicles}
+              predictions={null}
+              setTrackedBus={setTrackedBus}
+              routeType={gtfsRoute.routeType}
+              />
+              </div>
+      </div>
+
+      <div className="sanityContent mt-4">
+        <h4>Where does the streetcar stop?</h4>
+        <p>
+          The streetcar travels north and south between Congress St and Grand
+          Blvd.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <RouteTimepoints
+          agency={agencyData}
+          route={routeData}
+          trips={tripsByServiceAndDirection}
+          headsigns={headsignsByDirectionId}
+          link={false}
         />
+      </div>
     </div>
   );
 };

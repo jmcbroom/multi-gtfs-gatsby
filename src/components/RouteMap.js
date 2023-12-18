@@ -16,9 +16,10 @@ const RouteMap = ({
   agency,
   trackedBus,
   className = ``,
-  mapHeight = 500,
+  clickStops=true,
   mapBearing = 0,
   mapPadding = 30,
+  mapOffset=[0, 0]
 }) => {
 
   const routeFeatureCollection = routeFc;
@@ -59,11 +60,13 @@ const RouteMap = ({
   if (timepointsFeatureCollection.features.length > 0) {
     style.sources.timepoints.data = timepointsFeatureCollection;
   }
-  if (vehicleFc?.features.length > 0) {
+  if (vehicleFc?.features?.length > 0) {
     style.sources.vehicles.data = vehicleFc;
   }
 
   const handleClick = (e) => {
+    if(!clickStops) { return };
+
     let stop = map.current.queryRenderedFeatures(e.point, {
       layers: ["stops-points"],
     })[0];
@@ -86,6 +89,7 @@ const RouteMap = ({
     fitBoundsOptions: {
       padding: mapPadding,
       bearing: mapBearing,
+      offset: mapOffset,
       maxZoom: 17
     },
   };
@@ -104,7 +108,7 @@ const RouteMap = ({
   }
 
   return (
-    <div id="map" className={className} style={{ height: mapHeight + 28 }}>
+    <div id="map" className={`h-64 sm:h-72 md:h-96 lg:h-128 mb-8`}>
       <div className="grayHeader">Route map</div>
 
       <Mapbox
@@ -117,8 +121,7 @@ const RouteMap = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         twoFingerDrag={true}
-        interactiveLayerIds={["stops-points"]}
-        style={{ height: mapHeight }}
+        interactiveLayerIds={clickStops ? ["stops-points"] : []}
       >
         <NavigationControl showCompass={false} />
       </Mapbox>

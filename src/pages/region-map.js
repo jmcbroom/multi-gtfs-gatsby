@@ -49,6 +49,11 @@ const RegionMapPage = ({ data }) => {
     );
     let routeData = createRouteData(matching[0], sanityRoute);
 
+    let link = `/${sanityRoute.agency.slug.current}/route/${routeData.displayShortName}`;
+    if(["qline", "people-mover", "d2a2", "michigan-flyer"].indexOf(sanityRoute.agency.slug.current) > -1) {
+      link = `/${sanityRoute.agency.slug.current}`;
+    }
+
     // iterate through route directions
     routeData.directions.forEach((direction) => {
       // make a GeoJSON feature
@@ -63,6 +68,7 @@ const RegionMapPage = ({ data }) => {
         tripCount: routeData.trips.totalCount,
         mapPriority: routeData.mapPriority,
         agencySlug: sanityRoute.agency.slug.current,
+        link: link,
       };
       allRouteFeatures.push(feature);
     });
@@ -101,9 +107,7 @@ const RegionMapPage = ({ data }) => {
       ],
     })[0];
     if (route) {
-      navigate(
-        `/${route.properties.agencySlug}/route/${route.properties.displayShortName}`
-      );
+      navigate(route.properties.link);
     }
   };
 
@@ -195,6 +199,7 @@ const RegionMapPage = ({ data }) => {
               {routes.map((r) => (
                 <RouteHeader
                   {...r}
+                  key={`${r.feedIndex}-${r.routeShortName}`}
                   agency={{ slug: { current: r.agencySlug } }}
                 />
               ))}

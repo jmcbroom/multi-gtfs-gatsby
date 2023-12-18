@@ -143,7 +143,7 @@ const MichiganFlyer = ({ data }) => {
       </div>
 
       {sanityRoute.description && <PortableText
-        className="prose prose-lg dark:prose-dark p-2"
+        className="sanityContent"
         content={sanityRoute.description}
       />}
 
