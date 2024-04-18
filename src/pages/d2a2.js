@@ -46,6 +46,8 @@ const D2A2 = ({ data }) => {
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
+
+
   sanityRoute.directions.forEach((dir, idx) => {
     // get timepoints for each direction
     let timepoints = dir.directionTimepoints;
@@ -74,8 +76,10 @@ const D2A2 = ({ data }) => {
   let serviceDays = getServiceDays(
     serviceCalendars.filter((sc) =>
       data.agency.serviceIds.includes(sc.serviceId)
+      && sc.serviceId != "c_70310_b_82262_d_127"
     )
   );
+
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
   let tripsByServiceAndDirection = getTripsByServiceAndDirection(
@@ -226,7 +230,7 @@ export const query = graphql`
       }
     }
     postgres {
-      routes: routesList(condition: { feedIndex: 26, routeShortName: "D2A2" }) {
+      routes: routesList(condition: { feedIndex: 36, routeShortName: "D2A2" }) {
         agencyId
         routeShortName
         routeLongName
@@ -239,7 +243,7 @@ export const query = graphql`
         feedIndex
         trips: tripsByFeedIndexAndRouteIdList(
           filter: {
-            serviceId: { in: ["c_67584_b_78112_d_31", "c_67584_b_78112_d_96"] }
+            serviceId: { in: ["c_67584_b_78112_d_96", "c_67584_b_78112_d_31"] }
           }
         ) {
           serviceId
@@ -290,7 +294,7 @@ export const query = graphql`
           direction
         }
       }
-      agencies: agenciesList(condition: { feedIndex: 26 }) {
+      agencies: agenciesList(condition: { feedIndex: 36 }) {
         agencyName
         agencyUrl
         agencyTimezone

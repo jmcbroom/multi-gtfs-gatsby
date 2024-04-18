@@ -111,6 +111,7 @@ const Route = ({ data, pageContext }) => {
   let [patterns, setPatterns] = useState(null);
   let [vehicles, setVehicles] = useState(null);
   let [predictions, setPredictions] = useState(null);
+
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled) return;
     let tick = setInterval(() => {

@@ -13,3 +13,5 @@ jupyter/
 yarn-error.log
 .vscode
 *_routes.ndjson
+
+jsconfig.json

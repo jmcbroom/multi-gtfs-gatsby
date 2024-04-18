@@ -1,6 +1,8 @@
 import React from "react";
 import { Link, graphql } from "gatsby";
-import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import { DiscordLogoIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlane } from "@fortawesome/free-solid-svg-icons";
 
 const SiteFooter = ({ data }) => {
   return (
@@ -36,6 +38,9 @@ const SiteFooter = ({ data }) => {
                 <span className="">{a.node.name}</span>
               </Link>
             ))}
+          <Link to={`/dax`}>
+            <span className="">DAX <FontAwesomeIcon icon={faPlane} size="1x" className="mx-1" /></span>
+          </Link>
           <Link to={`/michigan-flyer`}>
             <span className="">Michigan Flyer</span>
           </Link>
@@ -45,7 +50,7 @@ const SiteFooter = ({ data }) => {
           <div className="flex flex-col justify-start gap-2">
             <h3>Other pages</h3>
             <Link to={`/region-map`}>Regional transit map</Link>
-            <Link to={`/nearby`}>Transit near me</Link>
+            <Link to={`/nearme`}>Transit near me</Link>
           </div>
           <div className="flex flex-col justify-start gap-2">
             <h3>This site</h3>
@@ -57,7 +62,18 @@ const SiteFooter = ({ data }) => {
               target="_blank"
               rel="noreferrer"
             >
-              multi-gtfs-gatsby <GitHubLogoIcon />
+               <GitHubLogoIcon />
+              multi-gtfs-gatsby
+            </a>
+          </div>
+          <div className="flex flex-col justify-start gap-2">
+            <h3>Other sites</h3>
+            <a
+              href="http://discord.det.city/"
+              className="flex items-center gap-2"
+            >
+              <DiscordLogoIcon />
+              Detroit Discord / #transit
             </a>
           </div>
         </div>

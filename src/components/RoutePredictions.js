@@ -12,6 +12,8 @@ const RoutePredictions = ({
   predictions,
   routeType = 3,
 }) => {
+
+  
   return (
     <div className="">
       {vehicles?.features?.length > 0 ? (
