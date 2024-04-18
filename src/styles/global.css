@@ -134,7 +134,13 @@ footer {
   @apply text-sm;
   /* font-family: "IBM Plex Sans"; */
   font-family: "Inter";
+  @apply mt-4;
 }
+
+.sanityContent h4 {
+  @apply mt-2;
+}
+
 
 .grayTitle {
   @apply bg-gray-100;

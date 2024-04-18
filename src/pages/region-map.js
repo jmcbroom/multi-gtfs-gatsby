@@ -47,6 +47,10 @@ const RegionMapPage = ({ data }) => {
         gr.feedIndex === sanityRoute.agency.currentFeedIndex &&
         gr.routeShortName === sanityRoute.shortName
     );
+
+    if (matching.length === 0) {
+      return;
+    }
     let routeData = createRouteData(matching[0], sanityRoute);
 
     let link = `/${sanityRoute.agency.slug.current}/route/${routeData.displayShortName}`;

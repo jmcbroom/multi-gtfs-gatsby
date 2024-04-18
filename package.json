@@ -41,6 +41,9 @@
     "@turf/distance": "^6.5.0",
     "@turf/nearest-point": "^6.5.0",
     "@turf/nearest-point-on-line": "^6.5.0",
+    "@types/geojson": "^7946.0.13",
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
     "autoprefixer": "^10.4.2",
     "classnames": "^2.3.2",
     "dayjs": "^1.11.7",
@@ -73,6 +76,7 @@
     "react-portable-text": "^0.4.3",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "tailwindcss": "^3.0.13"
+    "tailwindcss": "^3.0.13",
+    "typescript": "^5.3.3"
   }
 }

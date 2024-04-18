@@ -21,7 +21,8 @@ const RouteHeader = ({ routeShortName, displayShortName, routeLongName, routeCol
   }
 
   let url = `/${displayShortName.toLowerCase()}`
-  if(agency){
+
+  if(agency && agency?.slug.current !== 'd2a2'){
     url = `/${agency.slug.current}/route/${displayShortName}`
   }
 

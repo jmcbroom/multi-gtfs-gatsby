@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { sortTripsByFrequentTimepoint } from "../util";
 
 const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
+
   let {routeColor} = route;
 
   // white routeColor needs to be gray
@@ -48,7 +49,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
     // timepointName = timepointName.replace('Transit Center', 'TC');
     // timepointName = timepointName.replace('Park & Ride', 'P&R');
     // timepointName = timepointName.replace('Park And Ride', 'P&R');
-    // timepointName = timepointName.replace('Metro Airport', 'DTW');
+    // timepointName = timepointName.replace('Metro airport', 'DTW');
     // timepointName = timepointName.replace('Mcnamara', 'McNamara');
     // timepointName = timepointName.replace('Wb', '');
     // timepointName = timepointName.replace('+', '&')
@@ -91,9 +92,11 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
         {sortedTrips.map((t, i) => (
           <tr key={t.tripId} style={(i + 1) % 5 === 0 ? borderedRowStyle : {}}>
             {timepoints.map((tp, j) => {
+
               let filtered = t.stopTimes.filter(st => {
                 return st.stop.stopId === tp.stop.stopId;
               });
+
               if (filtered.length === 0) {
                 return (
                   <td key={`${t.id}-${i}-${j}`}

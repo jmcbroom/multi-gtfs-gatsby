@@ -1,5 +1,6 @@
 const { create } = require("domain");
 const path = require(`path`);
+const axios = require("axios");
 
 exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
   if (stage === "build-html") {
@@ -15,6 +16,31 @@ exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
     });
   }
 };
+
+// exports.createPages = async ({ graphql, actions: { createPage }, createNodeId, createContentDigest }) => {
+//   // Fetch JSON data from the endpoint
+//   const response = await axios.get('https://example.com/api/data');
+
+//   // Create nodes from the fetched data
+//   const jsonData = response.data;
+//   jsonData.forEach((item) => {
+//     const nodeData = {
+//       // Set the node fields based on the fetched data
+//       // For example:
+//       id: createNodeId(`my-node-${item.id}`),
+//       internal: {
+//         type: 'MyNodeType',
+//         contentDigest: createContentDigest(item),
+//       },
+//       // Other fields...
+//     };
+// //
+//     // Create the node
+//     createNode(nodeData);
+//   });
+
+//   // Rest of your code...
+// };
 
 exports.createPages = async ({ graphql, actions: { createPage } }) => {
   const allAgencies = await graphql(`
@@ -108,8 +134,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
   `);
 
     result.data.postgres.agencies.forEach((agency) => {
-
-      if (a.agencyType !== 'local-bus') {
+      if (a.agencyType !== "local-bus") {
         return;
       }
 
@@ -159,6 +184,10 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
         },
       });
     });
+
+    if (a.agencyType !== "local-bus") {
+      return;
+    }
 
     result.data.postgres.routes
       .filter((r) => r.trips.totalCount > 0)
@@ -224,16 +253,84 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
   }
 
   allAgencies.data.allSanityBikeshare.edges.forEach((b) => {
-    createPage({
-      path: `/bikeshare/${b.node.slug.current}`,
-      component: path.resolve("./src/templates/bikeshare-page.js"),
-      context: {
-        id: b.node.id,
-        feedUrl: b.node.feedUrl,
-        slug: b.node.slug.current,
-      },
+    const fetchBikeshareData = async () => {
+      const response = await axios.get(
+        `${b.node.feedUrl}/en/station_information`
+      );
+      return response.data;
+    };
+
+    let stations;
+
+    fetchBikeshareData().then((data) => {
+      stations = data.data.stations;
+
+      // Create main bikeshare page
+      createPage({
+        path: `/${b.node.slug.current}/`,
+        component: path.resolve("./src/templates/bikeshare-page.tsx"),
+        context: {
+          id: b.node.id,
+          feedUrl: b.node.feedUrl,
+          slug: b.node.slug.current,
+          data: stations,
+          initialTab: "home"
+        },
+      });
+      
+      // create bikeshare map page
+      createPage({
+        path: `/${b.node.slug.current}/map`,
+        component: path.resolve("./src/templates/bikeshare-page.tsx"),
+        context: {
+          id: b.node.id,
+          feedUrl: b.node.feedUrl,
+          slug: b.node.slug.current,
+          data: stations,
+          initialTab: 'map'
+        },
+      });
+
+      // create bikeshare station list page
+      createPage({
+        path: `/${b.node.slug.current}/stations`,
+        component: path.resolve("./src/templates/bikeshare-page.tsx"),
+        context: {
+          id: b.node.id,
+          feedUrl: b.node.feedUrl,
+          slug: b.node.slug.current,
+          data: stations,
+          initialTab: 'stations'
+        },
+      });
+
+      // create bikeshare fares page
+      createPage({
+        path: `/${b.node.slug.current}/fares`,
+        component: path.resolve("./src/templates/bikeshare-page.tsx"),
+        context: {
+          id: b.node.id,
+          feedUrl: b.node.feedUrl,
+          slug: b.node.slug.current,
+          data: stations,
+          initialTab: 'fares'
+        },
+      });
+
+      // Create bikeshare station pages
+      stations.forEach((s) => {
+        createPage({
+          path: `/${b.node.slug.current}/station/${s.station_id}`,
+          component: path.resolve("./src/templates/bikeshare-station-page.tsx"),
+          context: {
+            feedUrl: b.node.feedUrl,
+            station: s,
+            slug: b.node.slug.current,
+            lat: s.lat,
+            lon: s.lon,
+          },
+        });
+      });
     });
   });
-
-  
 };

@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLiveQuery } from "dexie-react-hooks";
 import _ from "lodash";
 import StopCard from "../components/StopCard";
+import BikeshareCard from "../components/Bikeshare/BikeshareCard";
 import { db } from "../db";
 /**
  * The home page.
@@ -19,6 +20,7 @@ const FavoritesPage = ({ data }) => {
 
   // get the favorite stops
   const favoriteStops = useLiveQuery(() => db.stops.toArray());
+  const favoriteBikeshareStops = useLiveQuery(() => db.bikeshare.toArray());
 
   let merged = sanityAgencies.map((sa) => {
     let filtered = agencies.filter(
@@ -56,11 +58,19 @@ const FavoritesPage = ({ data }) => {
 
   let grouped = _.groupBy(favoriteStops, "agency.agencySlug");
 
+  let bikeshareGrouped = _.groupBy(
+    favoriteBikeshareStops,
+    "agency.slug.current"
+  );
+
   return (
     <>
       <div className="my-4 flex items-center justify-normal">
-        <FontAwesomeIcon icon={faStar} className="text-yellow-500 ml-2 md:ml-0" />
-        <h2 className="ml-2 mb-0 block">favorite bus stops</h2>
+        <FontAwesomeIcon
+          icon={faStar}
+          className="text-yellow-500 ml-2 md:ml-0"
+        />
+        <h2 className="ml-2 mb-0 block">favorite stops</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {Object.keys(grouped).map((key) => {
@@ -74,6 +84,22 @@ const FavoritesPage = ({ data }) => {
                   .map((stop) => (
                     <StopCard stop={stop} agency={agency} key={stop.stopId} />
                   ))}
+              </div>
+            </div>
+          );
+        })}
+        {Object.keys(bikeshareGrouped).map((key) => {
+          return (
+            <div key={key}>
+              <AgencySlimHeader agency={bikeshareGrouped[key][0].agency} />
+              <div>
+                {bikeshareGrouped[key].map((station) => (
+                  <BikeshareCard
+                    station={station}
+                    agency={station.agency}
+                    key={station.id}
+                  />
+                ))}
               </div>
             </div>
           );

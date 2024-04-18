@@ -17,31 +17,35 @@ export const formatArrivalTime = (
 ) => {
   let hour = time.hours;
   let minutes = time.minutes ? time.minutes.toString().padStart(2, "0") : "00";
-  let ap = "am";
+  let ap = "a";
+
+  if (twentyFourHr) {
+    showAp = false;
+  }
 
   // vary hours & am/pm based on what hour it is
   // gtfs has hours that are greater than 24
   if (time.hours < 12 && time.hours > 0) {
     hour = time.hours;
-    ap = "am";
+    ap = "a";
   } else if (time.hours > 12 && time.hours < 24) {
     if (!twentyFourHr) {
       hour = time.hours - 12;
     }
-    ap = "pm";
+    ap = "p";
   } else if (time.hours % 12 === 0) {
     hour = 12;
-    ap = time.hours === 12 ? "pm" : "am";
+    ap = time.hours === 12 ? "p" : "a";
   } else if (time.hours >= 24) {
     hour = time.hours - 24;
-    ap = "am";
+    ap = "a";
   }
 
   if (twentyFourHr) {
     hour = time.hours ? time.hours.toString().padStart(2, "0") : "00";
   }
 
-  return `${hour}:${minutes}${showAp ? ` ${ap}` : ``}`;
+  return `${hour}:${minutes}${showAp ? `${ap}` : ``}`;
 };
 
 /**
@@ -114,6 +118,7 @@ export const getServiceDays = (serviceCalendars) => {
   let weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"];
 
   serviceCalendars.forEach((sc) => {
+
     // evaluate all weekdays of the service calendar
     let weekdayMatches = weekdays.map((day) => sc[day] === 1);
 
@@ -207,6 +212,7 @@ export const getTripsByServiceAndDirection = (
   serviceDays,
   headsignsByDirectionId
 ) => {
+
   let tripsByServiceAndDirection = {};
 
   Object.keys(serviceDays).forEach((day) => {
@@ -590,10 +596,15 @@ export const dayOfWeek = () => {
 };
 
 export const matchPredictionToRoute = (prediction, routes, patterns) => {
+
   let route = routes.filter(
     (r) =>
       r.routeShortName === prediction.rt && r.feedIndex === prediction.agency
   )[0];
+
+  if(!route) {
+    return null
+  }
 
   let direction = route.directions.filter(
     (direction) =>

@@ -69,6 +69,7 @@ const Stop = ({ data, pageContext }) => {
         properties: {
           name: stopName,
           code: stopIdentifier,
+          offset: [0, 2.2],
         },
       },
     ],
@@ -238,6 +239,8 @@ const Stop = ({ data, pageContext }) => {
         stopIdentifier={stopIdentifier}
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div>
+
         {predictions && (
           <StopPredictions
             trackedBus={trackedBus}
@@ -259,6 +262,7 @@ const Stop = ({ data, pageContext }) => {
           predictions={predictions}
           vehicles={vehicles}
         />
+        </div>
         <StopTimesHere
           times={times}
           routes={routes}

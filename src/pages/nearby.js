@@ -56,7 +56,7 @@ const NearbyPage = ({ data }) => {
             `/.netlify/functions/stop?stopId=${ddotStops}&agency=ddot`
           ).then((r) => r.json())
         );
-        agencies.push(24)
+        agencies.push(33)
       }
       if (stops.smart?.length > 0) {
         fetches.push(
@@ -64,7 +64,7 @@ const NearbyPage = ({ data }) => {
             `/.netlify/functions/stop?stopId=${smartStops}&agency=smart`
           ).then((r) => r.json())
         );
-        agencies.push(25)
+        agencies.push(35)
       }
       if (stops.theride?.length > 0) {
         fetches.push(
@@ -130,6 +130,10 @@ const NearbyPage = ({ data }) => {
         gr.feedIndex === sanityRoute.agency.currentFeedIndex &&
         gr.routeShortName === sanityRoute.shortName
     );
+    if(matching.length === 0) {
+      return;
+    }
+    
     let routeData = createRouteData(matching[0], sanityRoute);
     allRoutes.push(routeData);
 
@@ -276,7 +280,7 @@ const NearbyPage = ({ data }) => {
 export const query = graphql`
   query NearbyQuery {
     postgres {
-      allStops: stopsList(filter: { feedIndex: { in: [24, 25, 27] } }) {
+      allStops: stopsList(filter: { feedIndex: { in: [33,35,32,29,27,36] } }) {
         stopLat
         stopLon
         stopName
