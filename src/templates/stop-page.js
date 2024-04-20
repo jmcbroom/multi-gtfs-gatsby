@@ -9,12 +9,9 @@ import StopHeader from "../components/StopHeader";
 import StopMap from "../components/StopMap";
 import StopPredictions from "../components/StopPredictions";
 import StopTimesHere from "../components/StopTimesHere";
+import StopAccessibility from "../components/StopAccessibility";
 import { db } from "../db";
-import {
-  createAgencyData,
-  createRouteData,
-  getServiceDays
-} from "../util";
+import { createAgencyData, createRouteData, getServiceDays } from "../util";
 dayjs.extend(relativeTime);
 
 const Stop = ({ data, pageContext }) => {
@@ -177,7 +174,14 @@ const Stop = ({ data, pageContext }) => {
           return;
         }
       });
-  }, [now, twStopCode, patterns, sanityAgency.realTimeEnabled, sanityAgency.slug, stopCode]);
+  }, [
+    now,
+    twStopCode,
+    patterns,
+    sanityAgency.realTimeEnabled,
+    sanityAgency.slug,
+    stopCode,
+  ]);
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled || !predictions) return;
@@ -240,35 +244,39 @@ const Stop = ({ data, pageContext }) => {
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
-
-        {predictions && (
-          <StopPredictions
+          {predictions && (
+            <StopPredictions
+              trackedBus={trackedBus}
+              setTrackedBus={setTrackedBus}
+              predictions={predictions}
+              vehicles={vehicles}
+              times={times}
+              routes={routes}
+              agency={agencyData}
+              patterns={patterns}
+            />
+          )}
+          <StopMap
+            agency={agencyData}
+            stopFc={stopFc}
+            routes={routes}
+            times={times}
             trackedBus={trackedBus}
-            setTrackedBus={setTrackedBus}
             predictions={predictions}
             vehicles={vehicles}
+          />
+        </div>
+        <div>
+          <StopTimesHere
             times={times}
             routes={routes}
             agency={agencyData}
-            patterns={patterns}
+            serviceDays={serviceDays}
           />
-        )}
-        <StopMap
-          agency={agencyData}
-          stopFc={stopFc}
-          routes={routes}
-          times={times}
-          trackedBus={trackedBus}
-          predictions={predictions}
-          vehicles={vehicles}
-        />
+          {["ddot", "smart"].indexOf(agencyData.slug.current) > -1 && (
+            <StopAccessibility stop={indexedStop} />
+          )}
         </div>
-        <StopTimesHere
-          times={times}
-          routes={routes}
-          agency={agencyData}
-          serviceDays={serviceDays}
-        />
       </div>
     </div>
   );
