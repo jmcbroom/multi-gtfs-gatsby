@@ -83,7 +83,9 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
   `);
 
   let agencies = allAgencies.data.allSanityAgency.edges.map((e) => e.node);
+
   for (let a of agencies) {
+    // fetch information about the specific agency
     const result = await graphql(`
     {
       postgres {
@@ -133,11 +135,11 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     }
   `);
 
-    result.data.postgres.agencies.forEach((agency) => {
-      if (a.agencyType !== "local-bus") {
-        return;
-      }
+    if (a.agencyType !== "local-bus") {
+      continue;
+    }
 
+    result.data.postgres.agencies.forEach((agency) => {
       createPage({
         path: `/${a.slug.current}/`,
         component: path.resolve("./src/templates/agency-page.js"),
@@ -185,152 +187,142 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
       });
     });
 
-    if (a.agencyType !== "local-bus") {
-      return;
-    }
+    // make individual route pages
+    let routesWithTrips = result.data.postgres.routes.filter(
+      (r) => r.trips.totalCount > 0
+    );
+    routesWithTrips.forEach((r) => {
+      // override routeShortName from gtfs with displayShortName from Sanity
+      let short = r.routeShortName;
 
-    result.data.postgres.routes
-      .filter((r) => r.trips.totalCount > 0)
-      .forEach((r) => {
-        // override routeShortName from gtfs with displayShortName from Sanity
-        let short = r.routeShortName;
+      let matchingSanityRoute = result.data.allSanityRoute.edges
+        .map((e) => e.node)
+        .filter((sr) => sr.shortName === r.routeShortName);
 
-        let matchingSanityRoute = result.data.allSanityRoute.edges
-          .map((e) => e.node)
-          .filter((sr) => sr.shortName === r.routeShortName);
-
-        if (matchingSanityRoute.length === 1) {
-          if (matchingSanityRoute[0].displayShortName) {
-            short = matchingSanityRoute[0].displayShortName;
-          }
+      if (matchingSanityRoute.length === 1) {
+        if (matchingSanityRoute[0].displayShortName) {
+          short = matchingSanityRoute[0].displayShortName;
         }
+      }
 
-        createPage({
-          path: `/${a.slug.current}/route/${short}/`,
-          component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current,
-            initialTab: "",
-            serviceIds: a.serviceIds,
-          },
-        });
-        createPage({
-          path: `/${a.slug.current}/route/${short}/map`,
-          component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current,
-            initialTab: "map",
-            serviceIds: a.serviceIds,
-          },
-        });
-        createPage({
-          path: `/${a.slug.current}/route/${short}/stops`,
-          component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current,
-            initialTab: "stops",
-            serviceIds: a.serviceIds,
-          },
-        });
-        createPage({
-          path: `/${a.slug.current}/route/${short}/schedule`,
-          component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current,
-            initialTab: "schedule",
-            serviceIds: a.serviceIds,
-          },
-        });
-      });
-  }
-
-  allAgencies.data.allSanityBikeshare.edges.forEach((b) => {
-    const fetchBikeshareData = async () => {
-      const response = await axios.get(
-        `${b.node.feedUrl}/en/station_information`
-      );
-      return response.data;
-    };
-
-    let stations;
-
-    fetchBikeshareData().then((data) => {
-      stations = data.data.stations;
-
-      // Create main bikeshare page
       createPage({
-        path: `/${b.node.slug.current}/`,
-        component: path.resolve("./src/templates/bikeshare-page.tsx"),
+        path: `/${a.slug.current}/route/${short}/`,
+        component: path.resolve("./src/templates/route-page.js"),
         context: {
-          id: b.node.id,
-          feedUrl: b.node.feedUrl,
-          slug: b.node.slug.current,
-          data: stations,
-          initialTab: "home"
+          routeNo: r.routeShortName,
+          feedIndex: r.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: "",
+          serviceIds: a.serviceIds,
         },
       });
-      
-      // create bikeshare map page
       createPage({
-        path: `/${b.node.slug.current}/map`,
-        component: path.resolve("./src/templates/bikeshare-page.tsx"),
+        path: `/${a.slug.current}/route/${short}/map`,
+        component: path.resolve("./src/templates/route-page.js"),
         context: {
-          id: b.node.id,
-          feedUrl: b.node.feedUrl,
-          slug: b.node.slug.current,
-          data: stations,
-          initialTab: 'map'
+          routeNo: r.routeShortName,
+          feedIndex: r.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: "map",
+          serviceIds: a.serviceIds,
         },
       });
-
-      // create bikeshare station list page
       createPage({
-        path: `/${b.node.slug.current}/stations`,
-        component: path.resolve("./src/templates/bikeshare-page.tsx"),
+        path: `/${a.slug.current}/route/${short}/stops`,
+        component: path.resolve("./src/templates/route-page.js"),
         context: {
-          id: b.node.id,
-          feedUrl: b.node.feedUrl,
-          slug: b.node.slug.current,
-          data: stations,
-          initialTab: 'stations'
+          routeNo: r.routeShortName,
+          feedIndex: r.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: "stops",
+          serviceIds: a.serviceIds,
         },
       });
-
-      // create bikeshare fares page
       createPage({
-        path: `/${b.node.slug.current}/fares`,
-        component: path.resolve("./src/templates/bikeshare-page.tsx"),
+        path: `/${a.slug.current}/route/${short}/schedule`,
+        component: path.resolve("./src/templates/route-page.js"),
         context: {
-          id: b.node.id,
-          feedUrl: b.node.feedUrl,
-          slug: b.node.slug.current,
-          data: stations,
-          initialTab: 'fares'
+          routeNo: r.routeShortName,
+          feedIndex: r.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: "schedule",
+          serviceIds: a.serviceIds,
         },
-      });
-
-      // Create bikeshare station pages
-      stations.forEach((s) => {
-        createPage({
-          path: `/${b.node.slug.current}/station/${s.station_id}`,
-          component: path.resolve("./src/templates/bikeshare-station-page.tsx"),
-          context: {
-            feedUrl: b.node.feedUrl,
-            station: s,
-            slug: b.node.slug.current,
-            lat: s.lat,
-            lon: s.lon,
-          },
-        });
       });
     });
-  });
+  }
+
+  for (let b of allAgencies.data.allSanityBikeshare.edges) {
+
+    const response = await axios.get(`${b.node.feedUrl}/en/station_information`);
+
+    let { stations } = response.data.data;
+
+    // Create main bikeshare page
+    createPage({
+      path: `/${b.node.slug.current}/`,
+      component: path.resolve("./src/templates/bikeshare-page.tsx"),
+      context: {
+        id: b.node.id,
+        feedUrl: b.node.feedUrl,
+        slug: b.node.slug.current,
+        data: stations,
+        initialTab: "home",
+      },
+    });
+
+    // create bikeshare map page
+    createPage({
+      path: `/${b.node.slug.current}/map`,
+      component: path.resolve("./src/templates/bikeshare-page.tsx"),
+      context: {
+        id: b.node.id,
+        feedUrl: b.node.feedUrl,
+        slug: b.node.slug.current,
+        data: stations,
+        initialTab: "map",
+      },
+    });
+
+    // create bikeshare station list page
+    createPage({
+      path: `/${b.node.slug.current}/stations`,
+      component: path.resolve("./src/templates/bikeshare-page.tsx"),
+      context: {
+        id: b.node.id,
+        feedUrl: b.node.feedUrl,
+        slug: b.node.slug.current,
+        data: stations,
+        initialTab: "stations",
+      },
+    });
+
+    // create bikeshare fares page
+    createPage({
+      path: `/${b.node.slug.current}/fares`,
+      component: path.resolve("./src/templates/bikeshare-page.tsx"),
+      context: {
+        id: b.node.id,
+        feedUrl: b.node.feedUrl,
+        slug: b.node.slug.current,
+        data: stations,
+        initialTab: "fares",
+      },
+    });
+
+    // Create bikeshare station pages
+    stations.forEach((s) => {
+      createPage({
+        path: `/${b.node.slug.current}/station/${s.station_id}`,
+        component: path.resolve("./src/templates/bikeshare-station-page.tsx"),
+        context: {
+          feedUrl: b.node.feedUrl,
+          station: s,
+          slug: b.node.slug.current,
+          lat: s.lat,
+          lon: s.lon,
+        },
+      });
+    });
+  }
 };
