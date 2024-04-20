@@ -7,11 +7,18 @@ import AgencySlimHeader from "../components/AgencySlimHeader";
 import RouteHeader from "../components/RouteHeader";
 import RouteSlim from "../components/RouteSlim";
 import { createAgencyData, createRouteData } from "../util";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 
 const Agency = ({ data, pageContext, location }) => {
+
   let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.allSanityAgency.edges[0].node;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
+
+
+  let { startDate, endDate } = gtfsAgency.feedInfo;
+
 
   let {
     agencyUrl,
@@ -169,6 +176,17 @@ const Agency = ({ data, pageContext, location }) => {
                 ))}
               </div>
             </div>
+            <div>
+              <h4>Feed information</h4>
+              <p className="ml-2">The currently published GTFS feed is valid from: <b>{startDate}</b> to <b>{endDate}</b>.</p>
+              {/* if end date > today, add warning */}
+              {endDate < new Date().toISOString().split("T")[0] && (
+                <p className="text-red-400 font-semibold mt-3 ml-2">
+                  <FontAwesomeIcon icon={faExclamationTriangle} />{" "}
+                  This schedule may be out of date.
+                </p>
+              )}
+            </div>
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="routes">
@@ -221,6 +239,8 @@ export const query = graphql`
           }
         }
         feedInfo: feedInfoByFeedIndex {
+          startDate: feedStartDate
+          endDate: feedEndDate
           serviceCalendars: calendarsByFeedIndexList {
             sunday
             thursday
