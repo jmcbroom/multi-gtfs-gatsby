@@ -66,12 +66,15 @@ const FavoritesPage = ({ data }) => {
   return (
     <>
       <div className="my-4 flex items-center justify-normal">
-        <FontAwesomeIcon
-          icon={faStar}
-          className="text-yellow-500 ml-2 md:ml-0"
-        />
-        <h2 className="ml-2 mb-0 block">favorite stops</h2>
+        <h2 className="mr-2 mb-0 block">Favorite stops</h2>
+        <FontAwesomeIcon icon={faStar} className="ml-2 md:ml-0" />
       </div>
+      <p className="text-sm m-0 text-gray-700 mb-4">
+        Add stops to your favorites by clicking the star icon on the stop page.
+      </p>
+      {Object.keys(grouped).length === 0 && (
+        <span className="my-4">You have no favorite stops.</span>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {Object.keys(grouped).map((key) => {
           let agency = merged.filter((a) => a.slug.current === key)[0];
@@ -88,6 +91,9 @@ const FavoritesPage = ({ data }) => {
             </div>
           );
         })}
+        {Object.keys(bikeshareGrouped).length === 0 && (
+        <span className="my-4">You have no favorite bikeshare stations.</span>
+      )}
         {Object.keys(bikeshareGrouped).map((key) => {
           return (
             <div key={key}>
