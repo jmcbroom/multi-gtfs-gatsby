@@ -26,6 +26,10 @@ const RouteHeader = ({ routeShortName, displayShortName, routeLongName, routeCol
     url = `/${agency.slug.current}/route/${displayShortName}`
   }
 
+  if (displayShortName === 'DPM'){
+    url = '/people-mover'
+  }
+
   let routeNumberClassName = `font-bold text-center py-2 text-lg bg-white ${widths[displayShortName.length]}`
   return (
     <Link to={url}>
