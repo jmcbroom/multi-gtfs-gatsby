@@ -127,7 +127,7 @@ const BikeshareStationPage = ({ data, pageContext }) => {
             <>
               <h4 className="m-0">Station status</h4>
 
-              <div className="flex flex-col gap-4 py-2 px-2 bg-gray-100">
+              <div className="flex flex-col gap-4 py-2 px-2 bg-gray-100 dark:bg-zinc-700">
                 <div className="flex items-center">
                   <FontAwesomeIcon
                     icon={faBicycle}
