@@ -9,7 +9,7 @@ const BikeshareCard = ({ station, agency }) => {
     <div key={station.id} className="bg-gray-200 dark:bg-zinc-800 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none p-1">
       <div className="flex items-center justify-between px-2 py-1">
         <Link
-          to={`/${agency.slug.current}/station/${station.id}`}
+          to={`/${agency.slug.current}/station/${station.station_id}`}
         >
           <FontAwesomeIcon icon={faBicycle} className="mr-2 text-gray-500" />
           <span className="plex font-semibold">{station.name}</span>
