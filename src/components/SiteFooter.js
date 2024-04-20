@@ -2,7 +2,7 @@ import React from "react";
 import { Link, graphql } from "gatsby";
 import { DiscordLogoIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlane } from "@fortawesome/free-solid-svg-icons";
+import { faPlane, faStar } from "@fortawesome/free-solid-svg-icons";
 
 const SiteFooter = ({ data }) => {
   return (
@@ -44,11 +44,17 @@ const SiteFooter = ({ data }) => {
           <Link to={`/michigan-flyer`}>
             <span className="">Michigan Flyer</span>
           </Link>
+
+          <h3 className="mt-4">Bikeshare</h3>
+          <Link to={`/mogo`}>
+            <span className="">MoGo</span>
+          </Link>
         </div>
 
         <div className="flex flex-col justify-start gap-4">
           <div className="flex flex-col justify-start gap-2">
             <h3>Other pages</h3>
+          <Link to={`/favorites`}>Favorite stops <FontAwesomeIcon icon={faStar} /></Link>
             <Link to={`/region-map`}>Regional transit map</Link>
             <Link to={`/nearme`}>Transit near me</Link>
           </div>
