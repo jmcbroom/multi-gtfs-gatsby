@@ -1,14 +1,23 @@
 import React from "react";
 
 const MapLegend = ({ marks, text }) => {
+
+
+  let markClasses = marks.map((mark) => `${mark.size} bg-${mark.color}-500 rounded-full border-2 border-black dark:border-zinc-200`);
+
+  console.log(markClasses);
+
   return (
     <div>
       <h4>Map legend</h4>
       <div className="grid grid-cols-2 gap-2 pt-2">
-        {marks.map((mark) => (
+        {marks.map((mark, idx) => (
           <div className="flex items-center gap-2" key={mark.text}>
             <div
-              className={`${mark.size} bg-${mark.color}-500 rounded-full border-2 border-black dark:border-zinc-200`}
+              className={markClasses[idx]}
+              style={{
+                backgroundColor: mark.color,
+              }}
             ></div>
             <p>{mark.text}</p>
           </div>
