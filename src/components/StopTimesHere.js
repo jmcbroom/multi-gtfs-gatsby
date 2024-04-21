@@ -42,7 +42,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
               value={route.displayShortName}
             >
               <AccordionTrigger>
-                <RouteSlim {...route} agency={agency} className="px-2" />
+                <RouteSlim {...route} agency={agency} direction={route.directions[0]} className="px-2" />
               </AccordionTrigger>
               <AccordionContent>
                 <div className="flex flex-col gap-2 mt-2">

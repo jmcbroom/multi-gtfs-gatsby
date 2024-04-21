@@ -13,6 +13,7 @@ import {
   faBicycle,
   faSignInAlt,
 } from "@fortawesome/free-solid-svg-icons";
+import StopTransfers from '../components/StopTransfers';
 
 const BikeshareStationPage = ({ data, pageContext }) => {
   let bikeTypes = {
@@ -67,6 +68,8 @@ const BikeshareStationPage = ({ data, pageContext }) => {
 
   const [stationStatus, setStationStatus] = useState(null);
 
+  let sanityAgencies = data.agency.edges.map((e) => e.node);
+
   let nearbyStops = data.postgres.nearbyStops;
 
   let nearbyStopsFc = {
@@ -87,14 +90,14 @@ const BikeshareStationPage = ({ data, pageContext }) => {
           offset: [1, 0],
           anchor: "left",
           justify: "left",
-          agency: stop.feedIndex == 33 ? `ddot` : `smart`,
+          agency: sanityAgencies.find(sa => sa.currentFeedIndex === stop.feedIndex).slug.current,
         },
       };
     }),
   };
 
   useEffect(() => {
-    fetch(`${feedUrl}/en/station_status`)
+    fetch(`${feedUrl}/station_status`)
       .then((response) => response.json())
       .then((data) => {
         let matchingStation = data.data.stations.find(
@@ -167,6 +170,7 @@ const BikeshareStationPage = ({ data, pageContext }) => {
               <p>Loading station status..</p>
             </div>
           )}
+          <StopTransfers stop={indexedStop} nearbyStops={nearbyStops} routes={data.sanityRoutes.edges.map(e => e.node)} agencies={data.agency.edges.map(e => e.node)} />
         </div>
         <div>
           <BikeshareMap stationsFc={stationFc} nearbyStopsFc={nearbyStopsFc} />
@@ -175,18 +179,19 @@ const BikeshareStationPage = ({ data, pageContext }) => {
               {
                 color: "red",
                 text: "MoGo station",
-                size: "w-6 h-6",
+                size: "w-4 h-4",
               },
               {
                 color: "white",
                 text: "Nearby bus stop",
-                size: "w-4 h-4",
+                size: "w-3 h-3",
               },
             ]}
             text={`Tap a bus stop on the map to jump to that stop's schedule page.`}
           />
-          <div></div>
-        </div>
+          
+
+          </div>
       </div>
     </div>
   );
@@ -213,14 +218,66 @@ export const query = graphql`
         }
       }
     }
+    agency: allSanityAgency {
+      edges {
+        node {
+          name
+          fullName
+          id
+          realTimeEnabled
+          stopIdentifierField
+          currentFeedIndex
+          color {
+            hex
+          }
+          textColor {
+            hex
+          }
+          slug {
+            current
+          }
+        }
+      }
+    }
+    sanityRoutes: allSanityRoute{
+      edges {
+        node {
+          agency {
+            currentFeedIndex
+          }
+          longName
+          shortName
+          displayShortName: shortName
+          color {
+            hex
+          }
+          textColor {
+            hex
+          }
+          mapPriority
+          directions: extRouteDirections {
+            directionHeadsign
+            directionDescription
+            directionId
+            directionTimepoints
+            directionShape
+          }
+        }
+      }
+    }
     postgres {
       nearbyStops: nearbyStopsList(lat: $lat, lon: $lon) {
-        stopName
+        feedIndex
         stopId
         stopCode
-        feedIndex
+        stopName
         stopLat
         stopLon
+        tripDirections: tripDirectionsList {
+          routeId
+          directionId
+          tripCount
+        }
       }
     }
   }

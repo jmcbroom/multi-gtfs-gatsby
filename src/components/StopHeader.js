@@ -44,7 +44,7 @@ const StopHeader = ({
         <FontAwesomeIcon
           icon={stopType === "bus" ? faBus : faBicycle}
           size="lg"
-          className="m-0 p-3 text-gray-500 dark:text-zinc-500 dark:bg-zinc-800 bg-gray-300 mr-2"
+          className="m-0 p-3 text-gray-500 dark:text-zinc-500 dark:bg-zinc-800 bg-gray-200 mr-2"
           style={{ backgroundColor: "" }}
         />
         <h1 className="text-base font-semibold m-0">{stopName}</h1>

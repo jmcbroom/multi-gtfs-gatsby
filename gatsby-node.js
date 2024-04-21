@@ -254,7 +254,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
 
   for (let b of allAgencies.data.allSanityBikeshare.edges) {
 
-    const response = await axios.get(`${b.node.feedUrl}/en/station_information`);
+    const response = await axios.get(`${b.node.feedUrl}/station_information.json`);
 
     let { stations } = response.data.data;
 
