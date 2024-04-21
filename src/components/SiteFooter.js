@@ -74,6 +74,9 @@ const SiteFooter = ({ data }) => {
           </div>
           <div className="flex flex-col justify-start gap-2">
             <h3>Other sites</h3>
+            <a href="https://isthemetroaccessible.com/" className="flex items-center gap-2">
+              is the metro accessible?
+            </a>
             <a
               href="http://discord.det.city/"
               className="flex items-center gap-2"

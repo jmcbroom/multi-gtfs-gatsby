@@ -10,6 +10,7 @@ import StopMap from "../components/StopMap";
 import StopPredictions from "../components/StopPredictions";
 import StopTimesHere from "../components/StopTimesHere";
 import StopAccessibility from "../components/StopAccessibility";
+import StopTransfers from "../components/StopTransfers";
 import { db } from "../db";
 import { createAgencyData, createRouteData, getServiceDays } from "../util";
 dayjs.extend(relativeTime);
@@ -18,7 +19,7 @@ const Stop = ({ data, pageContext }) => {
   const favoriteStops = useLiveQuery(() => db.stops.toArray());
 
   let gtfsAgency = data.postgres.agencies[0];
-  let sanityAgency = data.agency.edges.map((e) => e.node)[0];
+  let sanityAgency = data.agency.edges.map(e => e.node).filter(a => pageContext.agencySlug === a.slug.current)[0];
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
   let { serviceCalendars } = agencyData.feedInfo;
   let serviceDays = getServiceDays(serviceCalendars);
@@ -26,6 +27,9 @@ const Stop = ({ data, pageContext }) => {
   let { sanityRoutes } = data;
 
   let indexedStop = { ...data.postgres.stop[0] };
+
+  delete indexedStop.times;
+  
   indexedStop.agency = {
     agencySlug: agencyData.slug.current,
     agencyName: agencyData.name,
@@ -40,13 +44,23 @@ const Stop = ({ data, pageContext }) => {
 
   routes.forEach((r) => {
     // find the matching sanityRoute
+
     let matching = sanityRoutes.edges
       .map((e) => e.node)
-      .filter((sr) => sr.shortName === r.routeShortName);
+      .filter((sr) => sr.shortName === r.routeShortName && sr.agency.currentFeedIndex === agencyData.feedIndex);
 
     // let's override the route attributes with those from Sanity
     if (matching.length === 1) {
       r = createRouteData(r, matching[0]);
+    }
+
+    // find in trip directions
+    let matchingDirection = indexedStop.tripDirections.find(
+      (td) => td.routeId === r.routeShortName
+    );
+    if (matchingDirection) {
+      r.directions = r.directions.filter((d) => d.directionId === matchingDirection.directionId);
+      r.directions[0].tripCount = matchingDirection.tripCount;
     }
   });
 
@@ -276,6 +290,7 @@ const Stop = ({ data, pageContext }) => {
           {["ddot", "smart"].indexOf(agencyData.slug.current) > -1 && (
             <StopAccessibility stop={indexedStop} />
           )}
+          <StopTransfers stop={indexedStop} nearbyStops={indexedStop.nearby} routes={sanityRoutes.edges.map(e => e.node)} agencies={data.agency.edges.map(e => e.node)} />
         </div>
       </div>
     </div>
@@ -283,10 +298,8 @@ const Stop = ({ data, pageContext }) => {
 };
 
 export const query = graphql`
-  query StopQuery($feedIndex: Int, $sanityFeedIndex: Float, $stopId: String) {
-    agency: allSanityAgency(
-      filter: { currentFeedIndex: { eq: $sanityFeedIndex } }
-    ) {
+  query StopQuery($feedIndex: Int, $stopId: String) {
+    agency: allSanityAgency {
       edges {
         node {
           name
@@ -294,6 +307,7 @@ export const query = graphql`
           id
           realTimeEnabled
           stopIdentifierField
+          currentFeedIndex
           color {
             hex
           }
@@ -306,14 +320,15 @@ export const query = graphql`
         }
       }
     }
-    sanityRoutes: allSanityRoute(
-      filter: { agency: { currentFeedIndex: { eq: $sanityFeedIndex } } }
-    ) {
+    sanityRoutes: allSanityRoute{
       edges {
         node {
+          agency {
+            currentFeedIndex
+          }
           longName
           shortName
-          displayShortName
+          displayShortName: shortName
           color {
             hex
           }
@@ -377,16 +392,22 @@ export const query = graphql`
           routeColor
           routeTextColor
         }
+        tripDirections: tripDirectionsList {
+          routeId
+          directionId
+          tripCount
+        }
         nearby: nearbyStopsList {
+          feedIndex
           stopId
+          stopCode
           stopName
           stopLat
           stopLon
-          routes: routesList {
-            routeShortName
-            routeLongName
-            routeColor
-            routeTextColor
+          tripDirections: tripDirectionsList {
+            routeId
+            directionId
+            tripCount
           }
         }
         times: stopTimesByFeedIndexAndStopIdList(orderBy: ARRIVAL_TIME_ASC) {

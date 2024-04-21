@@ -38,14 +38,14 @@ const StopAccessibility = ({ stop }) => {
         Stop accessibility
       </h4>
       <div className="p-2 py-3 text-sm flex items-center gap-1">
-        <span>
+        <span className="ml-1">
           Check this bus stop's accessibility on
         </span>
         <a
           href={itmaUrl}
           className="font-semibold"
         >
-          isthemetroaccessible
+          is the metro accessible
           {/* TODO: flip back and forth between dark and light? */}
           <img src="https://isthemetroaccessible.com/images/favicon-dark.png" alt="isthemetroaccessible logo" className="w-4 ml-1 -mt-1 inline-block" />
         </a>
