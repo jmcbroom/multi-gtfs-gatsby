@@ -8,6 +8,8 @@ import { db } from "../db";
 import _ from "lodash";
 import MapLegend from "../components/MapLegend";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import {
   faBolt,
   faBicycle,
@@ -16,6 +18,13 @@ import {
 import StopTransfers from '../components/StopTransfers';
 
 const BikeshareStationPage = ({ data, pageContext }) => {
+
+  let { sanityAgencies } = useSanityAgencies();
+  let { sanityRoutes } = useSanityRoutes();
+
+  sanityAgencies = sanityAgencies.edges.map(e => e.node);
+  sanityRoutes = sanityRoutes.edges.map(e => e.node);
+
   let bikeTypes = {
     ICONIC: "Normal",
     BOOST: "Electric (1st gen)",
@@ -67,8 +76,6 @@ const BikeshareStationPage = ({ data, pageContext }) => {
   };
 
   const [stationStatus, setStationStatus] = useState(null);
-
-  let sanityAgencies = data.agency.edges.map((e) => e.node);
 
   let nearbyStops = data.postgres.nearbyStops;
 
@@ -170,7 +177,7 @@ const BikeshareStationPage = ({ data, pageContext }) => {
               <p>Loading station status..</p>
             </div>
           )}
-          <StopTransfers stop={indexedStop} nearbyStops={nearbyStops} routes={data.sanityRoutes.edges.map(e => e.node)} agencies={data.agency.edges.map(e => e.node)} />
+          <StopTransfers stop={indexedStop} nearbyStops={nearbyStops} routes={sanityRoutes} agencies={sanityAgencies} />
         </div>
         <div>
           <BikeshareMap stationsFc={stationFc} nearbyStopsFc={nearbyStopsFc} />
@@ -214,53 +221,6 @@ export const query = graphql`
           }
           textColor {
             hex
-          }
-        }
-      }
-    }
-    agency: allSanityAgency {
-      edges {
-        node {
-          name
-          fullName
-          id
-          realTimeEnabled
-          stopIdentifierField
-          currentFeedIndex
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          slug {
-            current
-          }
-        }
-      }
-    }
-    sanityRoutes: allSanityRoute{
-      edges {
-        node {
-          agency {
-            currentFeedIndex
-          }
-          longName
-          shortName
-          displayShortName: shortName
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          mapPriority
-          directions: extRouteDirections {
-            directionHeadsign
-            directionDescription
-            directionId
-            directionTimepoints
-            directionShape
           }
         }
       }
