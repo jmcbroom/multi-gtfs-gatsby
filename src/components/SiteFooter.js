@@ -56,7 +56,7 @@ const SiteFooter = ({ data }) => {
             <h3>Other pages</h3>
           <Link to={`/favorites`}>Favorite stops <FontAwesomeIcon icon={faStar} /></Link>
             <Link to={`/region-map`}>Regional transit map</Link>
-            <Link to={`/nearme`}>Transit near me</Link>
+            <Link to={`/nearby`}>Transit near me</Link>
           </div>
           <div className="flex flex-col justify-start gap-2">
             <h3>This site</h3>

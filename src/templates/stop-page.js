@@ -13,18 +13,23 @@ import StopAccessibility from "../components/StopAccessibility";
 import StopTransfers from "../components/StopTransfers";
 import { db } from "../db";
 import { createAgencyData, createRouteData, getServiceDays } from "../util";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
 dayjs.extend(relativeTime);
+
 
 const Stop = ({ data, pageContext }) => {
   const favoriteStops = useLiveQuery(() => db.stops.toArray());
 
+  let { sanityAgencies } = useSanityAgencies();
+
   let gtfsAgency = data.postgres.agencies[0];
-  let sanityAgency = data.agency.edges.map(e => e.node).filter(a => pageContext.agencySlug === a.slug.current)[0];
+  let sanityAgency = sanityAgencies.edges.map(e => e.node).filter(a => pageContext.agencySlug === a.slug.current)[0];
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
   let { serviceCalendars } = agencyData.feedInfo;
   let serviceDays = getServiceDays(serviceCalendars);
 
-  let { sanityRoutes } = data;
+  const { sanityRoutes } = useSanityRoutes();
 
   let indexedStop = { ...data.postgres.stop[0] };
 
@@ -290,7 +295,7 @@ const Stop = ({ data, pageContext }) => {
           {["ddot", "smart"].indexOf(agencyData.slug.current) > -1 && (
             <StopAccessibility stop={indexedStop} />
           )}
-          <StopTransfers stop={indexedStop} nearbyStops={indexedStop.nearby} routes={sanityRoutes.edges.map(e => e.node)} agencies={data.agency.edges.map(e => e.node)} />
+          <StopTransfers stop={indexedStop} nearbyStops={indexedStop.nearby} routes={sanityRoutes.edges.map(e => e.node)} agencies={sanityAgencies.edges.map(e => e.node)} />
         </div>
       </div>
     </div>
@@ -299,53 +304,6 @@ const Stop = ({ data, pageContext }) => {
 
 export const query = graphql`
   query StopQuery($feedIndex: Int, $stopId: String) {
-    agency: allSanityAgency {
-      edges {
-        node {
-          name
-          fullName
-          id
-          realTimeEnabled
-          stopIdentifierField
-          currentFeedIndex
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          slug {
-            current
-          }
-        }
-      }
-    }
-    sanityRoutes: allSanityRoute{
-      edges {
-        node {
-          agency {
-            currentFeedIndex
-          }
-          longName
-          shortName
-          displayShortName: shortName
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          mapPriority
-          directions: extRouteDirections {
-            directionHeadsign
-            directionDescription
-            directionId
-            directionTimepoints
-            directionShape
-          }
-        }
-      }
-    }
     postgres {
       agencies: agenciesList(condition: { feedIndex: $feedIndex }) {
         agencyName

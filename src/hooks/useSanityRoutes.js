@@ -9,9 +9,13 @@ export const useSanityRoutes = () => {
             node {
               agency {
                 currentFeedIndex
+                slug {
+                  current
+                }
               }
               longName
               shortName
+              displayShortName: shortName
               color {
                 hex
               }

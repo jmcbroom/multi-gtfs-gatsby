@@ -10,6 +10,8 @@ import { navigate } from "gatsby";
 import bbox from "@turf/bbox";
 import _ from "lodash";
 import RouteHeader from "../components/RouteHeader";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
 
 const RegionMapPage = ({ data }) => {
   const { theme } = useTheme();
@@ -18,9 +20,12 @@ const RegionMapPage = ({ data }) => {
 
   let [routes, setRoutes] = useState([]);
 
-  let sanityAgencies = data.allSanityAgency.edges.map((edge) => edge.node);
-  let sanityRoutes = data.allSanityRoute.edges.map((edge) => edge.node);
+  let { sanityAgencies } = useSanityAgencies()
+  sanityAgencies = sanityAgencies.edges.map((edge) => edge.node);
   let gtfsAgencies = data.postgres.agencies;
+  
+  let { sanityRoutes } = useSanityRoutes();
+  sanityRoutes = sanityRoutes.edges.map((edge) => edge.node);
 
   // filter out non-active gtfsAgencies/feeds
   // TODO: Don't pull these from the GraphQL query in the first place.
@@ -265,53 +270,6 @@ export const query = graphql`
             saturday
             serviceId
           }
-        }
-      }
-    }
-    allSanityRoute {
-      edges {
-        node {
-          longName
-          shortName
-          displayShortName
-          agency {
-            currentFeedIndex
-            slug {
-              current
-            }
-          }
-          routeColor: color {
-            hex
-          }
-          routeTextColor: textColor {
-            hex
-          }
-          directions: extRouteDirections {
-            directionHeadsign
-            directionDescription
-            directionId
-            directionTimepoints
-            directionShape
-          }
-          mapPriority
-        }
-      }
-    }
-    allSanityAgency {
-      edges {
-        node {
-          name
-          currentFeedIndex
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          slug {
-            current
-          }
-          description: _rawDescription
         }
       }
     }
