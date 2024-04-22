@@ -39,6 +39,12 @@ export default {
       default: "1"
     },
     {
+      name: "onestopId",
+      title: "Onestop ID",
+      description: "The ID of the transit agency in the Transitland API",
+      type: "string"
+    },
+    {
       name: "color",
       title: "Color",
       description: "A color for the agency",

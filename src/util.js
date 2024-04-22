@@ -307,10 +307,10 @@ export const createRouteFc = (sanityRoute, gtfsRoute) => {
  * @returns GeoJSON feature collection
  */
 
-export const createVehicleFc = (vehicles, patterns, route, agency) => {
+export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
   // Create a GeoJSON FeatureCollection of vehicles
   // from the BusTime API response and the Sanity route directions
-  if (!vehicles || !patterns || !route) return null;
+  if (!vehicles || !patterns || !route || !trips) return null;
 
   // create a GeoJSON feature for each vehicle
   let features = vehicles.map((v) => {
@@ -349,28 +349,17 @@ export const createVehicleFc = (vehicles, patterns, route, agency) => {
       }
 
       if (agency.slug.current === "theride") {
-        // fallback to first point
-        let newDirection = route.directions.find((d) => {
-          let parsedShape = JSON.parse(d.directionShape);
-          let firstPoint =
-            parsedShape[0]["geometry"]["coordinates"][0][0].toFixed(3);
-          let firstVidPtLon = pattern.pt[0].lon.toFixed(3);
-          if (firstPoint === firstVidPtLon) {
-            return true;
-          } else {
-            let lastPoint =
-              parsedShape[parsedShape.length - 1]["geometry"][
-                "coordinates"
-              ][0][0].toFixed(3);
-            let lastVidPtLon = pattern.pt[pattern.pt.length - 1].lon.toFixed(3);
-            if (lastPoint === lastVidPtLon) {
-              return true;
-            }
-          }
-        });
-        if (newDirection) {
-          direction = newDirection;
-        }
+
+        let firstStopTime = pattern.pt.find(pt => pt.stpid)
+
+        let tripWithFirstStop = trips.find(t => {
+          let stopTimes = t.stopTimes
+          let firstStop = stopTimes.find(st => st.stop.stopCode === firstStopTime.stpid)
+          return firstStop
+        })
+
+        direction = route.directions.find(d => d.directionId === tripWithFirstStop.directionId)
+
       }
     }
 
@@ -606,7 +595,7 @@ export const matchPredictionToRoute = (prediction, routes, patterns) => {
     return null
   }
 
-  let direction = route.directions.filter(
+  let direction = route.directions?.filter(
     (direction) =>
       direction.directionDescription.toLowerCase().slice(0, 3) ===
       prediction.rtdir.toLowerCase().slice(0, 3)
@@ -622,7 +611,7 @@ export const matchPredictionToRoute = (prediction, routes, patterns) => {
     patterns["bustime-response"]["ptr"].forEach((ptrn) => {
       ptrn.pt.forEach((pt) => {
         if (pt.stpid === prediction.stpid) {
-          route.directions.forEach((dir) => {
+          route.directions?.forEach((dir) => {
             let firstPoint = JSON.parse(dir.directionShape)[0]["geometry"][
               "coordinates"
             ][0][0].toFixed(3);

@@ -8,13 +8,23 @@ import { db } from "../db";
 import _ from "lodash";
 import MapLegend from "../components/MapLegend";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import {
   faBolt,
   faBicycle,
   faSignInAlt,
 } from "@fortawesome/free-solid-svg-icons";
+import StopTransfers from '../components/StopTransfers';
 
 const BikeshareStationPage = ({ data, pageContext }) => {
+
+  let { sanityAgencies } = useSanityAgencies();
+  let { sanityRoutes } = useSanityRoutes();
+
+  sanityAgencies = sanityAgencies.edges.map(e => e.node);
+  sanityRoutes = sanityRoutes.edges.map(e => e.node);
+
   let bikeTypes = {
     ICONIC: "Normal",
     BOOST: "Electric (1st gen)",
@@ -87,14 +97,14 @@ const BikeshareStationPage = ({ data, pageContext }) => {
           offset: [1, 0],
           anchor: "left",
           justify: "left",
-          agency: stop.feedIndex == 33 ? `ddot` : `smart`,
+          agency: sanityAgencies.find(sa => sa.currentFeedIndex === stop.feedIndex).slug.current,
         },
       };
     }),
   };
 
   useEffect(() => {
-    fetch(`${feedUrl}/en/station_status`)
+    fetch(`${feedUrl}/station_status`)
       .then((response) => response.json())
       .then((data) => {
         let matchingStation = data.data.stations.find(
@@ -167,6 +177,7 @@ const BikeshareStationPage = ({ data, pageContext }) => {
               <p>Loading station status..</p>
             </div>
           )}
+          <StopTransfers stop={indexedStop} nearbyStops={nearbyStops} routes={sanityRoutes} agencies={sanityAgencies} />
         </div>
         <div>
           <BikeshareMap stationsFc={stationFc} nearbyStopsFc={nearbyStopsFc} />
@@ -175,18 +186,19 @@ const BikeshareStationPage = ({ data, pageContext }) => {
               {
                 color: "red",
                 text: "MoGo station",
-                size: "w-6 h-6",
+                size: "w-4 h-4",
               },
               {
                 color: "white",
                 text: "Nearby bus stop",
-                size: "w-4 h-4",
+                size: "w-3 h-3",
               },
             ]}
             text={`Tap a bus stop on the map to jump to that stop's schedule page.`}
           />
-          <div></div>
-        </div>
+          
+
+          </div>
       </div>
     </div>
   );
@@ -215,12 +227,17 @@ export const query = graphql`
     }
     postgres {
       nearbyStops: nearbyStopsList(lat: $lat, lon: $lon) {
-        stopName
+        feedIndex
         stopId
         stopCode
-        feedIndex
+        stopName
         stopLat
         stopLon
+        tripDirections: tripDirectionsList {
+          routeId
+          directionId
+          tripCount
+        }
       }
     }
   }

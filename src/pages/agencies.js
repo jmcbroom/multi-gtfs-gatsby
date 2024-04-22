@@ -4,6 +4,7 @@ import AgencyHeader from "../components/AgencyHeader";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import PortableText from "react-portable-text";
 import { createRouteData } from "../util";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
 
 /**
  * The home page.
@@ -20,7 +21,9 @@ const AllAgenciesPage = ({ data }) => {
     return { ...sa, ...filtered };
   });
 
-  let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
+  let { sanityRoutes } = useSanityRoutes();
+  sanityRoutes = sanityRoutes.edges.map((r) => r.node);
+
   // loop thru agencies
   merged.forEach((a) => {
     // loop thru those agencies' routes
