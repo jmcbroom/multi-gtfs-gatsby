@@ -17,6 +17,7 @@ const RoutePredictionItem = ({ vehicle, predictions, vehicleType }) => {
     routeColor,
     routeTextColor,
     routeShortName,
+    routeLongName,
     displayShortName,
     description,
     headsign,
@@ -78,7 +79,7 @@ const RoutePredictionItem = ({ vehicle, predictions, vehicleType }) => {
             <RouteSlim
               displayShortName={displayShortName}
               routeShortName={routeShortName}
-              routeLongName={description}
+              routeLongName={routeLongName}
               routeColor={routeColor}
               routeTextColor={routeTextColor}
               direction={{

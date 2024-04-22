@@ -272,7 +272,8 @@ const Route = ({ data, pageContext }) => {
                   vehicles,
                   patterns,
                   routeData,
-                  agencyData
+                  agencyData,
+                  trips
                 )}
                 predictions={predictions}
                 setTrackedBus={setTrackedBus}
@@ -294,7 +295,8 @@ const Route = ({ data, pageContext }) => {
                   vehicles,
                   patterns,
                   routeData,
-                  agencyData
+                  agencyData,
+                  trips
                 )}
                 agency={agencyData}
                 trackedBus={trackedBus}

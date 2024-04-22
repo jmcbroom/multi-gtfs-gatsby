@@ -98,6 +98,7 @@ const ShapeInput = React.forwardRef((props, ref) => {
         __unstable_presence={presence}
       >
         <div id="map" style={{ height: 500 }}></div>
+        <input type="text" placeholder="Enter text" value={value} onChange={(e) => onChange(PatchEvent.from(set(e.target.value)))} />
       </FormField>
     </>
   );

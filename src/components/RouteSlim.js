@@ -11,7 +11,7 @@ import React from "react";
  */
 const RouteSlim = ({
   routeShortName,
-  displayShortName,
+  displayShortName='fake',
   routeLongName,
   routeColor = "#000",
   routeTextColor = "#fff",
@@ -27,8 +27,9 @@ const RouteSlim = ({
   };
 
   let routeNumberClassName = `plex flex items-center justify-around text-sm font-semibold bg-white ${
-    widths[displayShortName.length]
+    widths[displayShortName?.length] || "w-8"
   } h-8`;
+
   return (
     <div className={"flex items-center justify-start gap-2"}>
       <span
@@ -38,11 +39,11 @@ const RouteSlim = ({
         {displayShortName}
       </span>
 
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col items-start justify-around">
         <h2 className="text-sm mb-0 font-medium leading-4">{routeLongName}</h2>
         {direction?.directionDescription && (
-          <span className="text-xs text-gray-600 dark:text-gray-400 text-left">
-            to {direction.directionHeadsign}
+          <span className="text-xs text-gray-500 dark:text-gray-400 text-left font-medium">
+            {direction.directionDescription.replace("bound", "")} to {direction.directionHeadsign}
           </span>
         )}
       </div>

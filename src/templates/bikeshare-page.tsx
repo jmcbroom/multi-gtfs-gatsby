@@ -60,7 +60,7 @@ const Bikeshare = ({ data, pageContext, location }) => {
   >(null);
 
   useEffect(() => {
-    fetch(`${feedUrl}/en/station_status`)
+    fetch(`${feedUrl}/station_status`)
       .then((response) => response.json())
       .then(
         (data) => setStationStatus(data.data.stations))
@@ -106,25 +106,25 @@ const Bikeshare = ({ data, pageContext, location }) => {
 
         <Tabs.Content className="tabContent" value="stations">
           <h2>Stations</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {stationStatus && createStationsFc(stations, stationStatus).features.map((station: any) => {
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {stationStatus && createStationsFc(stations, stationStatus).features?.map((station: any) => {
               return (
                 <div key={station.id} className="bg-gray-100 dark:bg-zinc-700">
                   <Link
                     to={`/${bikeshare.slug.current}/station/${station.id}`}
                   >
-                    <h4 className="m-0">{station.properties.name.replace("*", "")}</h4>
+                    <h4 className="m-0 text-xs">{station.properties.name.replace("*", "")}</h4>
                   </Link>
                   <div className="flex justify-evenly gap-1 py-1">
-                    <div className="bg-gray-100 dark:bg-zinc-600 flex justify-start px-2 gap-2 items-center py-1">
+                    <div className="bg-gray-100 dark:bg-zinc-700 flex justify-start px-2 gap-2 items-center py-1">
                       <FontAwesomeIcon icon={faBicycle} className="text-slate-500 dark:text-zinc-300" />
                       <span className="font-semibold text-xs dark:text-zinc-300">{station.properties.status.num_bikes_available} bikes</span>
                     </div>
-                    <div className="bg-gray-100 dark:bg-zinc-600 flex justify-start px-2 gap-2 items-center py-1">
+                    <div className="bg-gray-100 dark:bg-zinc-700 flex justify-start px-2 gap-2 items-center py-1">
                       <FontAwesomeIcon icon={faBolt} className="text-slate-500 dark:text-zinc-300" />
                       <span className="font-semibold text-xs dark:text-zinc-300">{station.properties.status.vehicle_types_available.filter(v => v.vehicle_type_id !== 'ICONIC').map(v => v.count).reduce((a,b) => a + b)} e-bikes</span>
                     </div>
-                    <div className="bg-gray-100 dark:bg-zinc-600 flex justify-start px-2 gap-2 items-center py-1">
+                    <div className="bg-gray-100 dark:bg-zinc-700 flex justify-start px-2 gap-2 items-center py-1">
                       <FontAwesomeIcon icon={faSignInAlt} className="text-slate-400 dark:text-zinc-400" />
                       <span className="font-regular text-xs text-gray-500 dark:text-zinc-400">{station.properties.status.num_docks_available} open docks</span>
                     </div>

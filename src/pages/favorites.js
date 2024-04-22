@@ -10,13 +10,19 @@ import _ from "lodash";
 import StopCard from "../components/StopCard";
 import BikeshareCard from "../components/Bikeshare/BikeshareCard";
 import { db } from "../db";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
 /**
  * The home page.
  * @param {*} data: GraphQL query
  */
 const FavoritesPage = ({ data }) => {
   let { agencies } = data.postgres;
-  let sanityAgencies = data.allSanityAgency.edges.map((e) => e.node);
+
+  let { sanityAgencies } = useSanityAgencies();
+  sanityAgencies = sanityAgencies.edges.map((e) => e.node);
+  let { sanityRoutes } = useSanityRoutes();
+  sanityRoutes = sanityRoutes.edges.map((e) => e.node);
 
   // get the favorite stops
   const favoriteStops = useLiveQuery(() => db.stops.toArray());
@@ -29,7 +35,6 @@ const FavoritesPage = ({ data }) => {
     return { ...sa, ...filtered };
   });
 
-  let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
   // loop thru agencies
   merged.forEach((a) => {
     // loop thru those agencies' routes
@@ -72,10 +77,9 @@ const FavoritesPage = ({ data }) => {
       <p className="text-sm m-0 text-gray-700 mb-4">
         Add stops to your favorites by clicking the star icon on the stop page.
       </p>
-      {Object.keys(grouped).length === 0 && (
-        <span className="my-4">You have no favorite stops.</span>
-      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+
         {Object.keys(grouped).map((key) => {
           let agency = merged.filter((a) => a.slug.current === key)[0];
           return (
@@ -83,17 +87,15 @@ const FavoritesPage = ({ data }) => {
               <AgencySlimHeader agency={agency} />
               <div className="grid mt-0">
                 {grouped[key]
-                  .sort((a, b) => b.times.length - a.times.length)
+                  // .sort((a, b) => b.times.length - a.times.length)
                   .map((stop) => (
-                    <StopCard stop={stop} agency={agency} key={stop.stopId} />
+                    <StopCard stop={stop} agency={agency} key={stop.stopId} routeDirections={stop.tripDirections} />
                   ))}
               </div>
             </div>
           );
         })}
-        {Object.keys(bikeshareGrouped).length === 0 && (
-        <span className="my-4">You have no favorite bikeshare stations.</span>
-      )}
+
         {Object.keys(bikeshareGrouped).map((key) => {
           return (
             <div key={key}>
@@ -117,46 +119,6 @@ const FavoritesPage = ({ data }) => {
 
 export const query = graphql`
   {
-    allSanityAgency(sort: { fields: name }) {
-      edges {
-        node {
-          currentFeedIndex
-          name
-          fullName
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          description: _rawDescription
-          stopIdentifierField
-          slug {
-            current
-          }
-        }
-      }
-    }
-    allSanityRoute {
-      edges {
-        node {
-          longName
-          shortName
-          routeColor: color {
-            hex
-          }
-          routeTextColor: textColor {
-            hex
-          }
-          agency {
-            currentFeedIndex
-            slug {
-              current
-            }
-          }
-        }
-      }
-    }
     postgres {
       agencies: agenciesList {
         agencyName

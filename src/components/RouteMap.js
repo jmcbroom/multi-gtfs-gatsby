@@ -95,7 +95,7 @@ const RouteMap = ({
   };
 
   if(trackedBus) {
-    let trackedFeature = vehicleFc.features.filter(v => v.properties.vid === trackedBus)[0]
+    let trackedFeature = vehicleFc?.features?.filter(v => v.properties.vid === trackedBus)[0] || null
     if(!trackedFeature) { return };
     map.current?.easeTo({
       center: trackedFeature.geometry.coordinates,

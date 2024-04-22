@@ -9,26 +9,32 @@ import StopHeader from "../components/StopHeader";
 import StopMap from "../components/StopMap";
 import StopPredictions from "../components/StopPredictions";
 import StopTimesHere from "../components/StopTimesHere";
+import StopAccessibility from "../components/StopAccessibility";
+import StopTransfers from "../components/StopTransfers";
 import { db } from "../db";
-import {
-  createAgencyData,
-  createRouteData,
-  getServiceDays
-} from "../util";
+import { createAgencyData, createRouteData, getServiceDays } from "../util";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
 dayjs.extend(relativeTime);
+
 
 const Stop = ({ data, pageContext }) => {
   const favoriteStops = useLiveQuery(() => db.stops.toArray());
 
+  let { sanityAgencies } = useSanityAgencies();
+
   let gtfsAgency = data.postgres.agencies[0];
-  let sanityAgency = data.agency.edges.map((e) => e.node)[0];
+  let sanityAgency = sanityAgencies.edges.map(e => e.node).filter(a => pageContext.agencySlug === a.slug.current)[0];
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
   let { serviceCalendars } = agencyData.feedInfo;
   let serviceDays = getServiceDays(serviceCalendars);
 
-  let { sanityRoutes } = data;
+  const { sanityRoutes } = useSanityRoutes();
 
   let indexedStop = { ...data.postgres.stop[0] };
+
+  delete indexedStop.times;
+  
   indexedStop.agency = {
     agencySlug: agencyData.slug.current,
     agencyName: agencyData.name,
@@ -43,13 +49,23 @@ const Stop = ({ data, pageContext }) => {
 
   routes.forEach((r) => {
     // find the matching sanityRoute
+
     let matching = sanityRoutes.edges
       .map((e) => e.node)
-      .filter((sr) => sr.shortName === r.routeShortName);
+      .filter((sr) => sr.shortName === r.routeShortName && sr.agency.currentFeedIndex === agencyData.feedIndex);
 
     // let's override the route attributes with those from Sanity
     if (matching.length === 1) {
       r = createRouteData(r, matching[0]);
+    }
+
+    // find in trip directions
+    let matchingDirection = indexedStop.tripDirections.find(
+      (td) => td.routeId === r.routeShortName
+    );
+    if (matchingDirection) {
+      r.directions = r.directions.filter((d) => d.directionId === matchingDirection.directionId);
+      r.directions[0].tripCount = matchingDirection.tripCount;
     }
   });
 
@@ -177,7 +193,14 @@ const Stop = ({ data, pageContext }) => {
           return;
         }
       });
-  }, [now, twStopCode, patterns, sanityAgency.realTimeEnabled, sanityAgency.slug, stopCode]);
+  }, [
+    now,
+    twStopCode,
+    patterns,
+    sanityAgency.realTimeEnabled,
+    sanityAgency.slug,
+    stopCode,
+  ]);
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled || !predictions) return;
@@ -240,89 +263,47 @@ const Stop = ({ data, pageContext }) => {
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
-
-        {predictions && (
-          <StopPredictions
+          {predictions && (
+            <StopPredictions
+              trackedBus={trackedBus}
+              setTrackedBus={setTrackedBus}
+              predictions={predictions}
+              vehicles={vehicles}
+              times={times}
+              routes={routes}
+              agency={agencyData}
+              patterns={patterns}
+            />
+          )}
+          <StopMap
+            agency={agencyData}
+            stopFc={stopFc}
+            routes={routes}
+            times={times}
             trackedBus={trackedBus}
-            setTrackedBus={setTrackedBus}
             predictions={predictions}
             vehicles={vehicles}
+          />
+        </div>
+        <div>
+          <StopTimesHere
             times={times}
             routes={routes}
             agency={agencyData}
-            patterns={patterns}
+            serviceDays={serviceDays}
           />
-        )}
-        <StopMap
-          agency={agencyData}
-          stopFc={stopFc}
-          routes={routes}
-          times={times}
-          trackedBus={trackedBus}
-          predictions={predictions}
-          vehicles={vehicles}
-        />
+          {["ddot", "smart"].indexOf(agencyData.slug.current) > -1 && (
+            <StopAccessibility stop={indexedStop} />
+          )}
+          <StopTransfers stop={indexedStop} nearbyStops={indexedStop.nearby} routes={sanityRoutes.edges.map(e => e.node)} agencies={sanityAgencies.edges.map(e => e.node)} />
         </div>
-        <StopTimesHere
-          times={times}
-          routes={routes}
-          agency={agencyData}
-          serviceDays={serviceDays}
-        />
       </div>
     </div>
   );
 };
 
 export const query = graphql`
-  query StopQuery($feedIndex: Int, $sanityFeedIndex: Float, $stopId: String) {
-    agency: allSanityAgency(
-      filter: { currentFeedIndex: { eq: $sanityFeedIndex } }
-    ) {
-      edges {
-        node {
-          name
-          fullName
-          id
-          realTimeEnabled
-          stopIdentifierField
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          slug {
-            current
-          }
-        }
-      }
-    }
-    sanityRoutes: allSanityRoute(
-      filter: { agency: { currentFeedIndex: { eq: $sanityFeedIndex } } }
-    ) {
-      edges {
-        node {
-          longName
-          shortName
-          displayShortName
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          mapPriority
-          directions: extRouteDirections {
-            directionHeadsign
-            directionDescription
-            directionId
-            directionTimepoints
-            directionShape
-          }
-        }
-      }
-    }
+  query StopQuery($feedIndex: Int, $stopId: String) {
     postgres {
       agencies: agenciesList(condition: { feedIndex: $feedIndex }) {
         agencyName
@@ -369,16 +350,22 @@ export const query = graphql`
           routeColor
           routeTextColor
         }
+        tripDirections: tripDirectionsList {
+          routeId
+          directionId
+          tripCount
+        }
         nearby: nearbyStopsList {
+          feedIndex
           stopId
+          stopCode
           stopName
           stopLat
           stopLon
-          routes: routesList {
-            routeShortName
-            routeLongName
-            routeColor
-            routeTextColor
+          tripDirections: tripDirectionsList {
+            routeId
+            directionId
+            tripCount
           }
         }
         times: stopTimesByFeedIndexAndStopIdList(orderBy: ARRIVAL_TIME_ASC) {

@@ -56,7 +56,7 @@ const SiteFooter = ({ data }) => {
             <h3>Other pages</h3>
           <Link to={`/favorites`}>Favorite stops <FontAwesomeIcon icon={faStar} /></Link>
             <Link to={`/region-map`}>Regional transit map</Link>
-            <Link to={`/nearme`}>Transit near me</Link>
+            <Link to={`/nearby`}>Transit near me</Link>
           </div>
           <div className="flex flex-col justify-start gap-2">
             <h3>This site</h3>
@@ -74,6 +74,9 @@ const SiteFooter = ({ data }) => {
           </div>
           <div className="flex flex-col justify-start gap-2">
             <h3>Other sites</h3>
+            <a href="https://isthemetroaccessible.com/" className="flex items-center gap-2">
+              is the metro accessible?
+            </a>
             <a
               href="http://discord.det.city/"
               className="flex items-center gap-2"
