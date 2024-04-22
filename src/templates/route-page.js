@@ -111,6 +111,7 @@ const Route = ({ data, pageContext }) => {
   let [patterns, setPatterns] = useState(null);
   let [vehicles, setVehicles] = useState(null);
   let [predictions, setPredictions] = useState(null);
+
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled) return;
     let tick = setInterval(() => {
@@ -271,7 +272,8 @@ const Route = ({ data, pageContext }) => {
                   vehicles,
                   patterns,
                   routeData,
-                  agencyData
+                  agencyData,
+                  trips
                 )}
                 predictions={predictions}
                 setTrackedBus={setTrackedBus}
@@ -285,13 +287,16 @@ const Route = ({ data, pageContext }) => {
                 timepointsFc={createStopsFc(
                   sanityRoute,
                   tripsByServiceAndDirection,
+                  true,
+                  true,
                   true
                 )}
                 vehicleFc={createVehicleFc(
                   vehicles,
                   patterns,
                   routeData,
-                  agencyData
+                  agencyData,
+                  trips
                 )}
                 agency={agencyData}
                 trackedBus={trackedBus}
@@ -313,6 +318,8 @@ const Route = ({ data, pageContext }) => {
               timepointsFc={createStopsFc(
                 sanityRoute,
                 tripsByServiceAndDirection,
+                true,
+                true,
                 true
               )}
               vehicleFc={createVehicleFc(

@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { sortTripsByFrequentTimepoint } from "../util";
 
 const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
+
   let {routeColor} = route;
 
   // white routeColor needs to be gray
@@ -48,7 +49,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
     // timepointName = timepointName.replace('Transit Center', 'TC');
     // timepointName = timepointName.replace('Park & Ride', 'P&R');
     // timepointName = timepointName.replace('Park And Ride', 'P&R');
-    // timepointName = timepointName.replace('Metro Airport', 'DTW');
+    // timepointName = timepointName.replace('Metro airport', 'DTW');
     // timepointName = timepointName.replace('Mcnamara', 'McNamara');
     // timepointName = timepointName.replace('Wb', '');
     // timepointName = timepointName.replace('+', '&')
@@ -64,7 +65,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
             <th key={`${s.stop.stopCode} + ${k}`} className="text-sm pt-2 timetable-header w-40 p-0 bg-white dark:bg-black tabular">
               <div className="flex flex-col items-center justify-end h-24 bg-white dark:bg-black">
                 <Link to={`/${agency.slug.current}/stop/${s.stop[agency.stopIdentifierField]}`} className="leading-none text-sm font-bold mb-2 px-2">
-                  {(s.stop.stopName.includes("DTW") || s.stop.stopName.includes("METRO AIRPORT")) && <FontAwesomeIcon icon={faPlane} size="normal" className="mx-1" />}
+                  {(s.stop.stopName.includes("DTW") || s.stop.stopName.includes("METRO AIRPORT")) && <FontAwesomeIcon icon={faPlane} size="1x" className="mx-1" />}
                   {shortenTimepointName(s.stop.stopName)}
                 </Link>
                 <FontAwesomeIcon icon={faChevronCircleRight} size="lg" className="relative z-10 bg-white dark:bg-black text-gray-700 dark:text-zinc-400" />
@@ -91,9 +92,11 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
         {sortedTrips.map((t, i) => (
           <tr key={t.tripId} style={(i + 1) % 5 === 0 ? borderedRowStyle : {}}>
             {timepoints.map((tp, j) => {
+
               let filtered = t.stopTimes.filter(st => {
                 return st.stop.stopId === tp.stop.stopId;
               });
+
               if (filtered.length === 0) {
                 return (
                   <td key={`${t.id}-${i}-${j}`}

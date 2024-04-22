@@ -3,6 +3,8 @@ import React from "react";
 import PortableText from "react-portable-text";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import { createRouteData } from "../util";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlane } from "@fortawesome/free-solid-svg-icons";
 
 /**
  * The home page.
@@ -61,7 +63,7 @@ const IndexPage = ({ data }) => {
               <AgencySlimHeader agency={a} />
               <div className="p-3 md:p-4">
                 <Link to={`/${a.slug.current}`} key={a.slug.current}>
-                  <h2>{a.name}</h2>
+                  <h3>{a.name}</h3>
                 </Link>
                 <PortableText content={a.description} className="" />
               </div>
@@ -70,42 +72,112 @@ const IndexPage = ({ data }) => {
         </div>
       </div>
       <div>
-        <h2>Other transit services</h2>
+        <h2 className="pl-3 md:pl-0">Downtown transit services</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-          {otherServices.map((a) => (
-            <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
-              <AgencySlimHeader agency={a} />
-              <div className="px-4 py-4">
-                <Link to={`/${a.slug.current}`} key={a.slug.current}>
-                  <h2>{a.name}</h2>
-                </Link>
-                <PortableText content={a.description} className="" />
+          {otherServices
+            .filter(
+              (a) => ["qline", "people-mover"].indexOf(a.slug.current) > -1
+            )
+            .map((a) => (
+              <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
+                <AgencySlimHeader agency={a} />
+                <div className="px-4 py-4">
+                  <Link to={`/${a.slug.current}`} key={a.slug.current}>
+                    <h3>{a.name}</h3>
+                  </Link>
+                  <PortableText content={a.description} className="" />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+        </div>
+      </div>
+      <div>
+        <h2 className="pl-3 md:pl-0">Regional bus services</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+          {otherServices
+            .filter((a) => ["d2a2"].indexOf(a.slug.current) > -1)
+            .map((a) => (
+              <div className="bg-gray-100 dark:bg-zinc-800" key={a.name}>
+                <AgencySlimHeader agency={a} />
+                <div className="px-4 py-4">
+                  <Link to={`/${a.slug.current}`} key={a.slug.current}>
+                    <h3>{a.name}</h3>
+                  </Link>
+                  <PortableText content={a.description} className="" />
+                </div>
+              </div>
+            ))}
           <div className="bg-gray-100 dark:bg-zinc-800">
-            <AgencySlimHeader agency={{
-              slug: { current: "michigan-flyer" },
-              name: "Michigan Flyer",
-              description: "The Michigan Flyer-AirRide bus service provides motorcoach transportation between Ann Arbor, East Lansing, and Detroit Metro Airport.",
-              agencyType: "other",
-              agencyUrl: "https://michiganflyer.com/",
-              agencyLang: "en",
-              agencyPhone: "517-333-0400",
-              agencyFareUrl: "https://michiganflyer.com/fares",
-              agencyEmail: "",
-              color: { hex: "#674A72" }, 
-              textColor: { hex: "#ffffff" }
-            }} />
+            <AgencySlimHeader
+              agency={{
+                slug: { current: "dax" },
+                name: "Detroit Air Xpress",
+                description:
+                  "The Detroit Air Xpress service provides service between Downtown Detroit and Detroit Metro airport (DTW).",
+                agencyType: "other",
+                agencyUrl: "https://www.dax-bus.com/",
+                agencyLang: "en",
+                agencyPhone: "517-333-0400",
+                agencyFareUrl: "https://www.dax-bus.com/ride?scrollto=fares",
+                agencyEmail: "",
+                color: { hex: "#19A8AF" },
+                textColor: { hex: "#FFF" },
+              }}
+            />
             <div className="p-4">
-              <Link to={`/michigan-flyer`} key="michigan-flyer">
-                <h2>Michigan Flyer</h2>
+              <Link to={`/dax`} key="dax">
+                <h3>Detroit Air Xpress <FontAwesomeIcon icon={faPlane} size="1x" className="mx-1" /></h3>
               </Link>
               <p>
-                The Michigan Flyer bus provides service between Ann Arbor, East Lansing, and DTW Airport.
-                </p>
+              The Detroit Air Xpress provides service between 
+              Downtown Detroit and Detroit Metro airport (DTW).
+              </p>
             </div>
           </div>
+          <div className="bg-gray-100 dark:bg-zinc-800">
+            <AgencySlimHeader
+              agency={{
+                slug: { current: "michigan-flyer" },
+                name: "Michigan Flyer",
+                description:
+                  "The Michigan Flyer-AirRide bus service provides motorcoach transportation between Ann Arbor, East Lansing, and Detroit Metro airport (DTW).",
+                agencyType: "other",
+                agencyUrl: "https://michiganflyer.com/",
+                agencyLang: "en",
+                agencyPhone: "517-333-0400",
+                agencyFareUrl: "https://michiganflyer.com/fares",
+                agencyEmail: "",
+                color: { hex: "#674A72" },
+                textColor: { hex: "#ffffff" },
+              }}
+            />
+            <div className="p-4">
+              <Link to={`/michigan-flyer`} key="michigan-flyer">
+                <h3>Michigan Flyer</h3>
+              </Link>
+              <p>
+                The Michigan Flyer bus provides service between Ann Arbor, East
+                Lansing, and Detroit Metro airport (DTW).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2 className="pl-3 md:pl-0">Bikeshare services</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+
+        {data.allSanityBikeshare.edges.map((e) => (
+          <div className="bg-gray-100 dark:bg-zinc-800" key={e.node.name}>
+            <AgencySlimHeader agency={e.node} />
+            <div className="px-4 py-4">
+              <Link to={`/${e.node.slug.current}`} key={e.node.slug.current}>
+                <h3>{e.node.name}</h3>
+              </Link>
+              {e.node.description && <PortableText content={e.node.description} className="" />}
+            </div>
+          </div>
+        ))}
         </div>
       </div>
     </div>
@@ -131,6 +203,24 @@ export const query = graphql`
           }
           description: _rawDescription
           agencyType
+          slug {
+            current
+          }
+        }
+      }
+    }
+    allSanityBikeshare {
+      edges {
+        node {
+          name
+          fullName
+          color {
+            hex
+          }
+          textColor {
+            hex
+          }
+          description: _rawDescription
           slug {
             current
           }

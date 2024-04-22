@@ -9,6 +9,7 @@ import StopTimeLabel from "./StopTimeLabel";
 import RouteSlim from "./RouteSlim";
 
 const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
+
   let timesByRoute = _.groupBy(times, "trip.route.routeShortName");
 
   Object.keys(timesByRoute).forEach((key) => {
@@ -30,7 +31,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
       <Accordion.Root
         className="AccordionRoot"
         type="single"
-        defaultValue={null}
+        defaultValue={routes[0]?.displayShortName}
         collapsible
       >
         {routes.map((route, idx) => {
@@ -41,7 +42,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
               value={route.displayShortName}
             >
               <AccordionTrigger>
-                <RouteSlim {...route} agency={agency} className="px-2" />
+                <RouteSlim {...route} agency={agency} direction={route.directions[0]} className="px-2" />
               </AccordionTrigger>
               <AccordionContent>
                 <div className="flex flex-col gap-2 mt-2">

@@ -10,6 +10,8 @@ import { navigate } from "gatsby";
 import bbox from "@turf/bbox";
 import _ from "lodash";
 import RouteHeader from "../components/RouteHeader";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
 
 const RegionMapPage = ({ data }) => {
   const { theme } = useTheme();
@@ -18,9 +20,12 @@ const RegionMapPage = ({ data }) => {
 
   let [routes, setRoutes] = useState([]);
 
-  let sanityAgencies = data.allSanityAgency.edges.map((edge) => edge.node);
-  let sanityRoutes = data.allSanityRoute.edges.map((edge) => edge.node);
+  let { sanityAgencies } = useSanityAgencies()
+  sanityAgencies = sanityAgencies.edges.map((edge) => edge.node);
   let gtfsAgencies = data.postgres.agencies;
+  
+  let { sanityRoutes } = useSanityRoutes();
+  sanityRoutes = sanityRoutes.edges.map((edge) => edge.node);
 
   // filter out non-active gtfsAgencies/feeds
   // TODO: Don't pull these from the GraphQL query in the first place.
@@ -47,7 +52,16 @@ const RegionMapPage = ({ data }) => {
         gr.feedIndex === sanityRoute.agency.currentFeedIndex &&
         gr.routeShortName === sanityRoute.shortName
     );
+
+    if (matching.length === 0) {
+      return;
+    }
     let routeData = createRouteData(matching[0], sanityRoute);
+
+    let link = `/${sanityRoute.agency.slug.current}/route/${routeData.displayShortName}`;
+    if(["qline", "people-mover", "d2a2", "michigan-flyer"].indexOf(sanityRoute.agency.slug.current) > -1) {
+      link = `/${sanityRoute.agency.slug.current}`;
+    }
 
     // iterate through route directions
     routeData.directions.forEach((direction) => {
@@ -63,6 +77,7 @@ const RegionMapPage = ({ data }) => {
         tripCount: routeData.trips.totalCount,
         mapPriority: routeData.mapPriority,
         agencySlug: sanityRoute.agency.slug.current,
+        link: link,
       };
       allRouteFeatures.push(feature);
     });
@@ -101,9 +116,7 @@ const RegionMapPage = ({ data }) => {
       ],
     })[0];
     if (route) {
-      navigate(
-        `/${route.properties.agencySlug}/route/${route.properties.displayShortName}`
-      );
+      navigate(route.properties.link);
     }
   };
 
@@ -195,6 +208,7 @@ const RegionMapPage = ({ data }) => {
               {routes.map((r) => (
                 <RouteHeader
                   {...r}
+                  key={`${r.feedIndex}-${r.routeShortName}`}
                   agency={{ slug: { current: r.agencySlug } }}
                 />
               ))}
@@ -256,53 +270,6 @@ export const query = graphql`
             saturday
             serviceId
           }
-        }
-      }
-    }
-    allSanityRoute {
-      edges {
-        node {
-          longName
-          shortName
-          displayShortName
-          agency {
-            currentFeedIndex
-            slug {
-              current
-            }
-          }
-          routeColor: color {
-            hex
-          }
-          routeTextColor: textColor {
-            hex
-          }
-          directions: extRouteDirections {
-            directionHeadsign
-            directionDescription
-            directionId
-            directionTimepoints
-            directionShape
-          }
-          mapPriority
-        }
-      }
-    }
-    allSanityAgency {
-      edges {
-        node {
-          name
-          currentFeedIndex
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          slug {
-            current
-          }
-          description: _rawDescription
         }
       }
     }

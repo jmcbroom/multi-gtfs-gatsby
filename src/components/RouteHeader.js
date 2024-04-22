@@ -20,10 +20,14 @@ const RouteHeader = ({ routeShortName, displayShortName, routeLongName, routeCol
     5: 'w-20',
   }
 
-
   let url = `/${displayShortName.toLowerCase()}`
-  if(agency){
+
+  if(agency && agency?.slug.current !== 'd2a2'){
     url = `/${agency.slug.current}/route/${displayShortName}`
+  }
+
+  if (displayShortName === 'DPM'){
+    url = '/people-mover'
   }
 
   let routeNumberClassName = `font-bold text-center py-2 text-lg bg-white ${widths[displayShortName.length]}`

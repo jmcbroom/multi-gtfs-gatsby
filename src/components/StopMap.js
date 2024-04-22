@@ -7,6 +7,7 @@ import _ from "lodash";
 import { useTheme } from "../hooks/ThemeContext";
 import bbox from "@turf/bbox";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
+import MapLegend from "./MapLegend";
 
 const StopMap = ({
   stopFc,
@@ -84,6 +85,7 @@ const StopMap = ({
             name: trackedVehicle.vid,
             routeColor: matchingRoute.properties.routeColor,
             routeTextColor: matchingRoute.properties.routeTextColor,
+            vehicleIcon: "bus",
           },
         });
       }
@@ -121,7 +123,7 @@ const StopMap = ({
   };
 
   return (
-    <div id="map" style={{ height: 350 }}>
+    <div id="map" style={{ height: 350 }} className="mb-8">
       <div className="grayHeader">Stop map</div>
       <Mapbox
         ref={map}

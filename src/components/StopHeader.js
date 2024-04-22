@@ -1,13 +1,18 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBus, faStar } from "@fortawesome/free-solid-svg-icons";
+import { faBicycle, faBus, faStar } from "@fortawesome/free-solid-svg-icons";
 import { db } from "../db";
 
-const addFavoriteStop = (stop) => {
-  db.stops.add(stop);
+const addFavoriteStop = (stop, stopType="bus") => {
+  if(stopType === "bus") {
+    db.stops.add(stop);
+  }
+  if(stopType === "bikeshare") {
+    db.bikeshare.add(stop)
+  }
 };
 
-const removeFavoriteStop = (stopToRemove, favoriteStops) => {
+const removeFavoriteStop = (stopToRemove, favoriteStops, stopType="bus") => {
   let stopIdsToRemove = favoriteStops
     .filter(
       (stop) =>
@@ -16,7 +21,12 @@ const removeFavoriteStop = (stopToRemove, favoriteStops) => {
     )
     .map((s) => s.id);
   stopIdsToRemove.forEach((id) => {
-    db.stops.delete(id);
+    if(stopType==="bus") {
+      db.stops.delete(id);
+    }
+    if(stopType === 'bikeshare') {
+      db.bikeshare.delete(id)
+    }
   });
 };
 
@@ -26,14 +36,15 @@ const StopHeader = ({
   isFavoriteStop,
   stopName,
   stopIdentifier,
+  stopType="bus",
 }) => {
   return (
     <div className="mb-2 bg-gray-200 dark:bg-zinc-900 flex items-center justify-between">
       <div className="flex items-center justify-between">
         <FontAwesomeIcon
-          icon={faBus}
+          icon={stopType === "bus" ? faBus : faBicycle}
           size="lg"
-          className="m-0 p-3 text-gray-500 dark:text-zinc-500 dark:bg-zinc-800 bg-gray-300 mr-2"
+          className="m-0 p-3 text-gray-500 dark:text-zinc-500 dark:bg-zinc-800 bg-gray-200 mr-2"
           style={{ backgroundColor: "" }}
         />
         <h1 className="text-base font-semibold m-0">{stopName}</h1>
@@ -49,15 +60,15 @@ const StopHeader = ({
           }
           onClick={() => {
             if (isFavoriteStop === false) {
-              addFavoriteStop(indexedStop);
+              addFavoriteStop(indexedStop, stopType);
             } else {
-              removeFavoriteStop(indexedStop, favoriteStops);
+              removeFavoriteStop(indexedStop, favoriteStops, stopType);
             }
           }}
         />
-        <span className="text-xs text-gray-500 dark:text-zinc-500 font-mono p-1 bg-gray-300 dark:bg-zinc-700">
+        {stopType === 'bus' && <span className="text-xs text-gray-500 dark:text-zinc-500 font-mono p-1 bg-gray-300 dark:bg-zinc-700">
           #{stopIdentifier}
-        </span>
+        </span>}
       </div>
     </div>
   );

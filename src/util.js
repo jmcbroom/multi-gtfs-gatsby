@@ -1,3 +1,9 @@
+import bearing from "@turf/bearing";
+import centroid from "@turf/centroid";
+import nearestPoint from "@turf/nearest-point";
+import nearestPointOnLine from "@turf/nearest-point-on-line";
+import _ from "lodash";
+
 /**
  * Convert the GraphQL arrivalTime to a human-readable string.
  * @param {arrivalTime} time
@@ -11,31 +17,35 @@ export const formatArrivalTime = (
 ) => {
   let hour = time.hours;
   let minutes = time.minutes ? time.minutes.toString().padStart(2, "0") : "00";
-  let ap = "am";
+  let ap = "a";
+
+  if (twentyFourHr) {
+    showAp = false;
+  }
 
   // vary hours & am/pm based on what hour it is
   // gtfs has hours that are greater than 24
   if (time.hours < 12 && time.hours > 0) {
     hour = time.hours;
-    ap = "am";
+    ap = "a";
   } else if (time.hours > 12 && time.hours < 24) {
     if (!twentyFourHr) {
       hour = time.hours - 12;
     }
-    ap = "pm";
+    ap = "p";
   } else if (time.hours % 12 === 0) {
     hour = 12;
-    ap = time.hours === 12 ? "pm" : "am";
+    ap = time.hours === 12 ? "p" : "a";
   } else if (time.hours >= 24) {
     hour = time.hours - 24;
-    ap = "am";
+    ap = "a";
   }
 
   if (twentyFourHr) {
     hour = time.hours ? time.hours.toString().padStart(2, "0") : "00";
   }
 
-  return `${hour}:${minutes}${showAp ? ` ${ap}` : ``}`;
+  return `${hour}:${minutes}${showAp ? `${ap}` : ``}`;
 };
 
 /**
@@ -108,6 +118,7 @@ export const getServiceDays = (serviceCalendars) => {
   let weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"];
 
   serviceCalendars.forEach((sc) => {
+
     // evaluate all weekdays of the service calendar
     let weekdayMatches = weekdays.map((day) => sc[day] === 1);
 
@@ -154,7 +165,6 @@ export const getServiceDays = (serviceCalendars) => {
       serviceDays.saturday = sc.serviceId;
       serviceDays.sunday = sc.serviceId;
     }
-    
   });
 
   // if there's still no weekday match, assign the wednesday serviceCalendar
@@ -202,6 +212,7 @@ export const getTripsByServiceAndDirection = (
   serviceDays,
   headsignsByDirectionId
 ) => {
+
   let tripsByServiceAndDirection = {};
 
   Object.keys(serviceDays).forEach((day) => {
@@ -296,10 +307,10 @@ export const createRouteFc = (sanityRoute, gtfsRoute) => {
  * @returns GeoJSON feature collection
  */
 
-export const createVehicleFc = (vehicles, patterns, route, agency) => {
+export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
   // Create a GeoJSON FeatureCollection of vehicles
   // from the BusTime API response and the Sanity route directions
-  if (!vehicles || !patterns || !route) return null;
+  if (!vehicles || !patterns || !route || !trips) return null;
 
   // create a GeoJSON feature for each vehicle
   let features = vehicles.map((v) => {
@@ -338,25 +349,17 @@ export const createVehicleFc = (vehicles, patterns, route, agency) => {
       }
 
       if (agency.slug.current === "theride") {
-        // fallback to first point
-        let newDirection = route.directions.find((d) => {
-          let parsedShape = JSON.parse(d.directionShape);
-          let firstPoint = parsedShape[0]['geometry']['coordinates'][0][0].toFixed(3);
-          let firstVidPtLon = pattern.pt[0].lon.toFixed(3)
-          if (firstPoint === firstVidPtLon) {
-            return true
-          }
-          else {
-            let lastPoint = parsedShape[parsedShape.length - 1]['geometry']['coordinates'][0][0].toFixed(3);
-            let lastVidPtLon = pattern.pt[pattern.pt.length - 1].lon.toFixed(3)
-            if (lastPoint === lastVidPtLon) {
-              return true
-            }
-          }
+
+        let firstStopTime = pattern.pt.find(pt => pt.stpid)
+
+        let tripWithFirstStop = trips.find(t => {
+          let stopTimes = t.stopTimes
+          let firstStop = stopTimes.find(st => st.stop.stopCode === firstStopTime.stpid)
+          return firstStop
         })
-        if (newDirection) {
-          direction = newDirection
-        }
+
+        direction = route.directions.find(d => d.directionId === tripWithFirstStop.directionId)
+
       }
     }
 
@@ -382,6 +385,7 @@ export const createVehicleFc = (vehicles, patterns, route, agency) => {
         nextStop: nextStops ? nextStops[0] : null,
         nextStops: nextStops ? nextStops : null,
         bearing: parseInt(v.hdg),
+        vehicleIcon: "bus",
       },
       geometry: {
         type: "Point",
@@ -407,9 +411,12 @@ export const createStopsFc = (
   sanityRoute,
   trips,
   timepointsOnly = false,
-  shortFormat = true
+  shortFormat = true,
+  dedupe = false
 ) => {
   // store GeoJSON features here to include with the featureCollection
+
+  // get all the stops from the trips
   let features = [];
 
   // iterate through each direction on weekday service
@@ -423,6 +430,12 @@ export const createStopsFc = (
       .filter((st) => !timepointsOnly || st.timepoint === 1)
       .map((st) => st.stop);
 
+    let direction = sanityRoute.directions.find(
+      (d) => d.directionId === parseInt(key)
+    );
+
+    let directionFeature = JSON.parse(direction.directionShape)[0];
+
     stops.forEach((stop) => {
       // create a new GeoJSON feature
       let stopFeature = {
@@ -433,22 +446,78 @@ export const createStopsFc = (
         },
         properties: {
           ...stop,
+          offset: [0, 1.5],
+          anchor: "top",
+          justify: "center"
         },
       };
+
+      let stopLabelBearing = bearing(
+        nearestPointOnLine(directionFeature.geometry, stopFeature.geometry),
+        stopFeature.geometry
+      );
+      
+      if (stopLabelBearing < 0 && stopLabelBearing > -90) {
+        stopFeature.properties.offset = [-0.75, 0];
+        stopFeature.properties.anchor = "bottom";
+        stopFeature.properties.justify = "center";
+      }
+      if (stopLabelBearing < -90 && stopLabelBearing > -180) {
+        stopFeature.properties.offset = [-0.75, 0];
+        stopFeature.properties.anchor = "right";
+        stopFeature.properties.justify = "right";
+      }
+
+      if (stopLabelBearing > 0 && stopLabelBearing < 45) {
+        stopFeature.properties.offset = [0, -0.75];
+        stopFeature.properties.anchor = "bottom";
+        stopFeature.properties.justify = "center";
+      }
+      if (stopLabelBearing > 45 && stopLabelBearing < 90) {
+        stopFeature.properties.offset = [0.5, -0.5];
+        stopFeature.properties.anchor = "left";
+        stopFeature.properties.justify = "left";
+      }
+      if (stopLabelBearing > 90 && stopLabelBearing < 135) {
+        stopFeature.properties.offset = [0.25, 0.5];
+        stopFeature.properties.anchor = "left";
+        stopFeature.properties.justify = "left";
+      }
+      if (stopLabelBearing > 135 && stopLabelBearing < 180) {
+        stopFeature.properties.offset = [0, 0.75];
+        stopFeature.properties.anchor = "top";
+        stopFeature.properties.justify = "center";
+      }
+
+      // console.log(nearestPoint(stopFeature.geometry, directionFeature.geometry))
 
       // strip out the name of the route, for shorter map labels
       // ex, on DDOT 39, timepoint `Puritan & Livernois` => `Livernois`
       if (shortFormat) {
-        stopFeature.properties.stopName =
-          stopFeature.properties.stopName.replace(
-            `${sanityRoute.longName} & `,
-            ""
-          );
+        // stopFeature.properties.stopName =
+        //   stopFeature.properties.stopName.replace(
+        //     `${sanityRoute.longName} & `,
+        //     ""
+        //   );
       }
 
       features.push(stopFeature);
     });
   });
+
+  if (dedupe) {
+    let groupedByName = _.groupBy(features, (f) => f.properties.stopName)
+  
+    features = Object.keys(groupedByName).map((k) => {
+      
+      let feature = groupedByName[k][0]
+      
+      feature.geometry = centroid({"type": 'FeatureCollection', "features": groupedByName[k]}).geometry
+
+      return feature
+
+    })
+  }
 
   return {
     type: "FeatureCollection",
@@ -516,32 +585,44 @@ export const dayOfWeek = () => {
 };
 
 export const matchPredictionToRoute = (prediction, routes, patterns) => {
+
   let route = routes.filter(
     (r) =>
       r.routeShortName === prediction.rt && r.feedIndex === prediction.agency
   )[0];
 
-  let direction = route.directions.filter(
+  if(!route) {
+    return null
+  }
+
+  let direction = route.directions?.filter(
     (direction) =>
       direction.directionDescription.toLowerCase().slice(0, 3) ===
       prediction.rtdir.toLowerCase().slice(0, 3)
   )[0];
 
   // Slightly insane workaround for TheRide
-  if (!direction && patterns && patterns['bustime-response'] && patterns['bustime-response']['ptr']) {
-    patterns['bustime-response']['ptr'].forEach((ptrn) => {
+  if (
+    !direction &&
+    patterns &&
+    patterns["bustime-response"] &&
+    patterns["bustime-response"]["ptr"]
+  ) {
+    patterns["bustime-response"]["ptr"].forEach((ptrn) => {
       ptrn.pt.forEach((pt) => {
         if (pt.stpid === prediction.stpid) {
-          route.directions.forEach((dir) => {
-            let firstPoint = JSON.parse(dir.directionShape)[0]['geometry']['coordinates'][0][0].toFixed(3);
-            let firstVidPtLon = ptrn.pt[0].lon.toFixed(3)
+          route.directions?.forEach((dir) => {
+            let firstPoint = JSON.parse(dir.directionShape)[0]["geometry"][
+              "coordinates"
+            ][0][0].toFixed(3);
+            let firstVidPtLon = ptrn.pt[0].lon.toFixed(3);
             if (firstPoint === firstVidPtLon) {
-              direction = dir
+              direction = dir;
             }
-          })
+          });
         }
-      })
-    })
+      });
+    });
   }
 
   return { route, direction };
@@ -576,4 +657,27 @@ export const createAllStopsFc = ({ allStops, agencies }) => {
     allStopsFc.features.push(feature);
   });
   return allStopsFc;
+};
+
+export const getVehicleType = (routeType) => {
+  const vehicles = {
+    streetcar: 0,
+    metro: 1,
+    rail: 2,
+    bus: 3,
+    ferry: 4,
+    "cable-tram": 5,
+    "aerial-lift": 6,
+    funicular: 7,
+    trolleybus: 11,
+    monorail: 12,
+  };
+
+  // switch k and v for vehicles
+  let vehiclesByType = {};
+  Object.keys(vehicles).forEach((key) => {
+    vehiclesByType[vehicles[key]] = key;
+  });
+
+  return vehiclesByType[routeType];
 };

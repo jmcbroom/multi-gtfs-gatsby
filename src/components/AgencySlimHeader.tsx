@@ -1,12 +1,13 @@
 import React from "react";
 import { Link } from "gatsby";
+import { AgencyType } from "../types/AgencyType";
 
 /**
  *
  * @param {agency} agency object from GraphQL
  * @returns
  */
-const AgencySlimHeader = ({ agency }) => {
+const AgencySlimHeader = ({ agency }: { agency: AgencyType }) => {
   const { slug, name, color, textColor } = agency;
 
   return (

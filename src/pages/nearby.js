@@ -8,6 +8,8 @@ import { useTheme } from "../hooks/ThemeContext";
 import mapboxStyles from "../styles/styleFactory";
 import { createAgencyData, createAllStopsFc, createRouteData } from "../util";
 import NearbyPredictions from "../components/NearbyPredictions";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
 
 const NearbyPage = ({ data }) => {
   const { theme } = useTheme();
@@ -56,7 +58,7 @@ const NearbyPage = ({ data }) => {
             `/.netlify/functions/stop?stopId=${ddotStops}&agency=ddot`
           ).then((r) => r.json())
         );
-        agencies.push(24)
+        agencies.push(37)
       }
       if (stops.smart?.length > 0) {
         fetches.push(
@@ -64,7 +66,7 @@ const NearbyPage = ({ data }) => {
             `/.netlify/functions/stop?stopId=${smartStops}&agency=smart`
           ).then((r) => r.json())
         );
-        agencies.push(25)
+        agencies.push(39)
       }
       if (stops.theride?.length > 0) {
         fetches.push(
@@ -72,7 +74,7 @@ const NearbyPage = ({ data }) => {
             `/.netlify/functions/stop?stopId=${therideStops}&agency=theride`
           ).then((r) => r.json())
         );
-        agencies.push(27)
+        agencies.push(40)
       }
       Promise.all(fetches).then((r) => {
         r.forEach((agency, idx) => {
@@ -91,7 +93,9 @@ const NearbyPage = ({ data }) => {
     }
   }, [now, stops]);
 
-  let sanityAgencies = data.allSanityAgency.edges.map((edge) => edge.node);
+
+  let { sanityAgencies } = useSanityAgencies()
+  sanityAgencies = sanityAgencies.edges.map((edge) => edge.node);
   let gtfsAgencies = data.postgres.agencies;
   let combinedAgencies = sanityAgencies.map((sanityAgency) => {
     let gtfsAgency = gtfsAgencies.find(
@@ -100,7 +104,8 @@ const NearbyPage = ({ data }) => {
     return createAgencyData(gtfsAgency, sanityAgency);
   });
 
-  let sanityRoutes = data.allSanityRoute.edges.map((edge) => edge.node);
+  let { sanityRoutes } = useSanityRoutes();
+  sanityRoutes = sanityRoutes.edges.map((edge) => edge.node);
   let { allStops } = data.postgres;
   let allStopsFc = createAllStopsFc({ allStops, agencies: sanityAgencies });
 
@@ -130,6 +135,10 @@ const NearbyPage = ({ data }) => {
         gr.feedIndex === sanityRoute.agency.currentFeedIndex &&
         gr.routeShortName === sanityRoute.shortName
     );
+    if(matching.length === 0) {
+      return;
+    }
+    
     let routeData = createRouteData(matching[0], sanityRoute);
     allRoutes.push(routeData);
 
@@ -276,7 +285,7 @@ const NearbyPage = ({ data }) => {
 export const query = graphql`
   query NearbyQuery {
     postgres {
-      allStops: stopsList(filter: { feedIndex: { in: [24, 25, 27] } }) {
+      allStops: stopsList(filter: { feedIndex: { in: [37, 38, 39, 40] } }) {
         stopLat
         stopLon
         stopName
@@ -320,53 +329,6 @@ export const query = graphql`
             saturday
             serviceId
           }
-        }
-      }
-    }
-    allSanityRoute {
-      edges {
-        node {
-          longName
-          shortName
-          agency {
-            currentFeedIndex
-            slug {
-              current
-            }
-          }
-          routeColor: color {
-            hex
-          }
-          routeTextColor: textColor {
-            hex
-          }
-          directions: extRouteDirections {
-            directionHeadsign
-            directionDescription
-            directionId
-            directionTimepoints
-            directionShape
-          }
-          mapPriority
-        }
-      }
-    }
-    allSanityAgency {
-      edges {
-        node {
-          name
-          currentFeedIndex
-          color {
-            hex
-          }
-          textColor {
-            hex
-          }
-          slug {
-            current
-          }
-          description: _rawDescription
-          realTimeEnabled
         }
       }
     }

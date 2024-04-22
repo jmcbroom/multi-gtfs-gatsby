@@ -1,5 +1,6 @@
 const { create } = require("domain");
 const path = require(`path`);
+const axios = require("axios");
 
 exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
   if (stage === "build-html") {
@@ -15,6 +16,31 @@ exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
     });
   }
 };
+
+// exports.createPages = async ({ graphql, actions: { createPage }, createNodeId, createContentDigest }) => {
+//   // Fetch JSON data from the endpoint
+//   const response = await axios.get('https://example.com/api/data');
+
+//   // Create nodes from the fetched data
+//   const jsonData = response.data;
+//   jsonData.forEach((item) => {
+//     const nodeData = {
+//       // Set the node fields based on the fetched data
+//       // For example:
+//       id: createNodeId(`my-node-${item.id}`),
+//       internal: {
+//         type: 'MyNodeType',
+//         contentDigest: createContentDigest(item),
+//       },
+//       // Other fields...
+//     };
+// //
+//     // Create the node
+//     createNode(nodeData);
+//   });
+
+//   // Rest of your code...
+// };
 
 exports.createPages = async ({ graphql, actions: { createPage } }) => {
   const allAgencies = await graphql(`
@@ -57,7 +83,9 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
   `);
 
   let agencies = allAgencies.data.allSanityAgency.edges.map((e) => e.node);
+
   for (let a of agencies) {
+    // fetch information about the specific agency
     const result = await graphql(`
     {
       postgres {
@@ -107,12 +135,11 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     }
   `);
 
+    if (a.agencyType !== "local-bus") {
+      continue;
+    }
+
     result.data.postgres.agencies.forEach((agency) => {
-
-      if (a.agencyType !== 'local-bus') {
-        return;
-      }
-
       createPage({
         path: `/${a.slug.current}/`,
         component: path.resolve("./src/templates/agency-page.js"),
@@ -160,80 +187,142 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
       });
     });
 
-    result.data.postgres.routes
-      .filter((r) => r.trips.totalCount > 0)
-      .forEach((r) => {
-        // override routeShortName from gtfs with displayShortName from Sanity
-        let short = r.routeShortName;
+    // make individual route pages
+    let routesWithTrips = result.data.postgres.routes.filter(
+      (r) => r.trips.totalCount > 0
+    );
+    routesWithTrips.forEach((r) => {
+      // override routeShortName from gtfs with displayShortName from Sanity
+      let short = r.routeShortName;
 
-        let matchingSanityRoute = result.data.allSanityRoute.edges
-          .map((e) => e.node)
-          .filter((sr) => sr.shortName === r.routeShortName);
+      let matchingSanityRoute = result.data.allSanityRoute.edges
+        .map((e) => e.node)
+        .filter((sr) => sr.shortName === r.routeShortName);
 
-        if (matchingSanityRoute.length === 1) {
-          if (matchingSanityRoute[0].displayShortName) {
-            short = matchingSanityRoute[0].displayShortName;
-          }
+      if (matchingSanityRoute.length === 1) {
+        if (matchingSanityRoute[0].displayShortName) {
+          short = matchingSanityRoute[0].displayShortName;
         }
+      }
 
-        createPage({
-          path: `/${a.slug.current}/route/${short}/`,
-          component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current,
-            initialTab: "",
-            serviceIds: a.serviceIds,
-          },
-        });
-        createPage({
-          path: `/${a.slug.current}/route/${short}/map`,
-          component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current,
-            initialTab: "map",
-            serviceIds: a.serviceIds,
-          },
-        });
-        createPage({
-          path: `/${a.slug.current}/route/${short}/stops`,
-          component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current,
-            initialTab: "stops",
-            serviceIds: a.serviceIds,
-          },
-        });
-        createPage({
-          path: `/${a.slug.current}/route/${short}/schedule`,
-          component: path.resolve("./src/templates/route-page.js"),
-          context: {
-            routeNo: r.routeShortName,
-            feedIndex: r.feedIndex,
-            agencySlug: a.slug.current,
-            initialTab: "schedule",
-            serviceIds: a.serviceIds,
-          },
-        });
+      createPage({
+        path: `/${a.slug.current}/route/${short}/`,
+        component: path.resolve("./src/templates/route-page.js"),
+        context: {
+          routeNo: r.routeShortName,
+          feedIndex: r.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: "",
+          serviceIds: a.serviceIds,
+        },
       });
+      createPage({
+        path: `/${a.slug.current}/route/${short}/map`,
+        component: path.resolve("./src/templates/route-page.js"),
+        context: {
+          routeNo: r.routeShortName,
+          feedIndex: r.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: "map",
+          serviceIds: a.serviceIds,
+        },
+      });
+      createPage({
+        path: `/${a.slug.current}/route/${short}/stops`,
+        component: path.resolve("./src/templates/route-page.js"),
+        context: {
+          routeNo: r.routeShortName,
+          feedIndex: r.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: "stops",
+          serviceIds: a.serviceIds,
+        },
+      });
+      createPage({
+        path: `/${a.slug.current}/route/${short}/schedule`,
+        component: path.resolve("./src/templates/route-page.js"),
+        context: {
+          routeNo: r.routeShortName,
+          feedIndex: r.feedIndex,
+          agencySlug: a.slug.current,
+          initialTab: "schedule",
+          serviceIds: a.serviceIds,
+        },
+      });
+    });
   }
 
-  allAgencies.data.allSanityBikeshare.edges.forEach((b) => {
+  for (let b of allAgencies.data.allSanityBikeshare.edges) {
+
+    const response = await axios.get(`${b.node.feedUrl}/station_information.json`);
+
+    let { stations } = response.data.data;
+
+    // Create main bikeshare page
     createPage({
-      path: `/bikeshare/${b.node.slug.current}`,
-      component: path.resolve("./src/templates/bikeshare-page.js"),
+      path: `/${b.node.slug.current}/`,
+      component: path.resolve("./src/templates/bikeshare-page.tsx"),
       context: {
         id: b.node.id,
         feedUrl: b.node.feedUrl,
         slug: b.node.slug.current,
+        data: stations,
+        initialTab: "home",
       },
     });
-  });
 
-  
+    // create bikeshare map page
+    createPage({
+      path: `/${b.node.slug.current}/map`,
+      component: path.resolve("./src/templates/bikeshare-page.tsx"),
+      context: {
+        id: b.node.id,
+        feedUrl: b.node.feedUrl,
+        slug: b.node.slug.current,
+        data: stations,
+        initialTab: "map",
+      },
+    });
+
+    // create bikeshare station list page
+    createPage({
+      path: `/${b.node.slug.current}/stations`,
+      component: path.resolve("./src/templates/bikeshare-page.tsx"),
+      context: {
+        id: b.node.id,
+        feedUrl: b.node.feedUrl,
+        slug: b.node.slug.current,
+        data: stations,
+        initialTab: "stations",
+      },
+    });
+
+    // create bikeshare fares page
+    createPage({
+      path: `/${b.node.slug.current}/fares`,
+      component: path.resolve("./src/templates/bikeshare-page.tsx"),
+      context: {
+        id: b.node.id,
+        feedUrl: b.node.feedUrl,
+        slug: b.node.slug.current,
+        data: stations,
+        initialTab: "fares",
+      },
+    });
+
+    // Create bikeshare station pages
+    stations.forEach((s) => {
+      createPage({
+        path: `/${b.node.slug.current}/station/${s.station_id}`,
+        component: path.resolve("./src/templates/bikeshare-station-page.tsx"),
+        context: {
+          feedUrl: b.node.feedUrl,
+          station: s,
+          slug: b.node.slug.current,
+          lat: s.lat,
+          lon: s.lon,
+        },
+      });
+    });
+  }
 };
