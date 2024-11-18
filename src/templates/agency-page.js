@@ -57,7 +57,7 @@ const Agency = ({ data, pageContext, location }) => {
     if (!route.directions) {
       console.log(route);
     }
-    route.directions.forEach((direction) => {
+    route?.directions?.forEach((direction) => {
       let feature = JSON.parse(direction.directionShape)[0];
 
       feature.properties = {

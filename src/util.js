@@ -312,6 +312,8 @@ export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
   // from the BusTime API response and the Sanity route directions
   if (!vehicles || !patterns || !route || !trips) return null;
 
+  console.log(vehicles, patterns, route, agency, trips)
+
   // create a GeoJSON feature for each vehicle
   let features = vehicles.map((v) => {
     // find the pattern and direction for this vehicle

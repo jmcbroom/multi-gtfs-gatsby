@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBicycle, faBus, faStar } from "@fortawesome/free-solid-svg-icons";
+import { faBicycle, faBusSimple, faStar } from "@fortawesome/free-solid-svg-icons";
 import { db } from "../db";
 
 const addFavoriteStop = (stop, stopType="bus") => {
@@ -42,7 +42,7 @@ const StopHeader = ({
     <div className="mb-2 bg-gray-200 dark:bg-zinc-900 flex items-center justify-between">
       <div className="flex items-center justify-between">
         <FontAwesomeIcon
-          icon={stopType === "bus" ? faBus : faBicycle}
+          icon={stopType === "bus" ? faBusSimple : faBicycle}
           size="lg"
           className="m-0 p-3 text-gray-500 dark:text-zinc-500 dark:bg-zinc-800 bg-gray-200 mr-2"
           style={{ backgroundColor: "" }}

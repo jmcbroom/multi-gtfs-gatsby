@@ -82,10 +82,7 @@ const RoutePredictionItem = ({ vehicle, predictions, vehicleType }) => {
               routeLongName={routeLongName}
               routeColor={routeColor}
               routeTextColor={routeTextColor}
-              direction={{
-                directionDescription: description,
-                directionHeadsign: headsign,
-              }}
+              size="small"
             />
             <div className="flex flex-col justify-end">
               <span className="text-xs block text-right mr-2 text-gray-400">

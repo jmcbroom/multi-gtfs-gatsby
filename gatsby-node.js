@@ -1,4 +1,3 @@
-const { create } = require("domain");
 const path = require(`path`);
 const axios = require("axios");
 
@@ -16,31 +15,6 @@ exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
     });
   }
 };
-
-// exports.createPages = async ({ graphql, actions: { createPage }, createNodeId, createContentDigest }) => {
-//   // Fetch JSON data from the endpoint
-//   const response = await axios.get('https://example.com/api/data');
-
-//   // Create nodes from the fetched data
-//   const jsonData = response.data;
-//   jsonData.forEach((item) => {
-//     const nodeData = {
-//       // Set the node fields based on the fetched data
-//       // For example:
-//       id: createNodeId(`my-node-${item.id}`),
-//       internal: {
-//         type: 'MyNodeType',
-//         contentDigest: createContentDigest(item),
-//       },
-//       // Other fields...
-//     };
-// //
-//     // Create the node
-//     createNode(nodeData);
-//   });
-
-//   // Rest of your code...
-// };
 
 exports.createPages = async ({ graphql, actions: { createPage } }) => {
   const allAgencies = await graphql(`
@@ -174,7 +148,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
       });
     });
 
-    result.data.postgres.stops.forEach((s) => {
+    for (let s of result.data.postgres.stops) {
       createPage({
         path: `/${a.slug.current}/stop/${s[a.stopIdentifierField]}`,
         component: path.resolve("./src/templates/stop-page.js"),
@@ -182,10 +156,10 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           feedIndex: s.feedIndex,
           sanityFeedIndex: s.feedIndex,
           agencySlug: a.slug.current,
-          stopId: s.stopId,
+          stopId: s.stopId
         },
       });
-    });
+    }
 
     // make individual route pages
     let routesWithTrips = result.data.postgres.routes.filter(
@@ -253,8 +227,9 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
   }
 
   for (let b of allAgencies.data.allSanityBikeshare.edges) {
-
-    const response = await axios.get(`${b.node.feedUrl}/station_information.json`);
+    const response = await axios.get(
+      `${b.node.feedUrl}/station_information.json`
+    );
 
     let { stations } = response.data.data;
 

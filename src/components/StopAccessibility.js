@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faWheelchair } from "@fortawesome/free-solid-svg-icons";
+import { faWheelchairMove } from "@fortawesome/free-solid-svg-icons";
 
 const StopAccessibility = ({ stop }) => {
 
@@ -46,7 +46,7 @@ const StopAccessibility = ({ stop }) => {
         >
           is the metro accessible
           {/* TODO: flip back and forth between dark and light? */}
-          <img src="https://isthemetroaccessible.com/images/favicon-dark.png" alt="isthemetroaccessible logo" className="w-4 ml-1 -mt-1 inline-block" />
+          <FontAwesomeIcon icon={faWheelchairMove} className="text-gray-800 dark:text-zinc-200" className="ml-1"/>
         </a>
         </span>
       </div>

@@ -32,10 +32,12 @@ const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
 
   }
 
+  console.log(transferStops);
+
   return (
     <div>
-      <h4>Nearby bus transfers</h4>
-      <div>
+      <h4>Nearby transfer stops</h4>
+      <div className="max-h-96 overflow-auto">
         {transferStops.map((nearbyStop, idx) => {
           nearbyStop.agency = agencies.find(
             (a) => a.currentFeedIndex === nearbyStop.feedIndex

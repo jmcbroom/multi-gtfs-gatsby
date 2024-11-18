@@ -38,7 +38,7 @@ const PredictionListItem = ({
   return (
     <Accordion.Item className="AccordionItem" value={prediction.vid}>
       <AccordionTrigger>
-        <div className="flex items-center justify-between gap-2 text-xs flex-grow">
+        <div className="flex items-center justify-between gap-2 flex-grow">
           <div className="flex items-center justify-between gap-2 w-full flex-grow">
             <RouteSlim
               {...{
@@ -50,6 +50,7 @@ const PredictionListItem = ({
                 agency,
                 direction,
               }}
+              size="small"
             />
             <div className="flex flex-col justify-end">
               {predictionText(prediction.prdctdn)}

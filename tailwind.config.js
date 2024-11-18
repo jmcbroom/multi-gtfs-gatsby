@@ -9,7 +9,7 @@ module.exports = {
         }
       },
       fontSize: {
-        '2xs': '.675rem',
+        'xxs': '.675rem',
       },
       spacing: {
         3: '0.75rem',

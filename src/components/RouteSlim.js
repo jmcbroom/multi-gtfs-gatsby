@@ -1,4 +1,5 @@
 import React from "react";
+import RouteBadge from "./RouteBadge";
 
 /**
  * Displays the number badge and name of a route.
@@ -16,29 +17,12 @@ const RouteSlim = ({
   routeColor = "#000",
   routeTextColor = "#fff",
   direction = {},
+  size="medium"
 }) => {
-
-  let widths = {
-    1: "w-8",
-    2: "w-8",
-    3: "w-9",
-    4: "w-10",
-    5: "w-12",
-  };
-
-  let routeNumberClassName = `plex flex items-center justify-around text-sm font-semibold bg-white ${
-    widths[displayShortName?.length] || "w-8"
-  } h-8`;
 
   return (
     <div className={"flex items-center justify-start gap-2"}>
-      <span
-        className={routeNumberClassName}
-        style={{ background: `${routeColor}`, color: `${routeTextColor}` }}
-      >
-        {displayShortName}
-      </span>
-
+      <RouteBadge route={{ displayShortName, routeColor, routeTextColor }} size={size} />
       <div className="flex flex-col items-start justify-around">
         <h2 className="text-sm mb-0 font-medium leading-4">{routeLongName}</h2>
         {direction?.directionDescription && (

@@ -14,7 +14,6 @@ const RoutePredictions = ({
   predictions,
   routeType = 3,
 }) => {
-  
   let directions = vehicles?.features[0]?.properties.directions;
 
   let vehiclesByDirection = _.groupBy(
@@ -27,16 +26,19 @@ const RoutePredictions = ({
       {vehicles?.features?.length > 0 ? (
         <div className="grayHeader text-gray-800 dark:text-gray-300 flex items-center justify-between">
           <div>
-            {vehicles.features.length}
-            {` `}
-            {getVehicleType(routeType)}
-            {/* add plural */}
-            {vehicles?.features?.length > 1
-              ? getVehicleType(routeType).slice(-1) === "s"
-                ? `es`
-                : `s`
-              : ``}{" "}
-            tracked
+            <div>
+              {vehicles.features.length}
+              {` `}
+              {getVehicleType(routeType)}
+              {/* add plural */}
+              {vehicles?.features?.length > 1
+                ? getVehicleType(routeType).slice(-1) === "s"
+                  ? `es`
+                  : `s`
+                : ``}{" "}
+              tracked
+            </div>
+            <div className="font-normal text-xs mt-1">Click a {getVehicleType(routeType)}</div>
           </div>
           <FontAwesomeIcon icon={faWifi} className="text-green-500" />
         </div>
@@ -67,7 +69,8 @@ const RoutePredictions = ({
             return (
               <div>
                 <h4 className="m-0">
-                  {direction} to {vehiclesByDirection[direction][0].properties.headsign}
+                  {direction} to{" "}
+                  {vehiclesByDirection[direction][0].properties.headsign}
                 </h4>
                 {vehiclesByDirection[direction] &&
                   vehiclesByDirection[direction].map((vehicle, idx) => {

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "gatsby";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBicycle, faBus } from "@fortawesome/free-solid-svg-icons";
+import { faBicycle, faBusSimple } from "@fortawesome/free-solid-svg-icons";
 import RouteSlim from "./RouteSlim";
 
 const BikeshareCard = ({ station, agency }) => {

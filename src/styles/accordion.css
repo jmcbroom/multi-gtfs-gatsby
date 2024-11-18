@@ -2,13 +2,14 @@
   @apply w-full;
   @apply flex;
   @apply flex-col;
+  @apply max-h-80;
+  @apply overflow-y-auto;
 }
 
 .AccordionItem {
-  overflow: hidden;
   @apply px-2;
   @apply md:px-0;
-  @apply p-2;
+  @apply p-1.5;
   @apply border-l-2;
   @apply border-gray-100;
   @apply dark:border-zinc-900;
@@ -25,6 +26,7 @@
 
 .AccordionHeader {
   display: flex;
+  @apply m-0;
 }
 
 .AccordionTrigger {

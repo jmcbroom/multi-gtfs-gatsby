@@ -134,7 +134,6 @@ footer {
   @apply text-sm;
   /* font-family: "IBM Plex Sans"; */
   font-family: "Inter";
-  @apply mt-4;
 }
 
 .sanityContent h4 {
