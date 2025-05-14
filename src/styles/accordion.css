@@ -2,7 +2,6 @@
   @apply w-full;
   @apply flex;
   @apply flex-col;
-  @apply max-h-80;
   @apply overflow-y-auto;
 }
 

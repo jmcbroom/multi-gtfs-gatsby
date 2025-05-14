@@ -8,6 +8,10 @@ import _ from "lodash";
 import VehicleBadge from "./VehicleBadge";
 import nearestPoint from "@turf/nearest-point";
 
+const shortenStopName = (stopName) => {
+  return stopName.replace("TRANSIT CENTER", "TC");
+};
+
 const RoutePredictionItem = ({ vehicle, predictions, vehicleType }) => {
   if (!vehicle) {
     return null;
@@ -84,22 +88,22 @@ const RoutePredictionItem = ({ vehicle, predictions, vehicleType }) => {
               routeTextColor={routeTextColor}
               size="small"
             />
-            <div className="flex flex-col justify-end">
+            <div className="flex flex-col">
               <span className="text-xs block text-right mr-2 text-gray-400">
                 {nextStop && (
                   <>
                     <span>
-                      next stop{" "}
+                      
                       {predictions?.length > 0 &&
                         (predictions[0].prdctdn === "DUE"
-                          ? `, now:`
-                          : `, in ${predictions[0].prdctdn}m:`)}
+                          ? `now:`
+                          : `in ${predictions[0].prdctdn}m:`)}
                     </span>
                   </>
                 )}
               </span>
               <span className="text-sm mr-2 text-right">
-                {nextStop && nextStop.stpnm}
+                {nextStop && shortenStopName(nextStop.stpnm)}
               </span>
             </div>
           </div>

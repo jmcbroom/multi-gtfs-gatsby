@@ -285,7 +285,7 @@ const NearbyPage = ({ data }) => {
 export const query = graphql`
   query NearbyQuery {
     postgres {
-      allStops: stopsList(filter: { feedIndex: { in: [44, 45, 46, 47] } }) {
+      allStops: stopsList(filter: { feedIndex: { in: [52, 53, 54, 55] } }) {
         stopLat
         stopLon
         stopName

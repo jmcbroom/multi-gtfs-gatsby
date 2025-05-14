@@ -1,29 +1,28 @@
-import { graphql } from "gatsby";
+import bbox from "@turf/bbox";
+import { graphql, navigate } from "gatsby";
+import _ from "lodash";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState } from "react";
 import Mapbox, { GeolocateControl, NavigationControl } from "react-map-gl";
+import RouteHeader from "../components/RouteHeader";
 import { useTheme } from "../hooks/ThemeContext";
+import { useSanityAgencies } from "../hooks/useSanityAgencies";
+import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import mapboxStyles from "../styles/styleFactory";
 import { createRouteData } from "../util";
-import { navigate } from "gatsby";
-import bbox from "@turf/bbox";
-import _ from "lodash";
-import RouteHeader from "../components/RouteHeader";
-import { useSanityRoutes } from "../hooks/useSanityRoutes";
-import { useSanityAgencies } from "../hooks/useSanityAgencies";
 
 const RegionMapPage = ({ data }) => {
   const { theme } = useTheme();
-  
+
   let style = _.cloneDeep(mapboxStyles[theme]);
 
   let [routes, setRoutes] = useState([]);
 
-  let { sanityAgencies } = useSanityAgencies()
+  let { sanityAgencies } = useSanityAgencies();
   sanityAgencies = sanityAgencies.edges.map((edge) => edge.node);
   let gtfsAgencies = data.postgres.agencies;
-  
+
   let { sanityRoutes } = useSanityRoutes();
   sanityRoutes = sanityRoutes.edges.map((edge) => edge.node);
 
@@ -59,7 +58,11 @@ const RegionMapPage = ({ data }) => {
     let routeData = createRouteData(matching[0], sanityRoute);
 
     let link = `/${sanityRoute.agency.slug.current}/route/${routeData.displayShortName}`;
-    if(["qline", "people-mover", "d2a2", "michigan-flyer"].indexOf(sanityRoute.agency.slug.current) > -1) {
+    if (
+      ["qline", "people-mover", "d2a2", "michigan-flyer"].indexOf(
+        sanityRoute.agency.slug.current
+      ) > -1
+    ) {
       link = `/${sanityRoute.agency.slug.current}`;
     }
 
@@ -93,11 +96,15 @@ const RegionMapPage = ({ data }) => {
 
   let bboxFc = Object.assign({}, routeFeatureCollection);
 
-  bboxFc.features = bboxFc.features.filter(ft => ft.properties.mapPriority < 4);
+  bboxFc.features = bboxFc.features.filter(
+    (ft) => ft.properties.mapPriority < 4
+  );
 
   const map = useRef();
-  
-  if (!theme) { return null; }
+
+  if (!theme) {
+    return null;
+  }
 
   let mapInitialBbox = bbox(bboxFc);
 
@@ -176,7 +183,7 @@ const RegionMapPage = ({ data }) => {
     },
   };
 
-  routes = routes.sort((a,b) => b.mapPriority < a.mapPriority)
+  routes = routes.sort((a, b) => b.mapPriority < a.mapPriority);
 
   return (
     <div>

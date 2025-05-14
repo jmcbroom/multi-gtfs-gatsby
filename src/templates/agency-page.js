@@ -48,31 +48,34 @@ const Agency = ({ data, pageContext, location }) => {
     }
   });
 
-  let allRoutes = Object.assign([], routes);
+  let allRoutes = Object.assign([], routes.filter(r => r.directions));
 
   // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
   let allRouteFeatures = [];
 
   routes.forEach((route) => {
     if (!route.directions) {
-      console.log(route);
+      return;
     }
-    route?.directions?.forEach((direction) => {
-      let feature = JSON.parse(direction.directionShape)[0];
+    else {
 
-      feature.properties = {
-        routeColor: route.routeColor,
-        routeLongName: route.routeLongName,
-        routeShortName: route.routeShortName,
-        displayShortName: route.displayShortName,
-        routeTextColor: route.routeTextColor,
-        mapPriority: route.mapPriority,
-        direction: direction.directionDescription,
-        directionId: direction.directionId,
-      };
-
-      allRouteFeatures.push(feature);
-    });
+      route?.directions?.forEach((direction) => {
+        let feature = JSON.parse(direction.directionShape)[0];
+        
+        feature.properties = {
+          routeColor: route.routeColor,
+          routeLongName: route.routeLongName,
+          routeShortName: route.routeShortName,
+          displayShortName: route.displayShortName,
+          routeTextColor: route.routeTextColor,
+          mapPriority: route.mapPriority,
+          direction: direction.directionDescription,
+          directionId: direction.directionId,
+        };
+        
+        allRouteFeatures.push(feature);
+      });
+    }
   });
 
   let allRouteFc = {
@@ -192,7 +195,7 @@ const Agency = ({ data, pageContext, location }) => {
         <Tabs.Content className="tabContent" value="routes">
           <p className="grayHeader">List of bus routes</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 pt-4 max-h-screen overflow-auto">
-            {routes.map((r) => (
+            {routes.filter(r => r.directions).map((r) => (
               <RouteHeader
                 key={r.displayShortName}
                 {...r}

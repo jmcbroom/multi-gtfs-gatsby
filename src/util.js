@@ -54,6 +54,7 @@ export const formatArrivalTime = (
  * @returns the same array, but sorted
  */
 export const sortTripsByFrequentTimepoint = (trips) => {
+
   const mostTimepointsTrip = trips.sort((a, b) => {
     return b.stopTimes.length - a.stopTimes.length;
   })[0];
@@ -424,9 +425,13 @@ export const createStopsFc = (
   // iterate through each direction on weekday service
   Object.keys(trips.weekday).forEach((key) => {
     // get the timepoints from the trip with the most timepoints
-    const mostTimepointsTrip = trips.weekday[key].sort((a, b) => {
+    let mostTimepointsTrip = trips.weekday[key].sort((a, b) => {
       return b.stopTimes.length - a.stopTimes.length;
     })[0];
+
+    if (!mostTimepointsTrip) {
+      return;
+    }
 
     let stops = mostTimepointsTrip.stopTimes
       .filter((st) => !timepointsOnly || st.timepoint === 1)
