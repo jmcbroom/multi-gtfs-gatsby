@@ -230,7 +230,7 @@ const Route = ({ data, pageContext }) => {
       </div>
 
       <div className="bg-gray-300 dark:bg-zinc-900">
-        <RouteHeader {...gtfsRoute} agency={agencyData} />
+        <RouteHeader {...gtfsRoute} agency={agencyData} showFavorite={true} />
       </div>
 
       <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>

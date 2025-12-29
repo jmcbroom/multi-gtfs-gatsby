@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import BikeshareMap from "../components/Bikeshare/BikeshareMap";
 import AgencySlimHeader from "../components/AgencySlimHeader";
+import { BikeshareStationStatus } from "../types/BikeshareTypes";
 import StopHeader from "../components/StopHeader";
 import { graphql } from "gatsby";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../db";
 import _ from "lodash";
-import MapLegend from "../components/MapLegend";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSanityAgencies } from "../hooks/useSanityAgencies";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
@@ -58,35 +58,20 @@ const BikeshareStationPage = ({ data, pageContext }) => {
         stop.agency?.slug.current === pageContext.slug
     ).length > 0;
 
-  let stationFc = {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        id: station.station_id,
-        geometry: {
-          type: "Point",
-          coordinates: [station.lon, station.lat],
-        },
-        properties: {
-          ...station,
-        },
-      },
-    ],
-  };
 
-  const [stationStatus, setStationStatus] = useState(null);
+
+  const [stationStatus, setStationStatus] = useState<BikeshareStationStatus | null>(null);
 
   let nearbyStops = data.postgres.nearbyStops;
 
   let nearbyStopsFc = {
-    type: "FeatureCollection",
+    type: "FeatureCollection" as const,
     features: nearbyStops.map((stop: any) => {
       return {
-        type: "Feature",
+        type: "Feature" as const,
         id: stop.stopId,
         geometry: {
-          type: "Point",
+          type: "Point" as const,
           coordinates: [stop.stopLon, stop.stopLat],
         },
         properties: {
@@ -116,6 +101,24 @@ const BikeshareStationPage = ({ data, pageContext }) => {
         console.error(error);
       });
   }, []);
+
+  let stationFc = {
+    type: "FeatureCollection" as const,
+    features: [
+      {
+        type: "Feature" as const,
+        id: station.station_id,
+        geometry: {
+          type: "Point" as const,
+          coordinates: [station.lon, station.lat],
+        },
+        properties: {
+          ...station,
+          status: stationStatus
+        },
+      },
+    ],
+  };
 
   let statusBadgeStyle = `h-10 w-10 bg-gray-300 dark:bg-zinc-600 text-lg font-semibold flex items-center justify-around`;
 
@@ -180,21 +183,12 @@ const BikeshareStationPage = ({ data, pageContext }) => {
           <StopTransfers stop={indexedStop} nearbyStops={nearbyStops} routes={sanityRoutes} agencies={sanityAgencies} />
         </div>
         <div>
-          <BikeshareMap stationsFc={stationFc} nearbyStopsFc={nearbyStopsFc} />
-          <MapLegend
-            marks={[
-              {
-                color: "red",
-                text: "MoGo station",
-                size: "w-4 h-4",
-              },
-              {
-                color: "white",
-                text: "Nearby bus stop",
-                size: "w-3 h-3",
-              },
-            ]}
-            text={`Tap a bus stop on the map to jump to that stop's schedule page.`}
+          <BikeshareMap 
+            stationsFc={stationFc} 
+            nearbyStopsFc={nearbyStopsFc}
+            showLegend={false}
+            legendText="Station color indicates bike availability. Tap a bus stop on the map to jump to that stop's schedule page."
+            includeNearbyStops={true}
           />
           
 

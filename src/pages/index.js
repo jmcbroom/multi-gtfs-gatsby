@@ -2,15 +2,24 @@ import { Link, graphql } from "gatsby";
 import React from "react";
 import PortableText from "react-portable-text";
 import AgencySlimHeader from "../components/AgencySlimHeader";
+import StopCard from "../components/StopCard";
+import RouteCard from "../components/RouteCard";
 import { createRouteData } from "../util";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlane } from "@fortawesome/free-solid-svg-icons";
+import { faPlane, faStar } from "@fortawesome/free-solid-svg-icons";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "../db";
+import _ from "lodash";
 
 /**
  * The home page.
  * @param {*} data: GraphQL query
  */
 const IndexPage = ({ data }) => {
+  // Get favorite stops and routes from local storage
+  const favoriteStops = useLiveQuery(() => db.stops.toArray());
+  const favoriteRoutes = useLiveQuery(() => db.routes.toArray());
+
   let { agencies } = data.postgres;
   let sanityAgencies = data.allSanityAgency.edges.map((e) => e.node);
 
@@ -53,8 +62,81 @@ const IndexPage = ({ data }) => {
     })
     .filter((a) => a.agencyType === "local-bus");
 
+  // Group favorite stops and routes by agency
+  let groupedFavoriteStops = favoriteStops ? _.groupBy(favoriteStops, "agency.agencySlug") : {};
+  let groupedFavoriteRoutes = favoriteRoutes ? _.groupBy(favoriteRoutes, "agency.agencySlug") : {};
+  
+  // Get all agencies that have favorites
+  let allFavoriteAgencies = new Set([
+    ...Object.keys(groupedFavoriteStops),
+    ...Object.keys(groupedFavoriteRoutes),
+  ]);
+
   return (
     <div className="py-4 flex flex-col gap-4 md:gap-6">
+
+      {/* favorite stops & routes */}
+      {((favoriteStops && favoriteStops.length > 0) || (favoriteRoutes && favoriteRoutes.length > 0)) && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="pl-3 md:pl-0 mb-0">Your favorites</h2>
+            <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Array.from(allFavoriteAgencies).map((agencySlug) => {
+              let agency = merged.find((a) => a.slug.current === agencySlug) || 
+                          otherServices.find((a) => a.slug.current === agencySlug);
+              
+              if (!agency) return null;
+              
+              let hasStops = groupedFavoriteStops[agencySlug]?.length > 0;
+              let hasRoutes = groupedFavoriteRoutes[agencySlug]?.length > 0;
+              
+              if (!hasStops && !hasRoutes) return null;
+              
+              return (
+                <div key={agencySlug} className="bg-gray-100 dark:bg-zinc-900">
+                  <AgencySlimHeader agency={agency} />
+                  <div>
+                    {/* Show favorite routes first */}
+                    {hasRoutes && (
+                      <div>
+                        <div className="text-xs font-semibold text-gray-500 dark:text-zinc-500 px-2 py-1 bg-gray-50 dark:bg-zinc-800">
+                          Routes
+                        </div>
+                        {groupedFavoriteRoutes[agencySlug].map((route) => (
+                          <RouteCard key={route.id} route={route} agency={agency} />
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Show favorite stops */}
+                    {hasStops && (
+                      <div className="flex flex-col gap-1">
+                        <div className="text-xs font-semibold text-gray-500 dark:text-zinc-500 px-2 py-1 bg-gray-50 dark:bg-zinc-800">
+                          Stops
+                        </div>
+                        {groupedFavoriteStops[agencySlug].map((stop) => (
+                          <StopCard 
+                            key={stop.id} 
+                            stop={stop} 
+                            agency={agency} 
+                            routeDirections={stop.tripDirections} 
+                          />
+                        ))}
+                      </div>
+                    )}
+                    
+
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+      )}
+      
       <div>
         <h2 className="pl-3 md:pl-0">Local bus systems</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -203,6 +285,7 @@ export const query = graphql`
           }
           description: _rawDescription
           agencyType
+          stopIdentifierField
           slug {
             current
           }

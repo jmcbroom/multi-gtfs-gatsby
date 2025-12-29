@@ -13,6 +13,8 @@ import mapboxStyles from "../styles/styleFactory";
 import { createRouteData } from "../util";
 
 const RegionMapPage = ({ data }) => {
+
+  console.log(data)
   const { theme } = useTheme();
 
   let style = _.cloneDeep(mapboxStyles[theme]);

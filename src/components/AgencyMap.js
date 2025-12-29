@@ -94,7 +94,7 @@ const AgencyMap = ({ routesFc, agency }) => {
       ],
     });
 
-    if (map.current.getZoom() > 13.5) {
+    if (map.current.getZoom() > 11.5) {
       let uniqueRoutes = _.uniqBy(routesOnMap, "properties.routeShortName")
         .map((r) => r.properties)
         .sort(

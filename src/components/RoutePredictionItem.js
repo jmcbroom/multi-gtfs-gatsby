@@ -102,7 +102,7 @@ const RoutePredictionItem = ({ vehicle, predictions, vehicleType }) => {
                   </>
                 )}
               </span>
-              <span className="text-sm mr-2 text-right">
+              <span className="text-xs mr-2 text-right max-w-40">
                 {nextStop && shortenStopName(nextStop.stpnm)}
               </span>
             </div>

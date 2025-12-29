@@ -109,6 +109,7 @@ export const sortTripsByFrequentTimepoint = (trips) => {
  * @returns an object whose keys are `weekday`, `saturday`, `sunday` and the corresponding serviceId values
  */
 export const getServiceDays = (serviceCalendars) => {
+
   // let's figure out which service ID is which
   let serviceDays = {
     weekday: null,
@@ -155,6 +156,16 @@ export const getServiceDays = (serviceCalendars) => {
     ) {
       serviceDays.saturday = sc.serviceId;
       serviceDays.sunday = sc.serviceId;
+    }
+
+    // all weekdayMatches are false + match both Sat and Sun
+    if (
+      weekdayMatches.every((e) => e) &&
+      sc.sunday === 0 &&
+      sc.saturday === 1
+    ) {
+      serviceDays.saturday = sc.serviceId;
+      serviceDays.weekday = sc.serviceId;
     }
 
     if (
@@ -313,10 +324,9 @@ export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
   // from the BusTime API response and the Sanity route directions
   if (!vehicles || !patterns || !route || !trips) return null;
 
-  console.log(vehicles, patterns, route, agency, trips)
-
   // create a GeoJSON feature for each vehicle
   let features = vehicles.map((v) => {
+
     // find the pattern and direction for this vehicle
     let pattern = patterns.find((p) => p.pid === v.pid);
 
@@ -328,7 +338,17 @@ export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
             .indexOf(pattern?.rtdir.toLowerCase()) > -1
       ) || "unknown";
 
+    if (direction == "unknown") {
+      direction = route.directions.find(
+        (d) =>
+          d.directionHeadsign
+            .toLowerCase()
+            .indexOf(v.des?.toLowerCase().split(" to ")[1]) > -1
+      ) || "unknown"
+    }
+
     if (direction === undefined || direction === "unknown") {
+
       // special case for DDOT 3
       if (v.des === "Downtown" && v.rt === "3") {
         direction = route.directions.find(

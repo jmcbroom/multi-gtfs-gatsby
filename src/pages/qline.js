@@ -17,7 +17,6 @@ import {
   getTripsByServiceAndDirection,
   getTripsByServiceDay,
 } from "../util";
-import supabase from "../supabaseClient";
 import RoutePredictions from "../components/RoutePredictions";
 import { set } from "lodash";
 
@@ -40,19 +39,27 @@ const Qline = ({ data }) => {
 
   let [realtime, setRealtime] = useState(null);
 
-  const realtimeChannel = supabase
-    .channel("qline_vehicle_position")
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "gtfsrt",
-      },
-      (payload) => {
-        setRealtime(payload.new);
-      }
-    )
-    .subscribe();
+  // // Fetch realtime data from QLINE API
+  // useEffect(() => {
+  //   const fetchRealtimeData = async () => {
+  //     try {
+  //       const response = await fetch('https://detroit-qline-api.james-mcbroom.workers.dev/');
+  //       const data = await response.json();
+  //       setRealtime(data);
+  //     } catch (error) {
+  //       console.error('Error fetching QLINE realtime data:', error);
+  //     }
+  //   };
+
+  //   // Fetch immediately when component mounts
+  //   fetchRealtimeData();
+    
+  //   // Set up polling every 30 seconds
+  //   const intervalId = setInterval(fetchRealtimeData, 20000);
+    
+  //   // Clean up interval on component unmount
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
   sanityRoute.directions.forEach((dir, idx) => {
     // get timepoints for each direction
@@ -150,34 +157,12 @@ const Qline = ({ data }) => {
   const [vehicles, setVehicles] = useState(null);
 
   useEffect(() => {
-    // Function to fetch data from the public table
-    const fetchData = async () => {
-      try {
-        // Replace 'YOUR_TABLE_NAME' with the actual name of your public table
-        const { data, error } = await supabase
-          .from("last_qline_vehicle_position")
-          .select("*");
-
-        if (error) {
-          throw error;
-        }
-
-        setRealtime(data[0]);
-      } catch (error) {
-        console.error("Error fetching data:", error.message);
-      }
-    };
-
-    fetchData();
-  }, []);
-  
-  useEffect(() => {
     if (!realtime) {
       return;
     }
     let vehicleFc = {
       type: "FeatureCollection",
-      features: realtime?.data.entity
+      features: realtime?.data?.entity
         ?.filter((e) => e.vehicle.trip)
         .map((v) => {
           let trip = trips.find((t) => t.tripId === v.vehicle.trip?.tripId);
@@ -205,7 +190,7 @@ const Qline = ({ data }) => {
             properties: {
               agency: "qline",
               hdg: v.vehicle.position.bearing,
-              bearing: v.vehicle.position.bearing,
+              bearing: direction.directionDescription === 'southbound' ? 156 : 336,
               vid: v.vehicle.vehicle.id,
               feedIndex: 32,
               routeColor: "#EF4D2E",
@@ -240,11 +225,11 @@ const Qline = ({ data }) => {
         <meta property="og:type" content={`website`} />
         <meta
           property="og:title"
-          content={`${agencyData.name} bus route: ${routeData.displayShortName} ${routeData.routeLongName}`}
+          content={`${agencyData.name} streetcar route: ${routeData.displayShortName} ${routeData.routeLongName}`}
         />
         <meta
           property="og:description"
-          content={`${agencyData.name} bus route ${routeData.displayShortName} ${routeData.routeLongName}`}
+          content={`${agencyData.name} streetcar route ${routeData.displayShortName} ${routeData.routeLongName}`}
         />
       </Helmet>
 
@@ -361,7 +346,7 @@ export const query = graphql`
     }
     postgres {
       routes: routesList(
-        condition: { feedIndex: 30, routeShortName: "QLINE" }
+        condition: { feedIndex: 56, routeShortName: "QLINE" }
       ) {
         agencyId
         routeShortName
@@ -375,7 +360,7 @@ export const query = graphql`
         feedIndex
         trips: tripsByFeedIndexAndRouteIdList(
           filter: {
-            serviceId: { in: ["c_45772_b_55794_d_63", "c_45772_b_55794_d_64"] }
+            serviceId: { in: ["c_71225_b_84754_d_63", "c_71225_b_84754_d_64"] }
           }
         ) {
           serviceId
@@ -426,7 +411,7 @@ export const query = graphql`
           direction
         }
       }
-      agencies: agenciesList(condition: { feedIndex: 30 }) {
+      agencies: agenciesList(condition: { feedIndex: 56 }) {
         agencyName
         agencyUrl
         agencyTimezone

@@ -8,12 +8,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLiveQuery } from "dexie-react-hooks";
 import _ from "lodash";
 import StopCard from "../components/StopCard";
+import RouteCard from "../components/RouteCard";
 import BikeshareCard from "../components/Bikeshare/BikeshareCard";
 import { db } from "../db";
 import { useSanityAgencies } from "../hooks/useSanityAgencies";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 /**
- * The home page.
+ * The favorites page.
  * @param {*} data: GraphQL query
  */
 const FavoritesPage = ({ data }) => {
@@ -24,8 +25,9 @@ const FavoritesPage = ({ data }) => {
   let { sanityRoutes } = useSanityRoutes();
   sanityRoutes = sanityRoutes.edges.map((e) => e.node);
 
-  // get the favorite stops
+  // get the favorite stops and routes
   const favoriteStops = useLiveQuery(() => db.stops.toArray());
+  const favoriteRoutes = useLiveQuery(() => db.routes.toArray());
   const favoriteBikeshareStops = useLiveQuery(() => db.bikeshare.toArray());
 
   let merged = sanityAgencies.map((sa) => {
@@ -61,36 +63,69 @@ const FavoritesPage = ({ data }) => {
     return order.indexOf(a.slug.current) - order.indexOf(b.slug.current);
   });
 
-  let grouped = _.groupBy(favoriteStops, "agency.agencySlug");
+  let groupedStops = _.groupBy(favoriteStops, "agency.agencySlug");
+  let groupedRoutes = _.groupBy(favoriteRoutes, "agency.agencySlug");
 
   let bikeshareGrouped = _.groupBy(
     favoriteBikeshareStops,
     "agency.slug.current"
   );
 
+  // Get all agencies that have either favorite stops or routes
+  let allFavoriteAgencies = new Set([
+    ...Object.keys(groupedStops),
+    ...Object.keys(groupedRoutes),
+  ]);
+
   return (
     <>
       <div className="my-4 flex items-center justify-normal">
-        <h2 className="mr-2 mb-0 block">Favorite stops</h2>
+        <h2 className="mr-2 mb-0 block">Favorite stops & routes</h2>
         <FontAwesomeIcon icon={faStar} className="ml-2 md:ml-0" />
       </div>
-      <p className="text-sm m-0 text-gray-700 mb-4">
-        Add stops to your favorites by clicking the star icon on the stop page.
+      <p className="text-sm m-0 text-gray-700 dark:text-zinc-400 mb-4">
+        Add stops and routes to your favorites by clicking the star icon on stop and route pages.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 
-        {Object.keys(grouped).map((key) => {
-          let agency = merged.filter((a) => a.slug.current === key)[0];
+        {Array.from(allFavoriteAgencies).map((agencySlug) => {
+          let agency = merged.filter((a) => a.slug.current === agencySlug)[0];
+          
+          if (!agency) return null;
+          
+          let hasStops = groupedStops[agencySlug]?.length > 0;
+          let hasRoutes = groupedRoutes[agencySlug]?.length > 0;
+          
+          if (!hasStops && !hasRoutes) return null;
+
           return (
-            <div key={key}>
+            <div key={agencySlug}>
               <AgencySlimHeader agency={agency} />
               <div className="grid mt-0">
-                {grouped[key]
-                  // .sort((a, b) => b.times.length - a.times.length)
-                  .map((stop) => (
-                    <StopCard stop={stop} agency={agency} key={stop.stopId} routeDirections={stop.tripDirections} />
-                  ))}
+                {/* Show favorite routes first */}
+                {hasRoutes && (
+                  <div>
+                    <div className="text-sm font-semibold text-gray-600 dark:text-zinc-400 px-2 py-1 bg-gray-50 dark:bg-zinc-800">
+                      Favorite Routes
+                    </div>
+                    {groupedRoutes[agencySlug].map((route) => (
+                      <RouteCard route={route} agency={agency} key={route.id} />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Show favorite stops */}
+                {hasStops && (
+                  <div>
+                    <div className="text-sm font-semibold text-gray-600 dark:text-zinc-400 px-2 py-1 bg-gray-50 dark:bg-zinc-800">
+                      Favorite Stops
+                    </div>
+                    {groupedStops[agencySlug].map((stop) => (
+                      <StopCard stop={stop} agency={agency} key={stop.id} routeDirections={stop.tripDirections} />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -101,6 +136,9 @@ const FavoritesPage = ({ data }) => {
             <div key={key}>
               <AgencySlimHeader agency={bikeshareGrouped[key][0].agency} />
               <div>
+                <div className="text-sm font-semibold text-gray-600 dark:text-zinc-400 px-2 py-1 bg-gray-50 dark:bg-zinc-800">
+                  Favorite Bike Stations
+                </div>
                 {bikeshareGrouped[key].map((station) => (
                   <BikeshareCard
                     station={station}

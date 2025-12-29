@@ -10,7 +10,6 @@ import * as Tabs from "@radix-ui/react-tabs";
 import PortableText from "react-portable-text";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBicycle, faBolt, faLockOpen, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
-import MapLegend from "../components/MapLegend";
 
 const createStationsFc = (
   stations: BikeshareStation[],
@@ -145,18 +144,10 @@ const Bikeshare = ({ data, pageContext, location }) => {
           {stationStatus && (
             <BikeshareMap
               stationsFc={createStationsFc(stations, stationStatus)}
+              showLegend={true}
+              legendText="Station colors indicate bike availability. Zoom in to see exact bike counts. Tap on a station to go to the station page."
             />
           )}
-          <MapLegend
-            marks={[
-              {
-                color: "red",
-                text: "MoGo station",
-                size: "w-4 h-4",
-              }
-            ]}
-            text={`Zoom in to see station details. Tap on a station to go to the station page.`}
-          />
         </Tabs.Content>
       </Tabs.Root>
     </div>

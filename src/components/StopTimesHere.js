@@ -25,6 +25,8 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
 
   let [service, setService] = useState(defaultService);
 
+  console.log(routes)
+
   return (
     <div>
       <div className="grayHeader">Routes that stop here</div>

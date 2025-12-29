@@ -6,7 +6,7 @@ import RouteSlim from "./RouteSlim";
 
 const BikeshareCard = ({ station, agency }) => {
   return (
-    <div key={station.id} className="bg-gray-200 dark:bg-zinc-800 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none p-1">
+    <div key={station.id} className="bg-gray-200 dark:bg-zinc-800 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none">
       <div className="flex items-center justify-between px-2 py-1">
         <Link
           to={`/${agency.slug.current}/station/${station.station_id}`}

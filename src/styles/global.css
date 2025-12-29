@@ -15,6 +15,22 @@ body {
   @apply dark:text-opacity-80;
 }
 
+/* PWA Safe Area Support for iPhone Dynamic Island and Home Indicator */
+header {
+  padding-top: env(safe-area-inset-top);
+}
+
+.fill-page {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Ensure install prompt respects safe areas */
+.install-prompt {
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  left: calc(1rem + env(safe-area-inset-left));
+  right: calc(1rem + env(safe-area-inset-right));
+}
+
 button {
   /* reset */
   background: none;

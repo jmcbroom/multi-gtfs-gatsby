@@ -1106,7 +1106,16 @@ for (const style in styles) {
       layout: {},
       // minzoom: 17,
       paint: {
-        "circle-color": "red",
+        "circle-color": [
+          "case",
+          ["!", ["has", "status"]], "#888", // Gray if no status
+          [
+            "case",
+            ["==", ["get", "num_bikes_available", ["get", "status"]], 0], "#DC2626", // Red for 0 bikes
+            ["<=", ["get", "num_bikes_available", ["get", "status"]], 2], "#F59E0B", // Orange for 1-2 bikes
+            "#2563EB" // Blue for 3+ bikes
+          ]
+        ],
         "circle-stroke-color": "#222",
         "circle-stroke-width": {
           stops: [
@@ -1127,7 +1136,7 @@ for (const style in styles) {
           stops: [
             [8, 0.5],
             [13, 3.5],
-            [19, 8],
+            [19, 12],
           ],
         },
       },
@@ -1175,6 +1184,7 @@ for (const style in styles) {
         },
       },
     },
+
   ];
   
   styles[style].layers = styles[style].layers.concat(stopLayers);

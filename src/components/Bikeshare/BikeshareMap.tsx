@@ -8,13 +8,23 @@ import { useTheme } from "../../hooks/ThemeContext";
 import mapboxStyles from "../../styles/styleFactory";
 import { FeatureCollection } from "geojson";
 import { navigate } from "gatsby";
+import MapLegend from "../MapLegend";
 
 interface BikeshareMapProps {
   stationsFc: FeatureCollection;
-  nearbyStopsFc: FeatureCollection;
+  nearbyStopsFc?: FeatureCollection;
+  showLegend?: boolean;
+  legendText?: string;
+  includeNearbyStops?: boolean;
 }
 
-const BikeshareMap:React.FC<BikeshareMapProps> = ({ stationsFc, nearbyStopsFc }) => {
+const BikeshareMap:React.FC<BikeshareMapProps> = ({ 
+  stationsFc, 
+  nearbyStopsFc, 
+  showLegend = false, 
+  legendText = "Station colors indicate bike availability. Zoom in to see exact bike counts.",
+  includeNearbyStops = false 
+}) => {
 
   const map = useRef<any>();
   const { theme } = useTheme();
@@ -26,7 +36,9 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({ stationsFc, nearbyStopsFc })
   let style = _.cloneDeep(mapboxStyles[theme]);
   style.sources.bikeshare.data = stationsFc;
 
-  style.sources.secondaryStops.data = nearbyStopsFc;
+  if (nearbyStopsFc) {
+    style.sources.secondaryStops.data = nearbyStopsFc;
+  }
 
   // add stations layer
 
@@ -105,12 +117,45 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({ stationsFc, nearbyStopsFc })
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onMoveEnd={handleMoveEnd}
-          interactiveLayerIds={["stops-points"]}
+          interactiveLayerIds={["bikeshare-point", "secondary-stops-points", "secondary-stops-labels"]}
         >
           <NavigationControl showCompass={false} />
           <GeolocateControl />
         </Mapbox>
       </div>
+      
+      {showLegend && (
+        <MapLegend
+          marks={[
+            {
+              color: "#2563EB",
+              text: "3+ bikes available",
+              size: "w-4 h-4",
+            },
+            {
+              color: "#F59E0B",
+              text: "1-2 bikes available",
+              size: "w-4 h-4",
+            },
+            {
+              color: "#DC2626",
+              text: "No bikes available",
+              size: "w-4 h-4",
+            },
+            {
+              color: "#888",
+              text: "Status unknown",
+              size: "w-4 h-4",
+            },
+            ...(includeNearbyStops ? [{
+              color: "white",
+              text: "Nearby bus stop",
+              size: "w-3 h-3",
+            }] : [])
+          ]}
+          text={legendText}
+        />
+      )}
     </>
   );
 };

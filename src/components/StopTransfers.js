@@ -32,8 +32,6 @@ const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
 
   }
 
-  console.log(transferStops);
-
   return (
     <div>
       <h4>Nearby transfer stops</h4>

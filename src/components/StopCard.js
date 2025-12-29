@@ -9,7 +9,7 @@ const StopCard = ({ stop, agency, routeDirections }) => {
   let directionIds = new Set();
 
   return (
-    <div key={stop.id} className="bg-gray-100 dark:bg-zinc-900 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none p-1">
+    <div key={stop.id} className="bg-gray-100 dark:bg-zinc-900 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none">
       <div className="flex items-center justify-between px-2 py-1">
         <Link
           to={`/${stop.agency.agencySlug}/stop/${stop[agency.stopIdentifierField]}`}
