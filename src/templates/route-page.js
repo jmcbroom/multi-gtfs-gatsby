@@ -1,7 +1,6 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { graphql, Link } from "gatsby";
 import React, { useState, useEffect } from "react";
-import { Helmet } from "react-helmet";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import DirectionPicker from "../components/DirectionPicker";
 import RouteHeader from "../components/RouteHeader";
@@ -208,23 +207,6 @@ const Route = ({ data, pageContext }) => {
 
   return (
     <div>
-      <Helmet>
-        <title>{`${agencyData.name} ${routeData.displayShortName}: ${routeData.routeLongName}`}</title>
-        <meta
-          property="og:url"
-          content={`https://transit.det.city/${pageContext.agencySlug}/route/${routeData.displayShortName}/`}
-        />
-        <meta property="og:type" content={`website`} />
-        <meta
-          property="og:title"
-          content={`${agencyData.name} bus route: ${routeData.displayShortName} ${routeData.routeLongName}`}
-        />
-        <meta
-          property="og:description"
-          content={`${agencyData.name} bus route ${routeData.displayShortName} ${routeData.routeLongName}`}
-        />
-      </Helmet>
-
       <div className="mt-4">
         <AgencySlimHeader agency={agencyData} />
       </div>
@@ -519,3 +501,21 @@ export const query = graphql`
 `;
 
 export default Route;
+
+export const Head = ({ data, pageContext }) => {
+  const agencyName = data.agency?.name || "";
+  const routeShortName = data.route?.displayShortName || data.route?.shortName || "";
+  const routeLongName = data.route?.longName || "";
+
+  return (
+    <>
+      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`}</title>
+      <meta name="description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <meta property="og:url" content={`https://transit.det.city/${pageContext.agencySlug}/route/${routeShortName}/`} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={`${agencyName} bus route: ${routeShortName} ${routeLongName}`} />
+      <meta property="og:description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <link rel="canonical" href={`https://transit.det.city/${pageContext.agencySlug}/route/${routeShortName}/`} />
+    </>
+  );
+};

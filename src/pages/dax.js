@@ -1,6 +1,5 @@
 import { graphql } from "gatsby";
 import React, { useState } from "react";
-import { Helmet } from "react-helmet";
 import RouteHeader from "../components/RouteHeader";
 import RouteTimeTable from "../components/RouteTimeTable";
 import ServicePicker from "../components/ServicePicker";
@@ -102,20 +101,6 @@ const Dax = ({ data }) => {
 
   return (
     <div>
-      <Helmet>
-        <title>{`${agencyData.name} ${routeData.displayShortName}: ${routeData.routeLongName}`}</title>
-        <meta property="og:url" content={`https://transit.det.city/dax/`} />
-        <meta property="og:type" content={`website`} />
-        <meta
-          property="og:title"
-          content={`Detroit Air Xpress`}
-        />
-        <meta
-          property="og:description"
-          content={`Information about the bus service from Detroit Metro airport (DTW), to downtown Detroit. Runs 16 trips per day, every day of the year.`}
-        />
-      </Helmet>
-
       <div className="bg-gray-300 dark:bg-zinc-900 mt-4">
         <RouteHeader {...gtfsRoute} agency={null} />
       </div>
@@ -307,3 +292,21 @@ export const query = graphql`
 `;
 
 export default Dax;
+
+export const Head = ({ data }) => {
+  const agencyName = data.agency?.name || "DAX";
+  const routeShortName = data.route?.displayShortName || data.route?.shortName || "DAX";
+  const routeLongName = data.route?.longName || "Detroit Air Xpress";
+
+  return (
+    <>
+      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`}</title>
+      <meta name="description" content="Information about the bus service from Detroit Metro airport (DTW), to downtown Detroit. Runs 16 trips per day, every day of the year." />
+      <meta property="og:url" content="https://transit.det.city/dax/" />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content="Detroit Air Xpress" />
+      <meta property="og:description" content="Information about the bus service from Detroit Metro airport (DTW), to downtown Detroit. Runs 16 trips per day, every day of the year." />
+      <link rel="canonical" href="https://transit.det.city/dax/" />
+    </>
+  );
+};

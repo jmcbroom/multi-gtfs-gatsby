@@ -1,6 +1,5 @@
 import { graphql } from "gatsby";
 import React, { useState } from "react";
-import { Helmet } from "react-helmet";
 import RouteHeader from "../components/RouteHeader";
 import RouteTimeTable from "../components/RouteTimeTable";
 import ServicePicker from "../components/ServicePicker";
@@ -118,20 +117,6 @@ const D2A2 = ({ data }) => {
 
   return (
     <div>
-      <Helmet>
-        <title>{`${agencyData.name} ${routeData.displayShortName}: ${routeData.routeLongName}`}</title>
-        <meta property="og:url" content={`https://transit.det.city/d2a2/`} />
-        <meta property="og:type" content={`website`} />
-        <meta
-          property="og:title"
-          content={`${agencyData.name} bus route: ${routeData.displayShortName} ${routeData.routeLongName}`}
-        />
-        <meta
-          property="og:description"
-          content={`${agencyData.name} bus route ${routeData.displayShortName} ${routeData.routeLongName}`}
-        />
-      </Helmet>
-
       <div className="bg-gray-300 dark:bg-zinc-900 mt-4">
         <RouteHeader {...gtfsRoute} agency={null} />
       </div>
@@ -327,3 +312,21 @@ export const query = graphql`
 `;
 
 export default D2A2;
+
+export const Head = ({ data }) => {
+  const agencyName = data.agency?.name || "D2A2";
+  const routeShortName = data.route?.displayShortName || data.route?.shortName || "D2A2";
+  const routeLongName = data.route?.longName || "Detroit to Ann Arbor";
+
+  return (
+    <>
+      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`}</title>
+      <meta name="description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <meta property="og:url" content="https://transit.det.city/d2a2/" />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={`${agencyName} bus route: ${routeShortName} ${routeLongName}`} />
+      <meta property="og:description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <link rel="canonical" href="https://transit.det.city/d2a2/" />
+    </>
+  );
+};

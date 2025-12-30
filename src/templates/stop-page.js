@@ -3,7 +3,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useLiveQuery } from "dexie-react-hooks";
 import { graphql } from "gatsby";
 import React, { useEffect, useState } from "react";
-import { Helmet } from "react-helmet";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopHeader from "../components/StopHeader";
 import StopMap from "../components/StopMap";
@@ -234,22 +233,6 @@ const Stop = ({ data, pageContext }) => {
 
   return (
     <div>
-      <Helmet>
-        <title>{`${agencyData.name} bus stop: ${stopName} (#${stopIdentifier})`}</title>
-        <meta
-          property="og:url"
-          content={`https://transit.det.city/${pageContext.agencySlug}/stop/${stopIdentifier}/`}
-        />
-        <meta property="og:type" content={`website`} />
-        <meta
-          property="og:title"
-          content={`${agencyData.name} bus stop: ${stopName} (#${stopIdentifier})`}
-        />
-        <meta
-          property="og:description"
-          content={`${agencyData.name} bus stop: ${stopName} (#${stopIdentifier})`}
-        />
-      </Helmet>
       <div className="mt-4">
         <AgencySlimHeader agency={agencyData} />
       </div>
@@ -398,3 +381,23 @@ export const query = graphql`
 `;
 
 export default Stop;
+
+export const Head = ({ data, pageContext }) => {
+  const stop = data.postgres?.stop?.[0];
+  const agency = data.postgres?.agencies?.[0];
+  const stopName = stop?.stopName || "";
+  const stopIdentifier = stop?.stopCode || stop?.stopId || "";
+  const agencyName = agency?.agencyName || "";
+
+  return (
+    <>
+      <title>{`${agencyName} bus stop: ${stopName} (#${stopIdentifier})`}</title>
+      <meta name="description" content={`${agencyName} bus stop: ${stopName} (#${stopIdentifier})`} />
+      <meta property="og:url" content={`https://transit.det.city/${pageContext.agencySlug}/stop/${stopIdentifier}/`} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={`${agencyName} bus stop: ${stopName} (#${stopIdentifier})`} />
+      <meta property="og:description" content={`${agencyName} bus stop: ${stopName} (#${stopIdentifier})`} />
+      <link rel="canonical" href={`https://transit.det.city/${pageContext.agencySlug}/stop/${stopIdentifier}/`} />
+    </>
+  );
+};

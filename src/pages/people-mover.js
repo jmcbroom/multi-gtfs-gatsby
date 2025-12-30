@@ -1,6 +1,5 @@
 import { graphql } from "gatsby";
 import React, { useState } from "react";
-import { Helmet } from "react-helmet";
 import PortableText from "react-portable-text";
 import RouteHeader from "../components/RouteHeader";
 import RouteTimepoints from "../components/RouteTimepoints";
@@ -130,20 +129,6 @@ const PeopleMover = ({ data }) => {
 
   return (
     <div>
-      <Helmet>
-        <title>{`${agencyData.name} ${routeData.displayShortName}: ${routeData.routeLongName}`}</title>
-        <meta property="og:url" content={`https://transit.det.city/qline/`} />
-        <meta property="og:type" content={`website`} />
-        <meta
-          property="og:title"
-          content={`${agencyData.name} bus route: ${routeData.displayShortName} ${routeData.routeLongName}`}
-        />
-        <meta
-          property="og:description"
-          content={`${agencyData.name} bus route ${routeData.displayShortName} ${routeData.routeLongName}`}
-        />
-      </Helmet>
-
       <div className="bg-gray-300 dark:bg-zinc-900 mt-4">
         <RouteHeader {...gtfsRoute} agency={null} />
       </div>
@@ -347,3 +332,21 @@ export const query = graphql`
 `;
 
 export default PeopleMover;
+
+export const Head = ({ data }) => {
+  const agencyName = data.agency?.name || "Detroit People Mover";
+  const routeShortName = data.route?.displayShortName || data.route?.shortName || "DPM";
+  const routeLongName = data.route?.longName || "People Mover";
+
+  return (
+    <>
+      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`}</title>
+      <meta name="description" content={`${agencyName} ${routeShortName} ${routeLongName}`} />
+      <meta property="og:url" content="https://transit.det.city/people-mover/" />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={`${agencyName}: ${routeShortName} ${routeLongName}`} />
+      <meta property="og:description" content={`${agencyName} ${routeShortName} ${routeLongName}`} />
+      <link rel="canonical" href="https://transit.det.city/people-mover/" />
+    </>
+  );
+};
