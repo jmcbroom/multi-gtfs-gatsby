@@ -42,7 +42,7 @@ export default function Layout({ children }) {
     <ThemeProvider>
       <div className="fill-page">
         <header className="bg-primary-light dark:bg-primary-dark bg-opacity-80 px-4">
-          <div className="max-w-5xl py-2 mx-auto flex items-center justify-between">
+          <div className="max-w-5xl py-2 mx-auto flex items-center justify-between relative">
             <Link to={`/`}>
               <h1 className="header font-bold text-gray-700 dark:text-gray-300 text-xl m-0">
                 transit

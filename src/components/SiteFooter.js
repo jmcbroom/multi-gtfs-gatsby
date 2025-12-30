@@ -54,7 +54,7 @@ const SiteFooter = ({ data }) => {
         <div className="flex flex-col justify-start gap-4">
           <div className="flex flex-col justify-start gap-2">
             <h3>Other pages</h3>
-          <Link to={`/favorites`}>Favorite stops <FontAwesomeIcon icon={faStar} /></Link>
+            <Link to={`/favorites`}>Favorite stops <FontAwesomeIcon icon={faStar} /></Link>
             <Link to={`/region-map`}>Regional transit map</Link>
             <Link to={`/nearby`}>Transit near me</Link>
           </div>
@@ -68,7 +68,7 @@ const SiteFooter = ({ data }) => {
               target="_blank"
               rel="noreferrer"
             >
-               <GitHubLogoIcon />
+              <GitHubLogoIcon />
               multi-gtfs-gatsby
             </a>
           </div>
@@ -76,13 +76,6 @@ const SiteFooter = ({ data }) => {
             <h3>Other sites</h3>
             <a href="https://isthemetroaccessible.com/" className="flex items-center gap-2">
               is the metro accessible?
-            </a>
-            <a
-              href="http://discord.det.city/"
-              className="flex items-center gap-2"
-            >
-              <DiscordLogoIcon />
-              Detroit Discord / #transit
             </a>
           </div>
         </div>

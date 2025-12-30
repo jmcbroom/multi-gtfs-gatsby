@@ -1,10 +1,10 @@
 import { graphql } from "gatsby";
 import React from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
+import PageHeader from "../components/PageHeader";
 import { createRouteData } from "../util";
 
 import { faStar } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLiveQuery } from "dexie-react-hooks";
 import _ from "lodash";
 import StopCard from "../components/StopCard";
@@ -79,11 +79,8 @@ const FavoritesPage = ({ data }) => {
 
   return (
     <>
-      <div className="my-4 flex items-center justify-normal">
-        <h2 className="mr-2 mb-0 block">Favorite stops & routes</h2>
-        <FontAwesomeIcon icon={faStar} className="ml-2 md:ml-0" />
-      </div>
-      <p className="text-sm m-0 text-gray-700 dark:text-zinc-400 mb-4">
+      <PageHeader title="Favorite stops & routes" icon={faStar} />
+      <p className="text-sm m-0 px-4 text-gray-700 dark:text-zinc-400 mb-4">
         Add stops and routes to your favorites by clicking the star icon on stop and route pages.
       </p>
 

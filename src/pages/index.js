@@ -4,6 +4,7 @@ import PortableText from "react-portable-text";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopCard from "../components/StopCard";
 import RouteCard from "../components/RouteCard";
+import TripPlannerBox from "../components/TripPlannerBox";
 import { createRouteData } from "../util";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlane, faStar } from "@fortawesome/free-solid-svg-icons";
@@ -75,12 +76,17 @@ const IndexPage = ({ data }) => {
   return (
     <div className="py-4 flex flex-col gap-4 md:gap-6">
 
+      {/* Trip planner box */}
+      <div className="px-3 md:px-0">
+        <TripPlannerBox />
+      </div>
+
       {/* favorite stops & routes */}
       {((favoriteStops && favoriteStops.length > 0) || (favoriteRoutes && favoriteRoutes.length > 0)) && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <h2 className="pl-3 md:pl-0 mb-0">Your favorites</h2>
+          <div className="flex items-center gap-2 mb-3 px-3 md:px-0">
             <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+            <h2 className="mb-0">Your favorites</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Array.from(allFavoriteAgencies).map((agencySlug) => {
