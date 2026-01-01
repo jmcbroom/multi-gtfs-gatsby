@@ -1,7 +1,8 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBicycle, faBusSimple, faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { db } from "../db";
+import StopBadge from "./StopBadge";
 
 const addFavoriteStop = (stop, stopType="bus") => {
   if (!db) return;
@@ -41,37 +42,28 @@ const StopHeader = ({
   stopType="bus",
 }) => {
   return (
-    <div className="mb-2 bg-gray-200 dark:bg-zinc-900 flex items-center justify-between">
-      <div className="flex items-center justify-between">
-        <FontAwesomeIcon
-          icon={stopType === "bus" ? faBusSimple : faBicycle}
-          size="lg"
-          className="m-0 p-3 text-gray-500 dark:text-zinc-500 dark:bg-zinc-800 bg-gray-200 mr-2"
-          style={{ backgroundColor: "" }}
-        />
-        <h1 className="text-base font-semibold m-0">{stopName}</h1>
+    <div className="mb-2 bg-gray-200 dark:bg-zinc-900 flex items-center justify-between p-2">
+      <div className="flex items-center gap-1.5 md:gap-2">
+        <h1 className="text-sm md:text-base font-semibold m-0">{stopName}</h1>
+        {stopType === 'bus' && <span className="hidden md:inline"><StopBadge stopId={stopIdentifier} size="medium" /></span>}
+        {stopType === 'bus' && <span className="md:hidden"><StopBadge stopId={stopIdentifier} size="small" /></span>}
       </div>
-      <div className="flex items-center justify-between gap-2 px-2">
-        <FontAwesomeIcon
-          icon={faStar}
-          size="lg"
-          className={
-            isFavoriteStop
-              ? "text-yellow-500 dark:text-yellow-600"
-              : "text-gray-400 dark:text-zinc-600"
+      <FontAwesomeIcon
+        icon={faStar}
+        size="lg"
+        className={
+          isFavoriteStop
+            ? "text-yellow-500 dark:text-yellow-600"
+            : "text-gray-400 dark:text-zinc-600"
+        }
+        onClick={() => {
+          if (isFavoriteStop === false) {
+            addFavoriteStop(indexedStop, stopType);
+          } else {
+            removeFavoriteStop(indexedStop, favoriteStops, stopType);
           }
-          onClick={() => {
-            if (isFavoriteStop === false) {
-              addFavoriteStop(indexedStop, stopType);
-            } else {
-              removeFavoriteStop(indexedStop, favoriteStops, stopType);
-            }
-          }}
-        />
-        {stopType === 'bus' && <span className="text-xs text-gray-500 dark:text-zinc-500 font-mono p-1 bg-gray-300 dark:bg-zinc-700">
-          #{stopIdentifier}
-        </span>}
-      </div>
+        }}
+      />
     </div>
   );
 };
