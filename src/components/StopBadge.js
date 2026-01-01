@@ -34,7 +34,7 @@ const StopBadge = ({ stopId, size = "small", borderColor }) => {
       className={`
         inline-flex items-center font-mono rounded
         ${sizeConfig.container}
-        bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300
+        bg-zinc-300 dark:bg-zinc-600 text-zinc-600 dark:text-zinc-300
         ${borderColor ? "" : "border-transparent"}
       `}
       style={borderStyle}
