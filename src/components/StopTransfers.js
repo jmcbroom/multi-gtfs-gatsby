@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "gatsby";
 import RouteSlim from "./RouteSlim";
 import StopBadge from "./StopBadge";
+import { getStopIdentifier } from "../stopUtils";
 
 const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
   // Get trip directions already served at this stop
@@ -101,32 +102,38 @@ const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
                 link={`/${entry.agency.slug?.current}/route/${entry.route.displayShortName}`}
               />
             </div>
-            <div className="ml-1 space-y-2">
+            <div className="ml-1">
               {Array.from(entry.directions.values())
                 .sort((a, b) => (b.tripCount || 0) - (a.tripCount || 0))
-                .map((dir) => {
-                  const stopIdentifier = dir.stop.stopCode || dir.stop.stopId;
-                  const directionText = dir.directionDescription
-                    ? `${dir.directionDescription.replace("bound", "")} to ${dir.directionHeadsign || "?"}`
-                    : dir.directionHeadsign
-                    ? `to ${dir.directionHeadsign}`
-                    : `Direction ${dir.directionId}`;
+                .map((dir, idx) => {
+                  const stopIdentifier = getStopIdentifier(dir.stop, entry.agency);
 
                   return (
-                    <div key={dir.directionId} className="flex items-start justify-between gap-2">
-                      <div className="text-xs text-gray-500 dark:text-zinc-500 w-[40%] flex-shrink-0">
-                        {directionText}
+                    <React.Fragment key={dir.directionId}>
+                      {idx > 0 && <hr className="border-gray-300 dark:border-zinc-700 ml-0 mr-12 my-1" />}
+                      <div className="flex items-center sm:justify-start gap-2 py-1">
+                      <div className="text-xs text-gray-500 dark:text-zinc-500 w-[45%] flex-shrink-0 leading-tight">
+                        {dir.directionDescription && (
+                          <div className="text-xs"><span className="font-semibold">{dir.directionDescription}</span></div>
+                        )}
+                        {dir.directionHeadsign && (
+                          <div>to <span className="font-regular">{dir.directionHeadsign}</span></div>
+                        )}
+                        {!dir.directionDescription && !dir.directionHeadsign && (
+                          <div>Direction {dir.directionId}</div>
+                        )}
                       </div>
                       <Link
                         to={`/${dir.stop.agencySlug}/stop/${stopIdentifier}`}
-                        className="flex flex-col items-end hover:text-blue-500 text-right"
+                        className="flex flex-col md:flex-row md:items-center md:gap-2 items-start hover:text-blue-500 text-right"
                       >
                         <span className="font-medium text-xs text-gray-700 dark:text-zinc-300">
                           {dir.stop.stopName}
                         </span>
                         <StopBadge stopId={stopIdentifier} size="xs" borderColor={entry.agency.color?.hex} />
                       </Link>
-                    </div>
+                      </div>
+                    </React.Fragment>
                   );
                 })}
             </div>
