@@ -31,10 +31,12 @@ const RouteMap = ({
     return null;
   }
 
-  let mapInitialBbox =
-    routeFeatureCollection.features.length > 0
-      ? bbox(stopsFeatureCollection)
-      : bbox(stopsFeatureCollection);
+  // Compute bbox from both route and stops combined
+  const combinedFc = {
+    type: "FeatureCollection",
+    features: [...routeFeatureCollection.features, ...stopsFeatureCollection.features]
+  };
+  let mapInitialBbox = bbox(combinedFc);
 
   let stopProperty =
     ["smart", "theride"].indexOf(agency.slug.current) > -1
