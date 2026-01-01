@@ -9,7 +9,6 @@ import StopTimeLabel from "./StopTimeLabel";
 import RouteSlim from "./RouteSlim";
 
 const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
-
   let timesByRoute = _.groupBy(times, "trip.route.routeShortName");
 
   Object.keys(timesByRoute).forEach((key) => {
@@ -153,16 +152,20 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                           : `weekdays`
                         }`}
                     </span>
-                    <ul className="columns-4 sm:columns-5 md:columns-5 lg:columns-6 gap-2 list-none ml-0">
+                    <ul
+                      className="columns-4 sm:columns-5 md:columns-6 gap-2 text-center list-none ml-0"
+                      style={{ columnRule: '1px solid rgb(234 233 229)' }}
+                    >
                       {timesByRoute[route.routeShortName][service].map((trip) => (
                         <li
-                          className="py-0.5 tabular"
+                          className="py-0.5 tabular break-inside-avoid"
                           key={trip.tripId}
                         >
                           <StopTimeLabel arrivalTime={trip.arrivalTime} />
                         </li>
                       ))}
                     </ul>
+                    <p className="text-xs text-gray-400 dark:text-zinc-500 mt-2">PM times shown in <strong>bold.</strong></p>
                   </div>
                 </AccordionContent>
               </Accordion.Item>
