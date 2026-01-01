@@ -174,3 +174,9 @@ footer {
   @apply md:pl-2;
   @apply my-3;
 }
+
+/* Progress bar animation for countdown */
+@keyframes progressShrink {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}

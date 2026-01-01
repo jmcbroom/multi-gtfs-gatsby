@@ -1,31 +1,7 @@
 const rp = require('request-promise');
+const { isAllowedOrigin, getCorsOrigin } = require('./lib/cors');
 
 const OTP_GRAPHQL_ENDPOINT = 'https://otp.det.city/otp/gtfs/v1';
-
-// Allowed origins for the API
-const ALLOWED_ORIGINS = [
-  'https://transit.det.city',
-  'http://localhost:8888',
-  'http://localhost:8000',
-];
-
-// Check if request is from allowed origin
-function isAllowedOrigin(event) {
-  const origin = event.headers.origin || event.headers.Origin;
-  const referer = event.headers.referer || event.headers.Referer;
-
-  // Check origin header
-  if (origin && ALLOWED_ORIGINS.some(allowed => origin.startsWith(allowed))) {
-    return true;
-  }
-
-  // Check referer header as fallback
-  if (referer && ALLOWED_ORIGINS.some(allowed => referer.startsWith(allowed))) {
-    return true;
-  }
-
-  return false;
-}
 
 // Using the 'plan' query which supports arriveBy
 const PLAN_QUERY = `
@@ -71,9 +47,7 @@ exports.handler = async function (event, context, callback) {
     });
   }
 
-  // Get the origin for CORS response
-  const origin = event.headers.origin || event.headers.Origin || 'https://transit.det.city';
-  const corsOrigin = ALLOWED_ORIGINS.find(allowed => origin.startsWith(allowed)) || ALLOWED_ORIGINS[0];
+  const corsOrigin = getCorsOrigin(event);
 
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {

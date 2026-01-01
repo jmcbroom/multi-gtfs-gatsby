@@ -1,13 +1,13 @@
 import bbox from "@turf/bbox";
-import MapboxGL from "mapbox-gl/dist/mapbox-gl";
-import Mapbox, { NavigationControl, Source, Layer } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useMemo } from "react";
-import { useTheme } from "../hooks/ThemeContext";
+import MapboxGL from "mapbox-gl/dist/mapbox-gl";
+import Mapbox, { NavigationControl, Source, Layer } from "react-map-gl";
+import { useTheme } from "../../hooks/ThemeContext";
 import _ from "lodash";
-import dark from "../styles/mapDark.json";
-import light from "../styles/mapLight.json";
-import { legsToGeoJSON, createEndpointMarkers, createStopMarkers } from "../tripPlannerUtils";
+import dark from "../../styles/mapDark.json";
+import light from "../../styles/mapLight.json";
+import { legsToGeoJSON, createEndpointMarkers, createStopMarkers } from "../../tripPlannerUtils";
 
 const TripMap = ({
   itinerary, // Backward compatibility
@@ -15,6 +15,7 @@ const TripMap = ({
   selectedIndex = null,
   hoveredIndex = null, // Index of the itinerary being hovered in the list
   hoveredLegIndex = null, // Index of the leg being hovered in the details
+  focusedLegIndex = null, // Index of the leg to zoom/focus on (from stepper)
   origin,
   destination,
   onClick,
@@ -125,19 +126,40 @@ const TripMap = ({
     };
   }, [effectiveItineraries, focusedItinerary, isOverview, origin, destination, hoveredIndex]);
 
-  // Calculate bounds
-  const mapBounds = useMemo(() => {
+  // Calculate bounds for the full trip
+  const fullBounds = useMemo(() => {
     if (legsFc.features.length > 0) return bbox(legsFc);
     if (endpointsFc.features.length >= 2) return bbox(endpointsFc);
     return null;
   }, [legsFc, endpointsFc]);
 
-  // Handle bounds updates
-  useEffect(() => {
-    if (map.current && mapBounds) {
-      map.current.fitBounds(mapBounds, { padding: 50, maxZoom: 16 });
+  // Calculate bounds for a focused leg
+  const focusedLegBounds = useMemo(() => {
+    if (focusedLegIndex === null || !focusedItinerary?.legs) return null;
+    const leg = focusedItinerary.legs[focusedLegIndex];
+    if (!leg) return null;
+
+    // Create a simple feature collection for this leg
+    const legFc = legsToGeoJSON([leg]);
+    if (legFc.features.length > 0) {
+      return bbox(legFc);
     }
-  }, [mapBounds]); // Trigger when bounds change (e.g. new search or selection change)
+    return null;
+  }, [focusedLegIndex, focusedItinerary]);
+
+  // Handle bounds updates - prioritize focused leg bounds
+  useEffect(() => {
+    if (map.current && focusedLegBounds) {
+      map.current.fitBounds(focusedLegBounds, { padding: 80, maxZoom: 17 });
+    }
+  }, [focusedLegBounds]);
+
+  // Handle full bounds updates (when no leg is focused)
+  useEffect(() => {
+    if (map.current && fullBounds && focusedLegIndex === null) {
+      map.current.fitBounds(fullBounds, { padding: 50, maxZoom: 16 });
+    }
+  }, [fullBounds, focusedLegIndex]);
 
   if (!theme) return null;
 
@@ -202,12 +224,12 @@ const TripMap = ({
         {/* ----------------- SINGLE VIEW LAYERS ----------------- */}
         {!isOverview && (
           <>
-            {/* Glow for single view leg hover */}
+            {/* Glow for single view leg hover or focus */}
             <Source id="all-legs" type="geojson" data={legsFc}>
               <Layer
                 id="all-legs-glow"
                 type="line"
-                filter={['==', ['id'], hoveredLegIndex ?? -1]}
+                filter={['==', ['id'], focusedLegIndex ?? hoveredLegIndex ?? -1]}
                 paint={{
                   "line-color": "#facc15",
                   "line-width": 22,

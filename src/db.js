@@ -1,10 +1,16 @@
 // db.js
 import Dexie from 'dexie';
 
-export const db = new Dexie('transit-det-city');
+let db = null;
 
-db.version(6).stores({
-  stops: '++id, agency, stop_id', // Primary key and indexed props
-  bikeshare: '++id, agency, stop_id',
-  routes: '++id, agency, route_id',
-});
+if (typeof window !== 'undefined') {
+  db = new Dexie('transit-det-city');
+
+  db.version(6).stores({
+    stops: '++id, agency, stop_id', // Primary key and indexed props
+    bikeshare: '++id, agency, stop_id',
+    routes: '++id, agency, route_id',
+  });
+}
+
+export { db };

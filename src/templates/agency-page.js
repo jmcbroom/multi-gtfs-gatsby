@@ -69,7 +69,8 @@ const Agency = ({ data, pageContext, location }) => {
           displayShortName: route.displayShortName,
           routeTextColor: route.routeTextColor,
           mapPriority: route.mapPriority,
-          direction: direction.directionDescription,
+          directionDescription: direction.directionDescription,
+          directionHeadsign: direction.directionHeadsign,
           directionId: direction.directionId,
         };
         
@@ -81,6 +82,28 @@ const Agency = ({ data, pageContext, location }) => {
   let allRouteFc = {
     type: "FeatureCollection",
     features: allRouteFeatures,
+  };
+
+  // Create stops feature collection for the system map
+  // Use the agency's stopIdentifierField to determine the correct identifier for URLs
+  let stopIdentifierField = sanityAgency.stopIdentifierField || "stopCode";
+  let stopsFc = {
+    type: "FeatureCollection",
+    features: data.postgres.stops.map((stop) => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [stop.stopLon, stop.stopLat],
+      },
+      properties: {
+        stopId: stop.stopId,
+        stopCode: stop[stopIdentifierField] || stop.stopCode || stop.stopId,
+        stopName: stop.stopName,
+        offset: [0, 0.8],
+        anchor: "top",
+        justify: "center",
+      },
+    })),
   };
 
   // generate human-readable text for fare info
@@ -170,12 +193,11 @@ const Agency = ({ data, pageContext, location }) => {
               <h4 className="grayHeader">List of routes</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 py-4 px-2">
                 {allRoutes.map((r) => (
-                  <Link
-                    to={`/${pageContext.agencySlug}/route/${r.displayShortName}`}
+                  <RouteSlim
                     key={r.displayShortName}
-                  >
-                    <RouteSlim {...r} />
-                  </Link>
+                    {...r}
+                    link={`/${pageContext.agencySlug}/route/${r.displayShortName}`}
+                  />
                 ))}
               </div>
             </div>
@@ -206,7 +228,7 @@ const Agency = ({ data, pageContext, location }) => {
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="map">
           <p className="grayHeader">System map</p>
-          <AgencyMap agency={agencyData} routesFc={allRouteFc} />
+          <AgencyMap agency={agencyData} routesFc={allRouteFc} stopsFc={stopsFc} />
         </Tabs.Content>
       </Tabs.Root>
     </div>
@@ -264,6 +286,13 @@ export const query = graphql`
           currencyType
         }
       }
+      stops: stopsList(condition: { feedIndex: $feedIndex }) {
+        stopId
+        stopCode
+        stopName
+        stopLat
+        stopLon
+      }
     }
     allSanityRoute(
       filter: { agency: { slug: { current: { eq: $agencySlug } } } }
@@ -295,6 +324,8 @@ export const query = graphql`
         node {
           name
           currentFeedIndex
+          gtfsRtVehiclePositions
+          stopIdentifierField
           color {
             hex
           }

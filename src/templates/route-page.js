@@ -1,6 +1,7 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { graphql, Link } from "gatsby";
 import React, { useState, useEffect } from "react";
+import { useTick } from "../hooks/useTick";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import DirectionPicker from "../components/DirectionPicker";
 import RouteHeader from "../components/RouteHeader";
@@ -24,8 +25,9 @@ import {
   getTripsByServiceAndDirection,
   getTripsByServiceDay,
 } from "../util";
+import { getStopIdentifier } from "../stopUtils";
 
-const Route = ({ data, pageContext }) => {
+const Route = ({ data, pageContext, location }) => {
   let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.agency;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
@@ -48,8 +50,8 @@ const Route = ({ data, pageContext }) => {
     // set timepoint = 1 for each stopTime that is a timepoint
     trips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
-      trip.stopTimes.forEach((st, idx) => {
-        if (timepoints.includes(st.stop[agencyData.stopIdentifierField])) {
+      trip.stopTimes.forEach((st) => {
+        if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
           st.timepoint = 1;
         }
       });
@@ -58,8 +60,8 @@ const Route = ({ data, pageContext }) => {
 
     longTrips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
-      trip.stopTimes.forEach((st, idx) => {
-        if (timepoints.includes(st.stop[agencyData.stopIdentifierField])) {
+      trip.stopTimes.forEach((st) => {
+        if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
           st.timepoint = 1;
         }
       });
@@ -90,12 +92,20 @@ const Route = ({ data, pageContext }) => {
   }
 
   let routeData = createRouteData(gtfsRoute, sanityRoute);
-  const [direction, setDirection] = useState(
-    Object.keys(headsignsByDirectionId)[0]
-  );
 
+  // Parse URL parameters for initial state
+  const urlParams = typeof window !== "undefined" ? new URLSearchParams(location?.search || "") : null;
+  const urlDirection = urlParams?.get("direction");
+  const urlDay = urlParams?.get("day");
+
+  // Validate URL direction parameter
+  const validDirections = Object.keys(headsignsByDirectionId);
+  const initialDirection = urlDirection && validDirections.includes(urlDirection)
+    ? urlDirection
+    : validDirections[0];
+
+  // Determine default service based on day of week
   let defaultService = "weekday";
-
   if (dayOfWeek() === "sunday" && tripsByServiceDay.sunday.length > 0) {
     defaultService = "sunday";
   }
@@ -103,21 +113,32 @@ const Route = ({ data, pageContext }) => {
     defaultService = "saturday";
   }
 
-  const [service, setService] = useState(defaultService);
+  // Validate URL day parameter
+  const validServices = ["weekday", "saturday", "sunday"];
+  const initialService = urlDay && validServices.includes(urlDay) && tripsByServiceDay[urlDay]?.length > 0
+    ? urlDay
+    : defaultService;
 
-  let [now, setNow] = useState(new Date());
+  const [direction, setDirection] = useState(initialDirection);
+  const [service, setService] = useState(initialService);
+
+  // Update URL when direction or service changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    params.set("direction", direction);
+    params.set("day", service);
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, "", newUrl);
+  }, [direction, service]);
+
+  const now = useTick(sanityAgency.realTimeEnabled);
 
   let [patterns, setPatterns] = useState(null);
   let [vehicles, setVehicles] = useState(null);
   let [predictions, setPredictions] = useState(null);
-
-  useEffect(() => {
-    if (!sanityAgency.realTimeEnabled) return;
-    let tick = setInterval(() => {
-      setNow(new Date());
-    }, 30000);
-    return () => clearInterval(tick);
-  }, [sanityAgency.realTimeEnabled]);
 
   useEffect(() => {
     if (!sanityAgency.realTimeEnabled) return;
@@ -207,7 +228,7 @@ const Route = ({ data, pageContext }) => {
 
   return (
     <div>
-      <div className="mt-4">
+      <div className="mt-2 md:mt-4">
         <AgencySlimHeader agency={agencyData} />
       </div>
 
@@ -315,7 +336,7 @@ const Route = ({ data, pageContext }) => {
           )}
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="schedule">
-          <div className="bg-gray-100 dark:bg-zinc-900 p-4 md:py-6 flex flex-col gap-4 md:gap-8">
+          <div className="bg-gray-100 dark:bg-zinc-900 px-3 py-2 md:p-4 md:py-6 flex flex-col gap-2 md:gap-6">
             <DirectionPicker
               directions={headsignsByDirectionId}
               {...{ direction, setDirection }}

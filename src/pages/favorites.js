@@ -1,18 +1,19 @@
 import { graphql } from "gatsby";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import PageHeader from "../components/PageHeader";
 import { createRouteData } from "../util";
-
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { useLiveQuery } from "dexie-react-hooks";
 import _ from "lodash";
 import StopCard from "../components/StopCard";
 import RouteCard from "../components/RouteCard";
 import BikeshareCard from "../components/Bikeshare/BikeshareCard";
+import NearbyStopsList from "../components/NearbyStopsList";
 import { db } from "../db";
 import { useSanityAgencies } from "../hooks/useSanityAgencies";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
+
 /**
  * The favorites page.
  * @param {*} data: GraphQL query
@@ -26,9 +27,20 @@ const FavoritesPage = ({ data }) => {
   sanityRoutes = sanityRoutes.edges.map((e) => e.node);
 
   // get the favorite stops and routes
-  const favoriteStops = useLiveQuery(() => db.stops.toArray());
-  const favoriteRoutes = useLiveQuery(() => db.routes.toArray());
-  const favoriteBikeshareStops = useLiveQuery(() => db.bikeshare.toArray());
+  const favoriteStops = useLiveQuery(() => db?.stops?.toArray());
+  const favoriteRoutes = useLiveQuery(() => db?.routes?.toArray());
+  const favoriteBikeshareStops = useLiveQuery(() => db?.bikeshare?.toArray());
+
+  // Track if we should show nearby stops (when user started with no favorites)
+  const [showNearbyStops, setShowNearbyStops] = useState(null);
+
+  // Set initial state based on whether user had favorites when page loaded
+  useEffect(() => {
+    if (showNearbyStops === null && favoriteStops !== undefined) {
+      const hadNoFavorites = !favoriteStops?.length && !favoriteRoutes?.length && !favoriteBikeshareStops?.length;
+      setShowNearbyStops(hadNoFavorites);
+    }
+  }, [favoriteStops, favoriteRoutes, favoriteBikeshareStops, showNearbyStops]);
 
   let merged = sanityAgencies.map((sa) => {
     let filtered = agencies.filter(
@@ -39,7 +51,8 @@ const FavoritesPage = ({ data }) => {
 
   // loop thru agencies
   merged.forEach((a) => {
-    // loop thru those agencies' routes
+    // loop thru those agencies' routes (if they exist)
+    if (!a.routes) return;
     a.routes.forEach((r) => {
       r.agencyData = a;
 
@@ -77,23 +90,46 @@ const FavoritesPage = ({ data }) => {
     ...Object.keys(groupedRoutes),
   ]);
 
+  // Delete handlers
+  const deleteStop = async (stopId) => {
+    if (!db) return;
+    await db.stops.delete(stopId);
+  };
+
+  const deleteRoute = async (routeId) => {
+    if (!db) return;
+    await db.routes.delete(routeId);
+  };
+
+  const deleteBikeshare = async (stationId) => {
+    if (!db) return;
+    await db.bikeshare.delete(stationId);
+  };
+
   return (
     <>
       <PageHeader title="Favorite stops & routes" icon={faStar} />
-      <p className="text-sm m-0 px-4 text-gray-700 dark:text-zinc-400 mb-4">
-        Add stops and routes to your favorites by clicking the star icon on stop and route pages.
-      </p>
+
+      {/* Show nearby stops list when user started with no favorites */}
+      {showNearbyStops && (
+        <div className="mb-6">
+          <NearbyStopsList
+            sanityAgencies={sanityAgencies}
+            favoriteStops={favoriteStops || []}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 
         {Array.from(allFavoriteAgencies).map((agencySlug) => {
           let agency = merged.filter((a) => a.slug.current === agencySlug)[0];
-          
+
           if (!agency) return null;
-          
+
           let hasStops = groupedStops[agencySlug]?.length > 0;
           let hasRoutes = groupedRoutes[agencySlug]?.length > 0;
-          
+
           if (!hasStops && !hasRoutes) return null;
 
           return (
@@ -107,11 +143,16 @@ const FavoritesPage = ({ data }) => {
                       Favorite Routes
                     </div>
                     {groupedRoutes[agencySlug].map((route) => (
-                      <RouteCard route={route} agency={agency} key={route.id} />
+                      <RouteCard
+                        key={route.id}
+                        route={route}
+                        agency={agency}
+                        onDelete={() => deleteRoute(route.id)}
+                      />
                     ))}
                   </div>
                 )}
-                
+
                 {/* Show favorite stops */}
                 {hasStops && (
                   <div>
@@ -119,7 +160,13 @@ const FavoritesPage = ({ data }) => {
                       Favorite Stops
                     </div>
                     {groupedStops[agencySlug].map((stop) => (
-                      <StopCard stop={stop} agency={agency} key={stop.id} routeDirections={stop.tripDirections} />
+                      <StopCard
+                        key={stop.id}
+                        stop={stop}
+                        agency={agency}
+                        routeDirections={stop.tripDirections}
+                        onDelete={() => deleteStop(stop.id)}
+                      />
                     ))}
                   </div>
                 )}
@@ -138,9 +185,10 @@ const FavoritesPage = ({ data }) => {
                 </div>
                 {bikeshareGrouped[key].map((station) => (
                   <BikeshareCard
+                    key={station.id}
                     station={station}
                     agency={station.agency}
-                    key={station.id}
+                    onDelete={() => deleteBikeshare(station.id)}
                   />
                 ))}
               </div>

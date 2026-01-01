@@ -104,33 +104,56 @@ const Bikeshare = ({ data, pageContext, location }) => {
         </Tabs.Content>
 
         <Tabs.Content className="tabContent" value="stations">
-          <h2>Stations</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {stationStatus && createStationsFc(stations, stationStatus).features?.map((station: any) => {
-              return (
-                <div key={station.id} className="bg-gray-100 dark:bg-zinc-700">
-                  <Link
-                    to={`/${bikeshare.slug.current}/station/${station.id}`}
-                  >
-                    <h4 className="m-0 text-xs">{station.properties.name.replace("*", "")}</h4>
-                  </Link>
-                  <div className="flex justify-evenly gap-1 py-1">
-                    <div className="bg-gray-100 dark:bg-zinc-700 flex justify-start px-2 gap-2 items-center py-1">
-                      <FontAwesomeIcon icon={faBicycle} className="text-slate-500 dark:text-zinc-300" />
-                      <span className="font-semibold text-xs dark:text-zinc-300">{station.properties.status.num_bikes_available} bikes</span>
-                    </div>
-                    <div className="bg-gray-100 dark:bg-zinc-700 flex justify-start px-2 gap-2 items-center py-1">
-                      <FontAwesomeIcon icon={faBolt} className="text-slate-500 dark:text-zinc-300" />
-                      <span className="font-semibold text-xs dark:text-zinc-300">{station.properties.status.vehicle_types_available.filter(v => v.vehicle_type_id !== 'ICONIC').map(v => v.count).reduce((a,b) => a + b)} e-bikes</span>
-                    </div>
-                    <div className="bg-gray-100 dark:bg-zinc-700 flex justify-start px-2 gap-2 items-center py-1">
-                      <FontAwesomeIcon icon={faSignInAlt} className="text-slate-400 dark:text-zinc-400" />
-                      <span className="font-regular text-xs text-gray-500 dark:text-zinc-400">{station.properties.status.num_docks_available} open docks</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="px-3 py-2">
+            <p className="text-sm text-gray-500 dark:text-zinc-400 mb-3">
+              {stationStatus ? `${stations.length} stations` : "Loading stations..."}
+            </p>
+            <div className="flex flex-col gap-2">
+              {stationStatus && createStationsFc(stations, stationStatus).features
+                ?.sort((a: any, b: any) => b.properties.status.num_bikes_available - a.properties.status.num_bikes_available)
+                .map((station: any) => {
+                  const bikesAvailable = station.properties.status.num_bikes_available;
+                  const ebikesAvailable = station.properties.status.vehicle_types_available
+                    .filter((v: any) => v.vehicle_type_id !== 'ICONIC')
+                    .map((v: any) => v.count)
+                    .reduce((a: number, b: number) => a + b, 0);
+                  const docksAvailable = station.properties.status.num_docks_available;
+
+                  // Color indicator based on availability
+                  const availabilityColor = bikesAvailable === 0
+                    ? "bg-red-400 dark:bg-red-600"
+                    : bikesAvailable <= 3
+                      ? "bg-yellow-400 dark:bg-yellow-600"
+                      : "bg-green-400 dark:bg-green-600";
+
+                  return (
+                    <Link
+                      key={station.id}
+                      to={`/${bikeshare.slug.current}/station/${station.id}`}
+                      className="flex items-center gap-3 py-2 px-3 bg-white dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-sm transition-all"
+                    >
+                      <div className={`w-2 h-8 rounded-full ${availabilityColor} flex-shrink-0`} />
+                      <div className="flex-grow min-w-0">
+                        <h4 className="m-0 text-sm font-medium truncate">{station.properties.name.replace("*", "")}</h4>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs flex-shrink-0">
+                        <div className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faBicycle} className="text-gray-400 dark:text-zinc-500" />
+                          <span className="font-semibold tabular-nums">{bikesAvailable}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <FontAwesomeIcon icon={faBolt} className="text-yellow-500 dark:text-yellow-400" />
+                          <span className="font-semibold tabular-nums">{ebikesAvailable}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-400 dark:text-zinc-500">
+                          <FontAwesomeIcon icon={faLockOpen} />
+                          <span className="tabular-nums">{docksAvailable}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+            </div>
           </div>
         </Tabs.Content>
 

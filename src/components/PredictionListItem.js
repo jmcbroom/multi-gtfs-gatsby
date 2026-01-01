@@ -35,49 +35,56 @@ const PredictionListItem = ({
   direction,
   vehicle,
 }) => {
+  const content = (
+    <div className="flex items-center justify-between gap-2 flex-grow">
+      <div className="flex items-center justify-between gap-2 w-full flex-grow">
+        <RouteSlim
+          {...{
+            routeShortName,
+            displayShortName,
+            routeLongName,
+            routeColor,
+            routeTextColor,
+            agency,
+            direction,
+          }}
+          size="small"
+        />
+        <div className="flex flex-col justify-end">
+          {predictionText(prediction.prdctdn)}
+          <span className="text-xs block text-right mr-2 text-gray-400 -mt-1">
+            {prediction.prdctdn === "DUE" ? "arriving" : "away"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
+  // If no vehicle, show without accordion/dropdown
+  if (!vehicle) {
+    return (
+      <div className="AccordionItem py-3 px-2 flex items-center justify-between">
+        {content}
+      </div>
+    );
+  }
+
+  // With vehicle, show accordion with dropdown
   return (
     <Accordion.Item className="AccordionItem" value={prediction.vid}>
       <AccordionTrigger>
-        <div className="flex items-center justify-between gap-2 flex-grow">
-          <div className="flex items-center justify-between gap-2 w-full flex-grow">
-            <RouteSlim
-              {...{
-                routeShortName,
-                displayShortName,
-                routeLongName,
-                routeColor,
-                routeTextColor,
-                agency,
-                direction,
-              }}
-              size="small"
-            />
-            <div className="flex flex-col justify-end">
-              {predictionText(prediction.prdctdn)}
-              <span className="text-xs block text-right mr-2 text-gray-400 -mt-1">
-                {prediction.prdctdn === "DUE" ? "arriving" : "away"}
-              </span>
-            </div>
-          </div>
-        </div>
+        {content}
       </AccordionTrigger>
       <AccordionContent>
-        {vehicle && (
-          <div className="flex items-center justify-between text-sm text-gray-700 dark:text-zinc-400 pt-2">
-            <span>
-              arriving at{" "}
-              <span className="font-semibold">
-                {dayjs(prediction.prdtm, "YYYYMMDD HH:MM").format("h:mm a")}
-              </span>
+        <div className="flex items-center justify-between text-sm text-gray-700 dark:text-zinc-400 pt-2">
+          <span>
+            arriving at{" "}
+            <span className="font-semibold">
+              {dayjs(prediction.prdtm, "YYYYMMDD HH:MM").format("h:mm a")}
             </span>
-            <VehicleBadge busNumber={vehicle.vid} />
-          </div>
-        )}
-        {!vehicle && (
-          <span className="text-gray-600 dark:text-zinc-500 text-xs">
-            No vehicle information available.
           </span>
-        )}
+          <VehicleBadge busNumber={vehicle.vid} />
+        </div>
       </AccordionContent>
     </Accordion.Item>
   );

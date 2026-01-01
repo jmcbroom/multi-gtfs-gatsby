@@ -1,91 +1,137 @@
 import React from "react";
-
-import _ from "lodash";
-import StopCard from "./StopCard";
+import { Link } from "gatsby";
+import RouteSlim from "./RouteSlim";
+import StopBadge from "./StopBadge";
 
 const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
-  // filter out stops that have the same trip directions as the current stop
+  // Get trip directions already served at this stop
+  const currentTripDirections = new Set(
+    stop.tripDirections?.map((td) => `${td.routeId}-${td.directionId}`) || []
+  );
 
-  nearbyStops = nearbyStops.filter((nearbyStop) => {
-    return (
-      JSON.stringify(nearbyStop.tripDirections) !=
-      JSON.stringify(stop.tripDirections)
+  // Build a map of route -> directions -> stops
+  const routeMap = new Map();
+
+  for (const nearbyStop of nearbyStops) {
+    const agency = agencies.find(
+      (a) => a.currentFeedIndex === nearbyStop.feedIndex
     );
-  });
+    if (!agency) continue;
 
-  let tripDirectionsSeen = stop.tripDirections?.map(td => JSON.stringify(td)) || []
-  let transferStops = [];
+    for (const td of nearbyStop.tripDirections) {
+      const key = `${td.routeId}-${td.directionId}`;
 
-  for (let nearbyStop of nearbyStops) {
-    let add = false;
+      // Skip if this direction is already at the current stop
+      if (currentTripDirections.has(key)) continue;
 
-    for (let tripDirection of nearbyStop.tripDirections) {
-      if (!tripDirectionsSeen.includes(JSON.stringify(tripDirection))) {
-        add = true;
-        tripDirectionsSeen.push(JSON.stringify(tripDirection));
+      // Find the matching route from Sanity
+      const matchingRoute = routes.find(
+        (rt) =>
+          rt.shortName === td.routeId &&
+          rt.agency.currentFeedIndex === nearbyStop.feedIndex
+      );
+      if (!matchingRoute) continue;
+
+      // Find direction info
+      const directionInfo = matchingRoute.directions?.find(
+        (d) => d.directionId === td.directionId
+      );
+
+      const routeKey = `${nearbyStop.feedIndex}-${td.routeId}`;
+
+      if (!routeMap.has(routeKey)) {
+        routeMap.set(routeKey, {
+          route: {
+            displayShortName: matchingRoute.displayShortName || matchingRoute.shortName,
+            routeShortName: matchingRoute.shortName,
+            routeLongName: matchingRoute.longName,
+            routeColor: matchingRoute.color?.hex || "#666",
+            routeTextColor: matchingRoute.textColor?.hex || "#fff",
+          },
+          agency,
+          directions: new Map(),
+        });
+      }
+
+      const routeEntry = routeMap.get(routeKey);
+      const dirKey = `${td.directionId}`;
+
+      // Only add if we haven't seen this direction yet (first stop wins)
+      if (!routeEntry.directions.has(dirKey)) {
+        routeEntry.directions.set(dirKey, {
+          directionId: td.directionId,
+          directionDescription: directionInfo?.directionDescription,
+          directionHeadsign: directionInfo?.directionHeadsign,
+          tripCount: td.tripCount,
+          stop: {
+            stopId: nearbyStop.stopId,
+            stopCode: nearbyStop.stopCode,
+            stopName: nearbyStop.stopName,
+            agencySlug: agency.slug?.current,
+          },
+        });
       }
     }
+  }
 
-    if (add) {
-      transferStops.push(nearbyStop);
-    }
+  // Convert to array and sort by route name
+  const routeEntries = Array.from(routeMap.values()).sort((a, b) => {
+    const aNum = parseInt(a.route.routeShortName) || 999;
+    const bNum = parseInt(b.route.routeShortName) || 999;
+    return aNum - bNum;
+  });
 
+  if (routeEntries.length === 0) {
+    return null;
   }
 
   return (
     <div>
-      <h4>Nearby transfer stops</h4>
+      <h4>Nearby transfers</h4>
       <div className="max-h-96 overflow-auto">
-        {transferStops.map((nearbyStop, idx) => {
-          nearbyStop.agency = agencies.find(
-            (a) => a.currentFeedIndex === nearbyStop.feedIndex
-          );
+        {routeEntries.map((entry) => (
+          <div
+            key={`${entry.agency.currentFeedIndex}-${entry.route.routeShortName}`}
+            className="bg-gray-100 dark:bg-zinc-900 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none p-2"
+          >
+            <div className="mb-1.5">
+              <RouteSlim
+                {...entry.route}
+                size="xs"
+                link={`/${entry.agency.slug?.current}/route/${entry.route.displayShortName}`}
+              />
+            </div>
+            <div className="ml-1 space-y-2">
+              {Array.from(entry.directions.values())
+                .sort((a, b) => (b.tripCount || 0) - (a.tripCount || 0))
+                .map((dir) => {
+                  const stopIdentifier = dir.stop.stopCode || dir.stop.stopId;
+                  const directionText = dir.directionDescription
+                    ? `${dir.directionDescription.replace("bound", "")} to ${dir.directionHeadsign || "?"}`
+                    : dir.directionHeadsign
+                    ? `to ${dir.directionHeadsign}`
+                    : `Direction ${dir.directionId}`;
 
-          nearbyStop.agency.agencySlug = nearbyStop.agency.slug.current;
-
-          nearbyStop.routes = [];
-
-          for (let tripDirection of _.sortBy(nearbyStop.tripDirections, (td) => td.tripCount).reverse()) {
-
-            delete tripDirection.tripCount;
-
-            // find the trip direction in the previous iterations of the loop and exclude display!
-            let directionsSeen = transferStops.slice(0, idx).map(td => td.tripDirections).flat().map(td => JSON.stringify(td));
-            if (directionsSeen.includes(JSON.stringify(tripDirection)) || stop.tripDirections?.map(td => delete td.tripCount && JSON.stringify(td)).includes(JSON.stringify(tripDirection))) {
-              continue;
-            }
-
-            // otherwise, it's "new" and can be displayed.
-            let matchingRoute = routes.find(
-              (rt) =>
-                rt.shortName === tripDirection.routeId &&
-                rt.agency.currentFeedIndex === nearbyStop.feedIndex
-            );
-
-            if (matchingRoute && !directionsSeen.includes(JSON.stringify(tripDirection))) {
-              matchingRoute.routeColor = `${matchingRoute.color.hex}`;
-              matchingRoute.routeTextColor = `${matchingRoute.textColor.hex}`;
-              matchingRoute.routeLongName = matchingRoute.longName;
-              nearbyStop.routes.push(matchingRoute);
-            }
-
-          }
-
-          nearbyStop.times = [];
-
-          if (nearbyStop.routes.length == 0) {
-            return;
-          }
-
-          return (
-            <StopCard
-              key={JSON.stringify(nearbyStop)}
-              stop={nearbyStop}
-              agency={nearbyStop.agency}
-              routeDirections={nearbyStop.tripDirections}
-            />
-          );
-        })}
+                  return (
+                    <div key={dir.directionId} className="flex items-start justify-between gap-2">
+                      <div className="text-xs text-gray-500 dark:text-zinc-500 w-[40%] flex-shrink-0">
+                        {directionText}
+                      </div>
+                      <Link
+                        to={`/${dir.stop.agencySlug}/stop/${stopIdentifier}`}
+                        className="flex flex-col items-end hover:text-blue-500 text-right"
+                      >
+                        <span className="font-medium text-xs text-gray-700 dark:text-zinc-300">
+                          {dir.stop.stopName}
+                        </span>
+                        <StopBadge stopId={stopIdentifier} size="xs" borderColor={entry.agency.color?.hex} />
+                      </Link>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

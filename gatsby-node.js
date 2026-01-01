@@ -1,6 +1,21 @@
 const path = require(`path`);
 const axios = require("axios");
 
+// Calculate distance in meters between two lat/lon points using Haversine formula
+const getDistanceMeters = (lat1, lon1, lat2, lon2) => {
+  const R = 6371000; // Earth's radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
 exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
   if (stage === "build-html") {
     actions.setWebpackConfig({
@@ -58,6 +73,22 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
 
   let agencies = allAgencies.data.allSanityAgency.edges.map((e) => e.node);
 
+  // Fetch all bikeshare stations upfront for nearby calculations
+  let allBikeshareStations = [];
+  for (let b of allAgencies.data.allSanityBikeshare.edges) {
+    try {
+      const response = await axios.get(`${b.node.feedUrl}/station_information.json`);
+      const stations = response.data.data.stations.map(s => ({
+        ...s,
+        bikeshareSlug: b.node.slug.current,
+        feedUrl: b.node.feedUrl,
+      }));
+      allBikeshareStations = allBikeshareStations.concat(stations);
+    } catch (err) {
+      console.error(`Error fetching bikeshare stations for ${b.node.name}:`, err.message);
+    }
+  }
+
   for (let a of agencies) {
     // fetch information about the specific agency
     const result = await graphql(`
@@ -92,6 +123,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
         stops: stopsList(filter: {feedIndex: {equalTo: ${a.currentFeedIndex}}}) {
           stopId
           stopCode
+          stopLat
+          stopLon
           feedIndex
         }
       }
@@ -149,6 +182,27 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
     });
 
     for (let s of result.data.postgres.stops) {
+      // Find nearest bikeshare station within 500m
+      let nearbyBikeshare = null;
+      if (s.stopLat && s.stopLon && allBikeshareStations.length > 0) {
+        let nearestDistance = Infinity;
+        for (const station of allBikeshareStations) {
+          const distance = getDistanceMeters(s.stopLat, s.stopLon, station.lat, station.lon);
+          if (distance < nearestDistance && distance <= 500) {
+            nearbyBikeshare = {
+              station_id: station.station_id,
+              name: station.name,
+              lat: station.lat,
+              lon: station.lon,
+              distance: Math.round(distance),
+              bikeshareSlug: station.bikeshareSlug,
+              feedUrl: station.feedUrl,
+            };
+            nearestDistance = distance;
+          }
+        }
+      }
+
       createPage({
         path: `/${a.slug.current}/stop/${s[a.stopIdentifierField]}`,
         component: path.resolve("./src/templates/stop-page.js"),
@@ -156,7 +210,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           feedIndex: s.feedIndex,
           sanityFeedIndex: s.feedIndex,
           agencySlug: a.slug.current,
-          stopId: s.stopId
+          stopId: s.stopId,
+          nearbyBikeshare,
         },
       });
     }

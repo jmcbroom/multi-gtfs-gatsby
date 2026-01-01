@@ -3,6 +3,9 @@ require("dotenv").config({
 })
 
 module.exports = {
+  flags: {
+    DEV_SSR: false,
+  },
   siteMetadata: {
     siteUrl: "https://transit.det.city",
     title: "transit.det.city",
@@ -31,21 +34,7 @@ module.exports = {
         theme_color: "#1f2937", // Dark gray theme color
         display: "standalone",
         orientation: "portrait",
-        icon: "src/images/icon.png",
-        icons: [
-          {
-            src: "src/images/icon.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any maskable"
-          },
-          {
-            src: "src/images/icon.png", 
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable"
-          }
-        ],
+        icon: "src/images/icon.svg",
         categories: ["travel", "navigation", "utilities"],
         scope: "/",
         lang: "en",

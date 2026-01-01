@@ -1,24 +1,133 @@
 import bbox from "@turf/bbox";
-import MapboxGL from "mapbox-gl/dist/mapbox-gl";
-import Mapbox, { GeolocateControl, NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
+import MapboxGL from "mapbox-gl/dist/mapbox-gl";
+import Mapbox, { GeolocateControl, NavigationControl, Popup } from "react-map-gl";
 import { navigate } from "gatsby";
-import { useTheme } from "../hooks/ThemeContext";
-import mapboxStyles from "../styles/styleFactory";
 import _ from "lodash";
 import RouteHeader from "./RouteHeader";
+import RouteSlim from "./RouteSlim";
+import VehicleBadge from "./VehicleBadge";
+import { useMapStyle } from "../hooks/useMapStyle";
+import { useMapNavigation } from "../hooks/useMapNavigation";
 
-const AgencyMap = ({ routesFc, agency }) => {
+const AgencyMap = ({ routesFc, stopsFc, agency }) => {
 
   const routeFeatureCollection = routesFc;
 
-  let [routes, setRoutes] = useState([]);
+  const [routes, setRoutes] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+  const [hoveredVehicle, setHoveredVehicle] = useState(null);
+  const [realTimeEnabled, setRealTimeEnabled] = useState(false);
 
   const map = useRef();
-  const { theme } = useTheme();
-  
-  if (!theme) { return null; }
+  const { theme, style: baseStyle } = useMapStyle();
+  const { zoomIn, geolocate } = useMapNavigation(map);
+
+  // Fetch GTFS-RT vehicle positions
+  const fetchVehicles = useCallback(async () => {
+    if (!agency?.gtfsRtVehiclePositions) return;
+
+    try {
+      const response = await fetch(
+        `/.netlify/functions/gtfs-rt-vehicles?url=${encodeURIComponent(agency.gtfsRtVehiclePositions)}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setVehicles(data.vehicles || []);
+      }
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+    }
+  }, [agency?.gtfsRtVehiclePositions]);
+
+  // Fetch vehicles when real-time is enabled, poll every 15 seconds
+  useEffect(() => {
+    if (!realTimeEnabled) {
+      setVehicles([]);
+      return;
+    }
+    fetchVehicles();
+    const interval = setInterval(fetchVehicles, 15000);
+    return () => clearInterval(interval);
+  }, [fetchVehicles, realTimeEnabled]);
+
+  // Build route lookup from routesFc (colors, names, and direction headsigns)
+  const routeLookup = {};
+  routeFeatureCollection?.features?.forEach((feature) => {
+    const { routeShortName, displayShortName, routeLongName, routeColor, routeTextColor, directionDescription, directionHeadsign, directionId } = feature.properties;
+    const key = routeShortName || displayShortName;
+    if (!key) return;
+
+    if (!routeLookup[key]) {
+      routeLookup[key] = {
+        routeShortName: key,
+        displayShortName: displayShortName || key,
+        routeLongName: routeLongName || "",
+        routeColor: routeColor || "#666",
+        routeTextColor: routeTextColor || "#fff",
+        directions: {},
+      };
+    }
+    // Store direction info by directionId (both string and number keys)
+    if (directionId !== undefined && directionId !== null) {
+      const dirInfo = {
+        directionDescription: directionDescription,
+        directionHeadsign: directionHeadsign,
+      };
+      routeLookup[key].directions[directionId] = dirInfo;
+      routeLookup[key].directions[String(directionId)] = dirInfo;
+    }
+    // Also index by lowercase
+    if (!routeLookup[key.toLowerCase()]) {
+      routeLookup[key.toLowerCase()] = routeLookup[key];
+    }
+  });
+
+  // Create vehicle GeoJSON feature collection with route colors
+  const vehiclesFc = {
+    type: "FeatureCollection",
+    features: vehicles.map((v) => {
+      // Try to match by routeId (GTFS-RT uses route_id)
+      const routeInfo =
+        routeLookup[v.routeId] ||
+        routeLookup[v.routeId?.toLowerCase()] ||
+        null;
+
+      // Get direction info - prefer Sanity over GTFS-RT
+      // Try both numeric and string keys since directionId types can vary
+      const directionInfo =
+        routeInfo?.directions?.[v.directionId] ||
+        routeInfo?.directions?.[String(v.directionId)] ||
+        null;
+
+      return {
+        type: "Feature",
+        properties: {
+          vehicleId: v.vehicleId || v.id,
+          routeId: v.routeId,
+          bearing: v.bearing || 0,
+          speed: v.speed,
+          tripId: v.tripId,
+          directionId: v.directionId,
+          directionDescription: directionInfo?.directionDescription || null,
+          directionHeadsign: directionInfo?.directionHeadsign || v.headsign || null,
+          vehicleIcon: "bus",
+          // Route info for display
+          displayShortName: routeInfo?.displayShortName || v.routeId,
+          routeLongName: routeInfo?.routeLongName || "",
+          routeColor: routeInfo?.routeColor || "#666",
+          routeTextColor: routeInfo?.routeTextColor || "#fff",
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [v.longitude, v.latitude],
+        },
+      };
+    }),
+  };
+
+  if (!baseStyle) { return null; }
 
   let bboxFc = Object.assign({}, routeFeatureCollection);
 
@@ -26,10 +135,21 @@ const AgencyMap = ({ routesFc, agency }) => {
 
   let mapInitialBbox = bbox(bboxFc);
 
-  let style = _.cloneDeep(mapboxStyles[theme]);
+  // Clone the base style so we can add route/vehicle data
+  let style = _.cloneDeep(baseStyle);
 
   if (routeFeatureCollection.features.length > 0) {
     style.sources.routes.data = routeFeatureCollection;
+  }
+
+  // Add vehicles to map style
+  if (vehiclesFc.features.length > 0) {
+    style.sources.vehicles.data = vehiclesFc;
+  }
+
+  // Add stops to map style
+  if (stopsFc?.features?.length > 0) {
+    style.sources.stops.data = stopsFc;
   }
 
   const handleClick = (e) => {
@@ -57,12 +177,44 @@ const AgencyMap = ({ routesFc, agency }) => {
     }
   };
 
-  const handleMouseEnter = () => {
-    map.current.getCanvas().style.cursor = "pointer";
+  const handleMouseMove = (e) => {
+    if (!map.current) return;
+
+    // Check for vehicle hover
+    const vehicleFeatures = map.current.queryRenderedFeatures(e.point, {
+      layers: ["vehicle-points"],
+    });
+
+    if (vehicleFeatures.length > 0) {
+      map.current.getCanvas().style.cursor = "pointer";
+      const feature = vehicleFeatures[0];
+      setHoveredVehicle({
+        ...feature.properties,
+        longitude: feature.geometry.coordinates[0],
+        latitude: feature.geometry.coordinates[1],
+      });
+      return;
+    }
+
+    // Check for other interactive elements
+    const stopFeatures = map.current.queryRenderedFeatures(e.point, {
+      layers: ["stops-points"],
+    });
+
+    if (stopFeatures.length > 0) {
+      map.current.getCanvas().style.cursor = "pointer";
+    } else {
+      map.current.getCanvas().style.cursor = "";
+    }
+
+    setHoveredVehicle(null);
   };
 
   const handleMouseLeave = () => {
-    map.current.getCanvas().style.cursor = "";
+    if (map.current) {
+      map.current.getCanvas().style.cursor = "";
+    }
+    setHoveredVehicle(null);
   };
 
   const zoomToRoutes = () => {
@@ -116,7 +268,7 @@ const AgencyMap = ({ routesFc, agency }) => {
 
   return (
     <>
-      <div id="map" style={{ height: 500 }}>
+      <div id="map" style={{ height: 500 }} className="relative">
         <Mapbox
           ref={map}
           mapLib={MapboxGL}
@@ -124,14 +276,72 @@ const AgencyMap = ({ routesFc, agency }) => {
           mapStyle={style}
           initialViewState={initialViewState}
           onClick={handleClick}
-          onMouseEnter={handleMouseEnter}
+          onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onMoveEnd={handleMoveEnd}
-          interactiveLayerIds={["stops-points"]}
+          interactiveLayerIds={["stops-points", "vehicle-points"]}
         >
           <NavigationControl showCompass={false} />
           <GeolocateControl />
+
+          {/* Vehicle hover popup */}
+          {hoveredVehicle && (
+            <Popup
+              longitude={hoveredVehicle.longitude}
+              latitude={hoveredVehicle.latitude}
+              anchor="bottom"
+              closeButton={false}
+              closeOnClick={false}
+              offset={15}
+            >
+              <div className="p-1.5 min-w-[180px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <VehicleBadge vehicleId={hoveredVehicle.vehicleId} size="small" />
+                  {hoveredVehicle.speed > 0 && (
+                    <span className="text-xs text-gray-500">
+                      {Math.round(hoveredVehicle.speed * 2.237)} mph
+                    </span>
+                  )}
+                </div>
+                {hoveredVehicle.routeId && (
+                  <RouteSlim
+                    displayShortName={hoveredVehicle.displayShortName}
+                    routeLongName={hoveredVehicle.routeLongName}
+                    routeColor={hoveredVehicle.routeColor}
+                    routeTextColor={hoveredVehicle.routeTextColor}
+                    size="small"
+                  />
+                )}
+              </div>
+            </Popup>
+          )}
         </Mapbox>
+        {/* Real-time toggle */}
+        {agency?.gtfsRtVehiclePositions && (
+          <button
+            onClick={() => setRealTimeEnabled(!realTimeEnabled)}
+            className={`
+              absolute top-2 left-2 px-3 py-1.5 rounded-full shadow-md text-sm font-medium
+              flex items-center gap-2 transition-colors
+              ${realTimeEnabled
+                ? "bg-green-600 text-white"
+                : "bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200"
+              }
+            `}
+          >
+            {realTimeEnabled ? (
+              <>
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                {vehicles.length} vehicles
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 bg-gray-400 rounded-full" />
+                Real-time off
+              </>
+            )}
+          </button>
+        )}
       </div>
       <>
         <div className="my-2">{`${

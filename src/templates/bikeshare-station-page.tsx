@@ -35,7 +35,7 @@ const BikeshareStationPage = ({ data, pageContext }) => {
 
   station.name = station.name.replace("*", "");
 
-  const favoriteBikeshareStops = useLiveQuery(() => db.bikeshare.toArray());
+  const favoriteBikeshareStops = useLiveQuery(() => db?.bikeshare?.toArray());
 
   let agencyData = data.allSanityBikeshare.edges.map((e) => e.node)[0];
 

@@ -574,6 +574,7 @@ export const createAgencyData = (gtfsAgency, sanityAgency) => {
   gtfsAgency.fareContent = sanityAgency.fareContent;
   gtfsAgency.realTimeEnabled = sanityAgency.realTimeEnabled;
   gtfsAgency.stopIdentifierField = sanityAgency.stopIdentifierField;
+  gtfsAgency.gtfsRtVehiclePositions = sanityAgency.gtfsRtVehiclePositions;
 
   return gtfsAgency;
 };

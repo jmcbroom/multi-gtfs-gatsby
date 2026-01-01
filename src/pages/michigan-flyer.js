@@ -15,6 +15,7 @@ import {
   getTripsByServiceAndDirection,
   getTripsByServiceDay
 } from "../util";
+import { getStopIdentifier } from "../stopUtils";
 
 const components = {
   marks: {
@@ -51,8 +52,8 @@ const MichiganFlyer = ({ data }) => {
     // set timepoint = 1 for each stopTime that is a timepoint
     trips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
-      trip.stopTimes.forEach((st, idx) => {
-        if (timepoints.includes(st.stop[agencyData.stopIdentifierField])) {
+      trip.stopTimes.forEach((st) => {
+        if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
           st.timepoint = 1;
         }
       });
@@ -61,8 +62,8 @@ const MichiganFlyer = ({ data }) => {
 
     longTrips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
-      trip.stopTimes.forEach((st, idx) => {
-        if (timepoints.includes(st.stop[agencyData.stopIdentifierField])) {
+      trip.stopTimes.forEach((st) => {
+        if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
           st.timepoint = 1;
         }
       });

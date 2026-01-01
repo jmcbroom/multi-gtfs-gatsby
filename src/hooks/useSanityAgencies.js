@@ -13,7 +13,10 @@ export const useSanityAgencies = () => {
               onestopId
               realTimeEnabled
               stopIdentifierField
+              apiStopIdentifierField
               currentFeedIndex
+              otpFeedId
+              gtfsRtVehiclePositions
               color {
                 hex
               }

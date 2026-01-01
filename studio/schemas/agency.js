@@ -117,12 +117,28 @@ export default {
     },
     {
       name: "stopIdentifierField",
-      title: "Stop identifier field",
-      description: `The field used to publicly identify stops for this agency.
-  
+      title: "Stop identifier field (URLs)",
+      description: `The field used to publicly identify stops in URLs for this agency.
+
         For example, SMART uses stop IDs, while DDOT uses stop codes.`,
       type: "string",
       validation: Rule => Rule.required(),
+      options: {
+        list: [
+          { title: "Stop ID", value: "stopId" },
+          { title: "Stop code", value: "stopCode" },
+        ],
+      },
+      group: 'gtfsIds'
+    },
+    {
+      name: "apiStopIdentifierField",
+      title: "Stop identifier field (API)",
+      description: `The field used when calling the real-time API (BusTime).
+
+        Usually the same as the URL field, but some agencies differ (e.g., SMART uses stopCode for API but stopId for URLs).
+        If not set, defaults to the URL identifier field.`,
+      type: "string",
       options: {
         list: [
           { title: "Stop ID", value: "stopId" },
@@ -144,6 +160,20 @@ export default {
       title: "Feed index",
       description: "The currently valid GTFS feed index #",
       type: "number",
+      group: 'gtfsIds'
+    },
+    {
+      name: "otpFeedId",
+      title: "OTP Feed ID",
+      description: "The feed ID prefix used in OpenTripPlanner (e.g., 'ddot', 'smart'). This is the prefix in gtfsId like 'ddot:1234'.",
+      type: "string",
+      group: 'gtfsIds'
+    },
+    {
+      name: "gtfsRtVehiclePositions",
+      title: "GTFS-RT Vehicle Positions URL",
+      description: "URL for GTFS-RT vehicle positions feed (protobuf format)",
+      type: "url",
       group: 'gtfsIds'
     },
   ]

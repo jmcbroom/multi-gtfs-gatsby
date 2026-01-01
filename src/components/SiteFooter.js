@@ -2,7 +2,7 @@ import React from "react";
 import { Link, graphql } from "gatsby";
 import { DiscordLogoIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlane, faStar } from "@fortawesome/free-solid-svg-icons";
+import { faCompass, faMap, faPlane, faStar, faTableList } from "@fortawesome/free-solid-svg-icons";
 
 const SiteFooter = ({ data }) => {
   return (
@@ -52,11 +52,23 @@ const SiteFooter = ({ data }) => {
         </div>
 
         <div className="flex flex-col justify-start gap-4">
-          <div className="flex flex-col justify-start gap-2">
-            <h3>Other pages</h3>
-            <Link to={`/favorites`}>Favorite stops <FontAwesomeIcon icon={faStar} /></Link>
-            <Link to={`/region-map`}>Regional transit map</Link>
-            <Link to={`/nearby`}>Transit near me</Link>
+          <div className="flex flex-col gap-2">
+            <Link to={`/trip-planner`} className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faCompass} className="w-5 text-center text-gray-500 dark:text-zinc-400" />
+              <span className="font-semibold">Trip planner</span>
+            </Link>
+            <Link to={`/favorites`} className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faStar} className="w-5 text-center text-yellow-500" />
+              <span className="font-semibold">Favorite stops</span>
+            </Link>
+            <Link to={`/region-map`} className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faMap} className="w-5 text-center text-gray-500 dark:text-zinc-400" />
+              <span className="font-semibold">Regional map</span>
+            </Link>
+            <Link to={`/departure-board`} className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faTableList} className="w-5 text-center text-gray-500 dark:text-zinc-400" />
+              <span className="font-semibold">Departure board</span>
+            </Link>
           </div>
           <div className="flex flex-col justify-start gap-2">
             <h3>This site</h3>

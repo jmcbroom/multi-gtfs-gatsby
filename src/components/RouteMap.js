@@ -1,12 +1,10 @@
 import bbox from "@turf/bbox";
+import { navigate } from "gatsby";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
-import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef } from "react";
-import { navigate } from "gatsby";
-import { useTheme } from "../hooks/ThemeContext";
-import mapboxStyles from "../styles/styleFactory";
-import _ from "lodash";
+import Mapbox, { NavigationControl } from "react-map-gl";
+import { useMapStyle } from "../hooks/useMapStyle";
 
 const RouteMap = ({
   routeFc,
@@ -27,9 +25,9 @@ const RouteMap = ({
   const timepointsFeatureCollection = timepointsFc;
 
   const map = useRef();
-  const { theme } = useTheme();
+  const { style } = useMapStyle();
 
-  if (!theme) {
+  if (!style) {
     return null;
   }
 
@@ -42,8 +40,6 @@ const RouteMap = ({
     ["smart", "theride"].indexOf(agency.slug.current) > -1
       ? "stopId"
       : "stopCode";
-
-  let style = _.cloneDeep(mapboxStyles[theme]);
   // turn off the route-labels
   style.layers.forEach((l, idx) => {
     if (l.id.startsWith("route-labels")) {

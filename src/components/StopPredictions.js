@@ -28,11 +28,11 @@ const StopPredictions = ({
         collapsible
       >
         {predictions.map((prediction, idx) => {
-          let { route, direction } = matchPredictionToRoute(prediction, routes, patterns);
-          let vehicle;
-          if(vehicles) {
-            vehicle = matchPredictionToVehicle(prediction, vehicles);
-          }
+          const matched = matchPredictionToRoute(prediction, routes, patterns);
+          const route = matched?.route;
+          const direction = matched?.direction;
+          const vehicle = vehicles ? matchPredictionToVehicle(prediction, vehicles) : null;
+
           return (
             <PredictionListItem
               {...route}

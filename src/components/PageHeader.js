@@ -8,9 +8,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
  */
 const PageHeader = ({ title, icon }) => {
   return (
-    <div className="my-4 px-4 flex items-center justify-normal">
-      {icon && <FontAwesomeIcon icon={icon} className="mr-2 md:mr-0" />}
-      <h2 className="ml-2 mb-0 block">{title}</h2>
+    <div className="my-2 md:my-3 px-3 md:px-0 flex items-center justify-normal">
+      {icon && <FontAwesomeIcon icon={icon} className="text-sm mr-1" />}
+      <h2 className="ml-1 mb-0 block text-lg md:text-xl">{title}</h2>
     </div>
   );
 };

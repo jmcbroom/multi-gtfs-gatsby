@@ -12,7 +12,8 @@ import SiteFooter from "./SiteFooter";
  * @param {*} children
  * @returns
  */
-export default function Layout({ children }) {
+export default function Layout({ children, pageContext, location }) {
+  const isFullWidth = location?.pathname === '/departure-board' || location?.pathname === '/departure-board/';
   const data = useStaticQuery(graphql`
     query {
       allSanityAgency {
@@ -38,6 +39,31 @@ export default function Layout({ children }) {
     }
   `);
 
+  if (isFullWidth) {
+    return (
+      <ThemeProvider>
+        <div className="h-screen flex flex-col overflow-hidden">
+          <header className="bg-primary-light dark:bg-primary-dark bg-opacity-80 px-4 flex-shrink-0">
+            <div className="py-2 flex items-center justify-between relative">
+              <Link to={`/`}>
+                <h1 className="header font-bold text-gray-700 dark:text-gray-300 text-xl m-0">
+                  transit
+                  <span className="text-gray-500 dark:text-gray-400">
+                    .det.city
+                  </span>
+                </h1>
+              </Link>
+              <NavMenu />
+            </div>
+          </header>
+          <div className="flex-1 overflow-hidden">
+            {children}
+          </div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider>
       <div className="fill-page">
@@ -60,7 +86,7 @@ export default function Layout({ children }) {
         </div>
 
         <SiteFooter data={data} />
-        
+
         {/* PWA Install Prompt */}
         <InstallPrompt />
       </div>

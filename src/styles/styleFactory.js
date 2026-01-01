@@ -781,33 +781,24 @@ for (const style in styles) {
       interactive: true,
       filter: ["==", "$type", "Point"],
       layout: {},
-      minzoom: 15,
+      minzoom: 12,
       paint: {
         "circle-color": "white",
         "circle-stroke-color": "#222",
         "circle-stroke-width": {
           stops: [
-            [13, 1],
+            [12, 0.5],
+            [15, 1],
             [19, 3],
           ],
         },
-        "circle-stroke-opacity": {
-          stops: [
-            [13, 0],
-            [13.1, 0.1],
-            [13.2, 0.8],
-          ],
-        },
-        "circle-opacity": {
-          stops: [
-            [13, 0],
-            [13.1, 0.1],
-            [13.2, 0.8],
-          ],
-        },
+        "circle-stroke-opacity": 0.8,
+        "circle-opacity": 0.8,
         "circle-radius": {
           stops: [
-            [13, 1.5],
+            [12, 1],
+            [14, 2],
+            [15, 3],
             [19, 12],
           ],
         },
@@ -817,13 +808,14 @@ for (const style in styles) {
       id: "stops-labels",
       type: "symbol",
       source: "stops",
-      minzoom: 15,
+      minzoom: 13,
       layout: {
         "text-line-height": 1,
         "text-size": {
           base: 1,
           stops: [
-            [15, 11],
+            [13, 7],
+            [15, 10],
             [18, 14],
           ],
         },
@@ -831,9 +823,9 @@ for (const style in styles) {
         "text-ignore-placement": false,
         "text-font": ["Inter Semi Bold"],
         "text-padding": 0,
-        "text-offset": ['get', 'offset'],
-        "text-anchor": ['get', 'anchor'],
-        "text-justify": ["get", "justify"],
+        "text-offset": ["coalesce", ["get", "offset"], ["literal", [0.75, 0]]],
+        "text-anchor": ["coalesce", ["get", "anchor"], "left"],
+        "text-justify": ["coalesce", ["get", "justify"], "left"],
         "text-field": ["get", "stopName"],
         "text-letter-spacing": -0.01,
         "text-max-width": 5,
@@ -847,14 +839,7 @@ for (const style in styles) {
         "text-color": style === "light" ?
           "hsl(0, 0%, 0%)" :
           "hsl(0, 0%, 100%)",
-        "text-opacity": {
-          base: 1,
-          stops: [
-            [15, 0],
-            [15.01, 0.9],
-            [15.1, 1],
-          ],
-        },
+        "text-opacity": 1,
       },
     },
     {
@@ -864,33 +849,24 @@ for (const style in styles) {
       interactive: true,
       filter: ["==", "$type", "Point"],
       layout: {},
-      minzoom: 15,
+      minzoom: 12,
       paint: {
         "circle-color": "white",
         "circle-stroke-color": "#222",
         "circle-stroke-width": {
           stops: [
-            [13, 0.5],
+            [12, 0.3],
+            [15, 0.5],
             [19, 2],
           ],
         },
-        "circle-stroke-opacity": {
-          stops: [
-            [13, 0],
-            [13.1, 0.1],
-            [13.2, 0.8],
-          ],
-        },
-        "circle-opacity": {
-          stops: [
-            [13, 0],
-            [13.1, 0.1],
-            [13.2, 0.8],
-          ],
-        },
+        "circle-stroke-opacity": 0.8,
+        "circle-opacity": 0.8,
         "circle-radius": {
           stops: [
-            [13, 1],
+            [12, 0.75],
+            [14, 1.5],
+            [15, 2],
             [19, 8],
           ],
         },
@@ -900,12 +876,13 @@ for (const style in styles) {
       id: "secondary-stops-labels",
       type: "symbol",
       source: "secondaryStops",
-      minzoom: 15,
+      minzoom: 14,
       layout: {
         "text-line-height": 1,
         "text-size": {
           base: 1,
           stops: [
+            [14, 6],
             [15, 9],
             [18, 13],
           ],
@@ -914,9 +891,9 @@ for (const style in styles) {
         "text-ignore-placement": false,
         "text-font": ["Inter Regular"],
         "text-padding": 10,
-        "text-offset": ['get', 'offset'],
-        "text-anchor": ['get', 'anchor'],
-        "text-justify": ["get", "justify"],
+        "text-offset": ["coalesce", ["get", "offset"], ["literal", [0.75, 0]]],
+        "text-anchor": ["coalesce", ["get", "anchor"], "left"],
+        "text-justify": ["coalesce", ["get", "justify"], "left"],
         "text-field": ["get", "stopName"],
         "text-letter-spacing": -0.01,
         "text-max-width": 5,
@@ -930,14 +907,7 @@ for (const style in styles) {
         "text-color": style === "light" ?
           "hsl(0, 0%, 0%)" :
           "hsl(0, 0%, 100%)",
-        "text-opacity": {
-          base: 1,
-          stops: [
-            [15, 0],
-            [15.01, 0.9],
-            [15.1, 1],
-          ],
-        },
+        "text-opacity": 1,
       },
     },
     {
@@ -1104,41 +1074,38 @@ for (const style in styles) {
       source: "bikeshare",
       filter: ["==", "$type", "Point"],
       layout: {},
-      // minzoom: 17,
       paint: {
-        "circle-color": [
-          "case",
-          ["!", ["has", "status"]], "#888", // Gray if no status
-          [
-            "case",
-            ["==", ["get", "num_bikes_available", ["get", "status"]], 0], "#DC2626", // Red for 0 bikes
-            ["<=", ["get", "num_bikes_available", ["get", "status"]], 2], "#F59E0B", // Orange for 1-2 bikes
-            "#2563EB" // Blue for 3+ bikes
-          ]
-        ],
-        "circle-stroke-color": "#222",
-        "circle-stroke-width": {
-          stops: [
-            [8, 0.15],
-            [13, 1],
-            [19, 3],
-          ],
-        },
-        "circle-stroke-opacity": {
-          stops: [
-            [8, 0],
-            [8.1, 0.1],
-            [13.2, 0.8],
-          ],
-        },
+        "circle-color": "#DC2626", // MoGo red
+        "circle-stroke-width": 0,
         "circle-opacity": 1,
         "circle-radius": {
           stops: [
-            [8, 0.5],
-            [13, 3.5],
-            [19, 12],
+            [8, 2],
+            [13, 6],
+            [19, 14],
           ],
         },
+      },
+    },
+    {
+      id: "bikeshare-icon",
+      type: "symbol",
+      source: "bikeshare",
+      filter: ["==", "$type", "Point"],
+      minzoom: 12,
+      layout: {
+        "icon-image": "bicycle",
+        "icon-size": {
+          stops: [
+            [12, 0.4],
+            [15, 0.7],
+            [19, 1],
+          ],
+        },
+        "icon-allow-overlap": true,
+      },
+      paint: {
+        "icon-color": "#fff",
       },
     },
     {

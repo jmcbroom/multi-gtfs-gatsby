@@ -7,10 +7,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../db";
 
 const addFavoriteRoute = (route) => {
+  if (!db) return;
   db.routes.add(route);
 };
 
 const removeFavoriteRoute = (routeToRemove, favoriteRoutes) => {
+  if (!db) return;
   let routeIdsToRemove = favoriteRoutes
     .filter(
       (route) =>
@@ -43,7 +45,7 @@ const RouteHeader = ({
   showFavorite = false,
   feedIndex 
 }) => {
-  const favoriteRoutes = useLiveQuery(() => db.routes.toArray());
+  const favoriteRoutes = useLiveQuery(() => db?.routes?.toArray());
 
   let url = `/${displayShortName.toLowerCase()}`
 
@@ -88,14 +90,14 @@ const RouteHeader = ({
 
   if (showFavorite) {
     return (
-      <div className="mb-2 bg-gray-200 dark:bg-zinc-900 flex items-center justify-between">
-        <Link to={url} className="flex items-center justify-start gap-2 flex-grow py-3 px-4">
+      <div className="bg-gray-200 dark:bg-zinc-900 flex items-center justify-between">
+        <Link to={url} className="flex items-center justify-start gap-2 flex-grow py-2 px-3 md:py-3 md:px-4">
           <RouteBadge route={route} size='large' />
-          <span className='font-semibold'>
+          <span className='font-semibold text-sm md:text-base'>
             {routeLongName}
           </span>
         </Link>
-        <div className="flex items-center justify-between gap-2 px-4">
+        <div className="flex items-center justify-between gap-2 px-3 md:px-4">
           <FontAwesomeIcon
             icon={faStar}
             size="lg"

@@ -4,6 +4,7 @@ import { faBicycle, faBusSimple, faStar } from "@fortawesome/free-solid-svg-icon
 import { db } from "../db";
 
 const addFavoriteStop = (stop, stopType="bus") => {
+  if (!db) return;
   if(stopType === "bus") {
     db.stops.add(stop);
   }
@@ -13,6 +14,7 @@ const addFavoriteStop = (stop, stopType="bus") => {
 };
 
 const removeFavoriteStop = (stopToRemove, favoriteStops, stopType="bus") => {
+  if (!db) return;
   let stopIdsToRemove = favoriteStops
     .filter(
       (stop) =>

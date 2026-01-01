@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#3b82f6"/>
+  <!-- Simple side-view bus -->
+  <g transform="translate(56, 140)">
+    <!-- Bus body -->
+    <rect x="0" y="40" width="400" height="160" rx="20" fill="#ffffff"/>
+    <!-- Roof -->
+    <rect x="20" y="0" width="360" height="50" rx="10" fill="#ffffff"/>
+    <!-- Windows -->
+    <rect x="40" y="60" width="70" height="60" rx="8" fill="#3b82f6"/>
+    <rect x="130" y="60" width="70" height="60" rx="8" fill="#3b82f6"/>
+    <rect x="220" y="60" width="70" height="60" rx="8" fill="#3b82f6"/>
+    <rect x="310" y="60" width="70" height="60" rx="8" fill="#3b82f6"/>
+    <!-- Door -->
+    <rect x="40" y="130" width="50" height="70" rx="4" fill="#3b82f6"/>
+    <!-- Wheels -->
+    <circle cx="90" cy="200" r="40" fill="#1e3a5f"/>
+    <circle cx="90" cy="200" r="20" fill="#ffffff"/>
+    <circle cx="310" cy="200" r="40" fill="#1e3a5f"/>
+    <circle cx="310" cy="200" r="20" fill="#ffffff"/>
+    <!-- Headlight -->
+    <rect x="370" y="150" width="30" height="30" rx="6" fill="#fbbf24"/>
+  </g>
+</svg>

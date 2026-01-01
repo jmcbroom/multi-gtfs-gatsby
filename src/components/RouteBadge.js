@@ -1,8 +1,14 @@
 import React from "react";
 
 const RouteBadge = ({ route, size="small" }) => {
+  if (!route) return null;
 
   let { displayShortName, routeColor, routeTextColor } = route;
+
+  // Handle missing displayShortName
+  if (!displayShortName) {
+    displayShortName = '?';
+  }
 
   let widths = {
     xs: {

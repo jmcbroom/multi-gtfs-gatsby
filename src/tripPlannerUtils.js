@@ -68,30 +68,41 @@ export function formatDuration(seconds) {
 }
 
 /**
- * Format an ISO datetime string to a time display
+ * Format an ISO datetime string to a compact time display
  * @param {string} isoString - ISO 8601 datetime string
- * @returns {string} Formatted time like "3:45 PM"
+ * @returns {string} Formatted time like "3:45p" or "11:30a"
  */
 export function formatTime(isoString) {
   if (!isoString) return '';
 
   const date = new Date(isoString);
-  return date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const period = hours >= 12 ? 'p' : 'a';
+  const hour12 = hours % 12 || 12;
+  const minuteStr = minutes.toString().padStart(2, '0');
+
+  return `${hour12}:${minuteStr}${period}`;
 }
 
 /**
  * Format walking distance in meters to human-readable string
+ * For distances < 0.25 mi, shows feet rounded to nearest 50
  * @param {number} meters - Distance in meters
- * @returns {string} Formatted distance like "0.3 mi" or "1.2 mi"
+ * @returns {string} Formatted distance like "0.3 mi" or "200 ft"
  */
 export function formatDistance(meters) {
   if (!meters) return '';
 
   const miles = meters * 0.000621371;
+
+  // For short distances (< 0.25 mi), show in feet rounded to nearest 50
+  if (miles < 0.25) {
+    const feet = meters * 3.28084;
+    const roundedFeet = Math.round(feet / 50) * 50;
+    return `${roundedFeet} ft`;
+  }
+
   return `${miles.toFixed(1)} mi`;
 }
 

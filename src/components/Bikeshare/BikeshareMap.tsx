@@ -1,8 +1,8 @@
 import bbox from "@turf/bbox";
 import _ from "lodash";
-import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef } from "react";
+import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { GeolocateControl, NavigationControl } from "react-map-gl";
 import { useTheme } from "../../hooks/ThemeContext";
 import mapboxStyles from "../../styles/styleFactory";
@@ -128,23 +128,8 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({
         <MapLegend
           marks={[
             {
-              color: "#2563EB",
-              text: "3+ bikes available",
-              size: "w-4 h-4",
-            },
-            {
-              color: "#F59E0B",
-              text: "1-2 bikes available",
-              size: "w-4 h-4",
-            },
-            {
               color: "#DC2626",
-              text: "No bikes available",
-              size: "w-4 h-4",
-            },
-            {
-              color: "#888",
-              text: "Status unknown",
+              text: "MoGo bikeshare station",
               size: "w-4 h-4",
             },
             ...(includeNearbyStops ? [{
@@ -153,7 +138,7 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({
               size: "w-3 h-3",
             }] : [])
           ]}
-          text={legendText}
+          text="Tap a station to see availability details."
         />
       )}
     </>

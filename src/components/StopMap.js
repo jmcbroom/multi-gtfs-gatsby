@@ -1,13 +1,10 @@
-import MapboxGL from "mapbox-gl/dist/mapbox-gl";
-import Mapbox, { NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef } from "react";
-import mapboxStyles from "../styles/styleFactory";
-import _ from "lodash";
-import { useTheme } from "../hooks/ThemeContext";
+import MapboxGL from "mapbox-gl/dist/mapbox-gl";
+import Mapbox, { NavigationControl } from "react-map-gl";
 import bbox from "@turf/bbox";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
-import MapLegend from "./MapLegend";
+import { useMapStyle } from "../hooks/useMapStyle";
 
 const StopMap = ({
   stopFc,
@@ -20,8 +17,8 @@ const StopMap = ({
 }) => {
   const { sanityRoutes } = useSanityRoutes();
   const map = useRef();
-  const { theme } = useTheme();
-  if (!theme) {
+  const { style } = useMapStyle();
+  if (!style) {
     return null;
   }
   let allRoutes = sanityRoutes.edges.map((e) => e.node);
@@ -101,7 +98,6 @@ const StopMap = ({
     });
   }
 
-  let style = _.cloneDeep(mapboxStyles[theme]);
   style.sources.stop.data = stopFc;
   style.sources.vehicles.data = vehicleFc;
 

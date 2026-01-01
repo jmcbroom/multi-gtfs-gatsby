@@ -3,6 +3,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useLiveQuery } from "dexie-react-hooks";
 import { graphql } from "gatsby";
 import React, { useEffect, useState } from "react";
+import { useTick } from "../hooks/useTick";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopHeader from "../components/StopHeader";
 import StopMap from "../components/StopMap";
@@ -10,15 +11,17 @@ import StopPredictions from "../components/StopPredictions";
 import StopTimesHere from "../components/StopTimesHere";
 import StopAccessibility from "../components/StopAccessibility";
 import StopTransfers from "../components/StopTransfers";
+import NearbyBikeshare from "../components/NearbyBikeshare";
 import { db } from "../db";
 import { createAgencyData, createRouteData, getServiceDays } from "../util";
+import { getStopIdentifier } from "../stopUtils";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import { useSanityAgencies } from "../hooks/useSanityAgencies";
 dayjs.extend(relativeTime);
 
 
 const Stop = ({ data, pageContext }) => {
-  const favoriteStops = useLiveQuery(() => db.stops.toArray());
+  const favoriteStops = useLiveQuery(() => db?.stops?.toArray());
 
   let { sanityAgencies } = useSanityAgencies();
 
@@ -43,8 +46,7 @@ const Stop = ({ data, pageContext }) => {
   let { stopLon, stopLat, stopName, stopCode, stopId, routes, times } =
     data.postgres.stop[0];
 
-  let stopIdentifier =
-    sanityAgency.stopIdentifierField === "stopId" ? stopId : stopCode;
+  let stopIdentifier = getStopIdentifier({ stopId, stopCode }, sanityAgency);
 
   routes.forEach((r) => {
     // find the matching sanityRoute
@@ -63,7 +65,8 @@ const Stop = ({ data, pageContext }) => {
       (td) => td.routeId === r.routeShortName
     );
     if (matchingDirection) {
-      r.directions = r.directions.filter((d) => d.directionId === matchingDirection.directionId);
+      r.directions = r.directions?.filter((d) => d.directionId === matchingDirection.directionId);
+      
       r.directions[0].tripCount = matchingDirection.tripCount;
     }
   });
@@ -90,18 +93,9 @@ const Stop = ({ data, pageContext }) => {
     ],
   };
 
-  // set up a 10s 'tick' using `now`
-  let [now, setNow] = useState(new Date());
+  const now = useTick(sanityAgency.realTimeEnabled);
   const [predictions, setPredictions] = useState(null);
   const [vehicles, setVehicles] = useState(null);
-
-  useEffect(() => {
-    if (!sanityAgency.realTimeEnabled) return;
-    let tick = setInterval(() => {
-      setNow(new Date());
-    }, 30000);
-    return () => clearInterval(tick);
-  }, [sanityAgency.realTimeEnabled]);
 
   // get stop route patterns
   const [patterns, setPatterns] = useState(null);
@@ -267,6 +261,7 @@ const Stop = ({ data, pageContext }) => {
             predictions={predictions}
             vehicles={vehicles}
           />
+          <NearbyBikeshare nearbyBikeshare={pageContext.nearbyBikeshare} />
         </div>
         <div>
           <StopTimesHere
