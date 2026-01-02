@@ -5,6 +5,12 @@ import light from "./mapLight.json";
 let styles = _.cloneDeep({ light, dark });
 
 let newSources = {
+  esri: {
+    type: "vector",
+    tiles: [
+      "https://tiles.arcgis.com/tiles/qvkbeam7Wirps6zC/arcgis/rest/services/Basemap_Dynamic_Detail/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+    ],
+  },
   routes: {
     type: "geojson",
     data: {
@@ -58,6 +64,34 @@ let newSources = {
 
 for (const style in styles) {
   styles[style].sources = { ...styles[style].sources, ...newSources };
+}
+
+// Add impervious surface layers (from City of Detroit ESRI tiles)
+for (const style in styles) {
+  let imperviousLayer = {
+    id: "impervious-surface-roads",
+    type: "fill",
+    source: "esri",
+    "source-layer": "Impervious Surface",
+    filter: ["==", "_symbol", 0],
+    minzoom: 14,
+    layout: {},
+    paint: {
+      "fill-color": style === "light" ? "#efefef" : "#2a2a2a",
+      "fill-opacity": 0.75,
+    },
+  };
+
+  // Insert impervious layers early in the stack (before admin boundaries)
+  let insertIndex = styles[style].layers.findIndex((l) => l.id === "admin-0-boundary-disputed");
+  if (insertIndex === -1) insertIndex = styles[style].layers.length;
+  styles[style].layers.splice(insertIndex, 0, imperviousLayer);
+
+  // Match road-simple line color to impervious surface
+  let roadSimpleLayer = styles[style].layers.find((l) => l.id === "road-simple");
+  if (roadSimpleLayer) {
+    roadSimpleLayer.paint["line-color"] = style === "light" ? "#efefef" : "#2a2a2a";
+  }
 }
 
 for (const style in styles) {
