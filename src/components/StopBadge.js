@@ -26,7 +26,7 @@ const StopBadge = ({ stopId, size = "small", borderColor }) => {
   const sizeConfig = sizes[size] || sizes.small;
 
   const borderStyle = borderColor
-    ? { borderColor: borderColor, borderWidth: size === "medium" ? 2 : 1 }
+    ? { borderLeftColor: borderColor, borderLeftWidth: size === "medium" ? 3 : 2 }
     : {};
 
   return (
@@ -35,7 +35,6 @@ const StopBadge = ({ stopId, size = "small", borderColor }) => {
         inline-flex items-center font-mono rounded
         ${sizeConfig.container}
         bg-zinc-300 dark:bg-zinc-600 text-zinc-600 dark:text-zinc-300
-        ${borderColor ? "" : "border-transparent"}
       `}
       style={borderStyle}
     >
