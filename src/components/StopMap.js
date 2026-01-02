@@ -1,10 +1,12 @@
 import "mapbox-gl/dist/mapbox-gl.css";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { NavigationControl } from "react-map-gl";
 import bbox from "@turf/bbox";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import { useMapStyle } from "../hooks/useMapStyle";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExpand } from "@fortawesome/free-solid-svg-icons";
 
 const StopMap = ({
   stopFc,
@@ -18,87 +20,136 @@ const StopMap = ({
   const { sanityRoutes } = useSanityRoutes();
   const map = useRef();
   const { style } = useMapStyle();
-  if (!style) {
-    return null;
-  }
-  let allRoutes = sanityRoutes.edges.map((e) => e.node);
 
-  let routeFc = {
-    type: "FeatureCollection",
-    features: [],
-  };
-  let shortNames = routes.map((r) => r.routeShortName);
-  let filtered = allRoutes.filter(
-    (r) =>
-      r.agency.currentFeedIndex === agency.feedIndex &&
-      shortNames.indexOf(r.shortName) > -1
-  );
-  filtered.forEach((route) => {
-    route.directions.forEach((direction) => {
-      let feature = JSON.parse(direction.directionShape)[0];
+  // Track if user has moved away from stop-centered view
+  const [userHasMoved, setUserHasMoved] = useState(false);
+  const isUserInteracting = useRef(false);
+  const lastTrackedBus = useRef(null);
 
-      feature.properties = {
-        routeColor: route.color.hex,
-        routeLongName: route.longName,
-        routeShortName: route.shortName,
-        routeTextColor: route.textColor.hex,
-        mapPriority: route.mapPriority,
-        direction: direction.directionDescription,
-        directionId: direction.directionId,
-      };
+  // Compute route features
+  const routeFc = useMemo(() => {
+    if (!sanityRoutes?.edges) return { type: "FeatureCollection", features: [] };
 
-      routeFc.features.push(feature);
+    const allRoutes = sanityRoutes.edges.map((e) => e.node);
+    const fc = { type: "FeatureCollection", features: [] };
+    const shortNames = routes.map((r) => r.routeShortName);
+    const filtered = allRoutes.filter(
+      (r) =>
+        r.agency.currentFeedIndex === agency.feedIndex &&
+        shortNames.indexOf(r.shortName) > -1
+    );
+
+    filtered.forEach((route) => {
+      route.directions.forEach((direction) => {
+        let feature = JSON.parse(direction.directionShape)[0];
+        feature.properties = {
+          routeColor: route.color.hex,
+          routeLongName: route.longName,
+          routeShortName: route.shortName,
+          routeTextColor: route.textColor.hex,
+          mapPriority: route.mapPriority,
+          direction: direction.directionDescription,
+          directionId: direction.directionId,
+        };
+        fc.features.push(feature);
+      });
     });
-  });
 
-  let stop = stopFc.features[0];
+    return fc;
+  }, [sanityRoutes, routes, agency.feedIndex]);
 
-  // make a feature collection of the vehicles
-  let vehicleFc = {
-    type: "FeatureCollection",
-    features: [],
-  };
-  // if we have predictions and vehicles, push a new feature for the tracked bus
-  if (predictions && vehicles) {
-    let trackedPrediction = predictions.filter((p) => p.vid === trackedBus)[0];
-    if (trackedPrediction) {
-      let trackedVehicle = vehicles.filter(
-        (v) => v.vid === trackedPrediction.vid
-      )[0];
-      let matchingRoute = routeFc.features.filter(
-        (r) => r.properties.routeShortName === trackedPrediction.rt
-      )[0];
-      if (trackedVehicle) {
-        vehicleFc.features.push({
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [
-              parseFloat(trackedVehicle.lon),
-              parseFloat(trackedVehicle.lat),
-            ],
-          },
-          properties: {
-            name: trackedVehicle.vid,
-            routeColor: matchingRoute.properties.routeColor,
-            routeTextColor: matchingRoute.properties.routeTextColor,
-            vehicleIcon: "bus",
-          },
-        });
+  // Compute vehicle feature collection
+  const vehicleFc = useMemo(() => {
+    const fc = { type: "FeatureCollection", features: [] };
+
+    if (predictions && vehicles && trackedBus) {
+      const trackedPrediction = predictions.find((p) => p.vid === trackedBus);
+      if (trackedPrediction) {
+        const trackedVehicle = vehicles.find((v) => v.vid === trackedPrediction.vid);
+        const matchingRoute = routeFc.features.find(
+          (r) => r.properties.routeShortName === trackedPrediction.rt
+        );
+        if (trackedVehicle && matchingRoute) {
+          fc.features.push({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [
+                parseFloat(trackedVehicle.lon),
+                parseFloat(trackedVehicle.lat),
+              ],
+            },
+            properties: {
+              name: trackedVehicle.vid,
+              routeColor: matchingRoute.properties.routeColor,
+              routeTextColor: matchingRoute.properties.routeTextColor,
+              vehicleIcon: "bus",
+            },
+          });
+        }
       }
     }
 
-    let stopAndVehicleFc = {
-      type: "FeatureCollection",
-      features: [...stopFc.features, ...vehicleFc.features],
-    };
-    map.current.fitBounds(bbox(stopAndVehicleFc), {
-      padding: 50,
-      maxZoom: 17.25,
-      linear: true,
-    });
+    return fc;
+  }, [predictions, vehicles, trackedBus, routeFc]);
+
+  // Get stop coordinates
+  const stop = stopFc?.features?.[0];
+  const stopCoords = stop?.geometry?.coordinates;
+
+  // Track when user starts interacting
+  const handleMoveStart = useCallback((e) => {
+    if (e.originalEvent) {
+      isUserInteracting.current = true;
+    }
+  }, []);
+
+  // Track when user finishes moving the map
+  const handleMoveEnd = useCallback((e) => {
+    if (isUserInteracting.current) {
+      setUserHasMoved(true);
+      isUserInteracting.current = false;
+    }
+  }, []);
+
+  // Fit to show stop and tracked vehicle only when trackedBus changes
+  useEffect(() => {
+    if (!map.current || !trackedBus || trackedBus === lastTrackedBus.current) return;
+
+    lastTrackedBus.current = trackedBus;
+
+    if (vehicleFc.features.length > 0 && stopFc?.features?.length > 0) {
+      const stopAndVehicleFc = {
+        type: "FeatureCollection",
+        features: [...stopFc.features, ...vehicleFc.features],
+      };
+      map.current.fitBounds(bbox(stopAndVehicleFc), {
+        padding: 50,
+        maxZoom: 17.25,
+        duration: 500,
+      });
+      setUserHasMoved(true);
+    }
+  }, [trackedBus, vehicleFc, stopFc]);
+
+  // Reset to stop-centered view
+  const handleResetView = useCallback(() => {
+    if (map.current && stopCoords) {
+      map.current.easeTo({
+        center: stopCoords,
+        zoom: 17.25,
+        duration: 500,
+      });
+      setUserHasMoved(false);
+    }
+  }, [stopCoords]);
+
+  // Early return after all hooks
+  if (!style || !stop) {
+    return null;
   }
 
+  // Update style sources
   style.sources.stop.data = stopFc;
   style.sources.vehicles.data = vehicleFc;
 
@@ -114,20 +165,34 @@ const StopMap = ({
   });
 
   const initialViewState = {
-    longitude: stop.geometry.coordinates[0],
-    latitude: stop.geometry.coordinates[1],
+    longitude: stopCoords[0],
+    latitude: stopCoords[1],
     zoom: 17.25,
   };
 
   return (
-    <div id="map" style={{ height: 350 }} className="mb-8">
-      <div className="grayHeader">Stop map</div>
+    <div id="map" style={{ height: 350 }} className="mb-8 relative">
+      <div className="grayHeader flex justify-between items-center">
+        <span>Stop map</span>
+        {userHasMoved && (
+          <button
+            onClick={handleResetView}
+            className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
+            aria-label="Reset to stop view"
+            title="Center on stop"
+          >
+            <FontAwesomeIcon icon={faExpand} className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
       <Mapbox
         ref={map}
         mapLib={MapboxGL}
         mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
         mapStyle={style}
         initialViewState={initialViewState}
+        onMoveStart={handleMoveStart}
+        onMoveEnd={handleMoveEnd}
       >
         <NavigationControl showCompass={false} />
       </Mapbox>
