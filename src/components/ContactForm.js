@@ -1,94 +1,115 @@
 // components/ContactForm.js
 import React, { useState } from 'react';
+import { navigate } from 'gatsby';
 
-  const ContactForm = () => {
-    const [formData, setFormData] = useState({
-      name: '',
-      email: '',
-      message: '',
-    });
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
+const ContactForm = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setFormData((prevData) => ({ ...prevData, [name]: value }));
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(false);
 
-      setLoading(true);
+    try {
+      const response = await fetch('/.netlify/functions/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-      try {
-        const response = await fetch('/.netlify/functions/feedback', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
+      if (response.ok) {
+        // Redirect to home page after successful submission
+        navigate('/', {
+          state: { feedbackSubmitted: true }
         });
-
-        if (response.ok) {
-          console.log('Form submitted successfully!');
-          setSuccess(true);
-          // Handle success (e.g., show a success message)
-        } else {
-          console.error('Form submission failed!');
-          // Handle failure (e.g., show an error message)
-        }
-      } catch (error) {
-        console.error('An error occurred during form submission:', error);
+      } else {
+        console.error('Form submission failed!');
+        setError(true);
       }
+    } catch (err) {
+      console.error('An error occurred during form submission:', err);
+      setError(true);
+    }
 
-      setLoading(false);
-    };
+    setLoading(false);
+  };
 
-    return (
-      <form onSubmit={handleSubmit} className="max-w-sm mx-auto text-sm md:text-base">
-        <h2 className="my-8">Contact form</h2>
-        <label className="block mb-2">
-          Name:
+  return (
+    <div className="max-w-md mx-auto text-sm md:text-base">
+      <h2 className="my-6 text-xl font-bold">Website Feedback</h2>
+
+      {/* Notice about scope */}
+      <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 mb-6">
+        <p className="text-amber-800 dark:text-amber-200 text-sm">
+          <strong>Note:</strong> This form is for feedback about the transit.det.city website only.
+          We do not operate the buses or transit services. For questions about schedules, fares,
+          or service issues, please contact the transit agency directly.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <label className="block mb-4">
+          <span className="text-gray-700 dark:text-gray-300">Name</span>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="border border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 px-3 py-2 mt-1 w-full"
+            className="border border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 rounded px-3 py-2 mt-1 w-full"
           />
         </label>
-        <br />
-        <label className="block mb-2">
-          Email:
+
+        <label className="block mb-4">
+          <span className="text-gray-700 dark:text-gray-300">Email</span>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="border border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 px-3 py-2 mt-1 w-full"
+            className="border border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 rounded px-3 py-2 mt-1 w-full"
           />
         </label>
-        <br />
-        <label className="block mb-2">
-          Message:
+
+        <label className="block mb-4">
+          <span className="text-gray-700 dark:text-gray-300">Message</span>
           <textarea
             name="message"
             value={formData.message}
             onChange={handleChange}
-            className="border border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 px-3 py-2 mt-1 w-full"
+            rows={4}
+            className="border border-gray-300 dark:border-zinc-600 dark:bg-zinc-800 rounded px-3 py-2 mt-1 w-full"
           />
         </label>
-        <br />
+
+        {error && (
+          <p className="text-red-600 dark:text-red-400 mb-4">
+            Something went wrong. Please try again.
+          </p>
+        )}
+
         <button
           type="submit"
-          className="bg-blue-500 hover:bg-blue-700 dark:bg-purple-600 dark:hover:bg-purple-800 text-white dark:text-zinc-800 dark:hover:text-zinc-400 font-bold py-2 px-4 rounded"
+          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white font-semibold py-2 px-6 rounded transition-colors"
           disabled={loading}
         >
-          {loading ? 'Submitting...' : 'Submit'}
+          {loading ? 'Sending...' : 'Send Feedback'}
         </button>
-        {success && <p className="font-semibold text-gray-200 dark:text-zinc-500 mt-8">Form submitted successfully!</p>}
       </form>
-    );
-  };
+    </div>
+  );
+};
 
-  export default ContactForm;
+export default ContactForm;

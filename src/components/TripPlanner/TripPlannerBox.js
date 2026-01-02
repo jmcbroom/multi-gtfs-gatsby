@@ -19,6 +19,12 @@ const TripPlannerBox = () => {
   const [destination, setDestination] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
 
+  // Date/Time state
+  const now = new Date();
+  const [date, setDate] = useState(now.toISOString().split("T")[0]);
+  const [time, setTime] = useState(now.toTimeString().split(" ")[0].substring(0, 5));
+  const [arriveBy, setArriveBy] = useState(false);
+
   const handleOriginRetrieve = (result) => {
     const feature = result.features?.[0];
     if (feature) {
@@ -83,6 +89,10 @@ const TripPlannerBox = () => {
       params.set("toName", destination.name);
     }
 
+    if (date) params.set("date", date);
+    if (time) params.set("time", time);
+    if (arriveBy) params.set("arriveBy", "true");
+
     const url = params.toString()
       ? `/trip-planner?${params.toString()}`
       : "/trip-planner";
@@ -92,9 +102,9 @@ const TripPlannerBox = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-zinc-800 p-4">
-
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1 flex gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Row 1: From */}
+        <div className="flex gap-2">
           {origin?.name === "Current location" ? (
             <div className="flex-1 flex items-center bg-white dark:bg-zinc-700 px-3 py-2 rounded text-sm">
               <FontAwesomeIcon icon={faLocationCrosshairs} className="text-blue-500 mr-2" />
@@ -136,11 +146,10 @@ const TripPlannerBox = () => {
           </button>
         </div>
 
-        <div className="flex-1">
+        {/* Row 1: To */}
+        <div>
           <SearchBox
-            accessToken={
-              process.env.MAPBOX_ACCESS_TOKEN
-            }
+            accessToken={process.env.MAPBOX_ACCESS_TOKEN}
             options={{
               bbox: DETROIT_BBOX,
               proximity: { lng: -83.05, lat: 42.35 },
@@ -151,12 +160,55 @@ const TripPlannerBox = () => {
           />
         </div>
 
-        <button
-          onClick={handlePlanTrip}
-          className="bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600 text-gray-700 dark:text-zinc-200 text-sm font-medium py-2 px-4 rounded transition-colors"
-        >
-          Go
-        </button>
+        {/* Row 2: Date/Time */}
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="px-2 py-1.5 text-sm bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className="px-2 py-1.5 text-sm bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+          <div className="inline-flex rounded bg-gray-200 dark:bg-zinc-700 p-0.5">
+            <button
+              type="button"
+              className={`text-xs px-2 py-1 rounded transition-colors ${
+                !arriveBy
+                  ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 shadow-sm"
+                  : "text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300"
+              }`}
+              onClick={() => setArriveBy(false)}
+            >
+              Leave
+            </button>
+            <button
+              type="button"
+              className={`text-xs px-2 py-1 rounded transition-colors ${
+                arriveBy
+                  ? "bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 shadow-sm"
+                  : "text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300"
+              }`}
+              onClick={() => setArriveBy(true)}
+            >
+              Arrive
+            </button>
+          </div>
+        </div>
+
+        {/* Row 2: Go button */}
+        <div className="flex">
+          <button
+            onClick={handlePlanTrip}
+            className="flex-1 bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 dark:hover:bg-zinc-600 text-gray-700 dark:text-zinc-200 text-sm font-medium py-2 px-4 rounded transition-colors"
+          >
+            Go
+          </button>
+        </div>
       </div>
     </div>
   );

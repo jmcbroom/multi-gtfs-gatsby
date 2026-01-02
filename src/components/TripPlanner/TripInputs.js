@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExchange } from "@fortawesome/free-solid-svg-icons";
+import { faExchange, faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
 import { SearchBox } from "@mapbox/search-js-react";
 
 // Detroit metro bounding box [west, south, east, north]
@@ -100,15 +100,7 @@ export const FromToInputs = ({
                 className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200 rounded hover:bg-gray-200 dark:hover:bg-zinc-700"
                 title="Use current location"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="12" cy="12" r="3" strokeWidth="2" />
-                  <path strokeWidth="2" d="M12 2v4m0 12v4m10-10h-4M6 12H2" />
-                </svg>
+                <FontAwesomeIcon icon={faLocationCrosshairs} />
               </button>
             </div>
           )}
