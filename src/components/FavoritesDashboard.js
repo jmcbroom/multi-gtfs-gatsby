@@ -8,8 +8,7 @@ import { useTheme } from "../hooks/ThemeContext";
 import bbox from "@turf/bbox";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import { getStopIdentifier, getApiStopIdentifier } from "../stopUtils";
-import RouteSlim from "./RouteSlim";
-import VehicleBadge from "./VehicleBadge";
+import PredictionsList from "./PredictionsList";
 import { Link } from "gatsby";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBicycle, faBolt, faParking, faThumbtack, faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
@@ -482,7 +481,7 @@ const FavoritesDashboard = ({
 
       mapInstance.fitBounds(
         [[minLng, minLat], [maxLng, maxLat]],
-        { padding: 80, maxZoom: 15, duration: 1000, linear: true }
+        { padding: 80, maxZoom: 15, duration: 1500, linear: true }
       );
     };
 
@@ -503,7 +502,7 @@ const FavoritesDashboard = ({
 
       mapInstance.fitBounds(
         [[bounds[0], bounds[1]], [bounds[2], bounds[3]]],
-        { padding: 80, maxZoom: 15, duration: 1000, linear: true }
+        { padding: 80, maxZoom: 15, duration: 1750, linear: true }
       );
     };
 
@@ -708,7 +707,7 @@ const FavoritesDashboard = ({
     if (!carouselMode && bounds) {
       mapInstance.fitBounds(
         [[bounds[0], bounds[1]], [bounds[2], bounds[3]]],
-        { padding: 80, maxZoom: 16, duration: 0 }
+        { padding: 80, maxZoom: 16, duration: 0, linear: true }
       );
     }
 
@@ -752,175 +751,104 @@ const FavoritesDashboard = ({
   // Check if carousel state is controlled externally
   const isExternallyControlled = carouselModeProp !== undefined;
 
-  // Predictions panel
-  const PredictionsPanel = () => (
-    <div className="flex-1 min-h-0 flex flex-col relative pb-6">
-      <div className="grayHeader flex items-center justify-between">
-        <span>Upcoming arrivals</span>
-        {/* Only show controls here if not externally controlled (i.e., not in widescreen mode) */}
-        {!isExternallyControlled && carouselMode && filteredPredictions.length > 0 && (
-          <div className="flex items-center gap-2">
-            {pinnedPrediction && (
-              <span className="text-[10px] text-blue-500 flex items-center gap-1">
-                <FontAwesomeIcon icon={faThumbtack} />
-                pinned
-              </span>
-            )}
-            <button
-              onClick={() => {
-                if (pinnedPrediction) {
-                  setPinnedPrediction(null);
-                } else {
-                  setCarouselMode(!carouselMode);
-                }
-              }}
-              className="text-[10px] text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
-              title={pinnedPrediction ? "Resume carousel" : (carouselMode ? "Pause carousel" : "Start carousel")}
-            >
-              <FontAwesomeIcon icon={pinnedPrediction || !carouselMode ? faPlay : faPause} />
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="flex-1 overflow-y-auto max-h-80 md:max-h-none">
-        {loading ? (
-          <div className="p-4 text-gray-500 dark:text-zinc-400 text-sm">
-            Loading predictions...
-          </div>
-        ) : filteredPredictions.length === 0 ? (
-          <div className="p-4 text-gray-500 dark:text-zinc-400 text-sm">
-            No upcoming arrivals at your favorite stops.
-          </div>
-        ) : (
-          <ul className="list-none m-0">
-            {filteredPredictions.slice(0, 20).map((pred, idx) => {
-              const routeData = getRouteForPrediction(pred);
-              const isActive = isPredictionActive(pred, idx);
-              const isPinned = pinnedPrediction?.vid === pred.vid && pinnedPrediction?.stpid === pred.stpid;
-              const hasVehicle = pred.vid && vehicles.some(v => v.vid === pred.vid);
-
-              return (
-                <li
-                  key={`${pred.vid}-${idx}`}
-                  onClick={() => handlePredictionClick(pred, idx)}
-                  className={`relative flex items-center gap-4 py-3 px-3 cursor-pointer transition-colors ${
-                    isActive
-                      ? "bg-blue-50 dark:bg-blue-900/30"
-                      : "hover:bg-gray-50 dark:hover:bg-zinc-800"
-                  }`}
-                >
-                  {/* Separator line */}
-                  {idx > 0 && (
-                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gray-200 dark:bg-zinc-700" />
-                  )}
-                  {/* Pin icon in top right - only for pinned prediction */}
-                  {isPinned && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePredictionClick(pred, idx);
-                      }}
-                      className="absolute -top-0.5 right-1 p-0.5 text-blue-500 rounded transition-colors hover:text-blue-600"
-                      title="Unpin"
-                    >
-                      <FontAwesomeIcon icon={faThumbtack} className="text-[10px]" />
-                    </button>
-                  )}
-                  <div className="w-14 flex-shrink-0 text-right font-['Inter'] tabular-nums">
-                    {pred.prdctdn === "DUE" ? (
-                      <span className="text-lg font-bold">now</span>
-                    ) : (
-                      <>
-                        <span className="text-xl font-semibold">{pred.prdctdn}</span>
-                        <span className="text-[10px] text-gray-400 dark:text-zinc-500 ml-0.5">min</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <RouteSlim
-                      {...routeData}
-                      direction={routeData.direction}
-                      size="small"
-                      link={`/${pred.agencySlug}/route/${pred.rt}`}
-                    />
-                    {isActive && (
-                      <Link
-                        to={`/${pred.agencySlug}/stop/${pred.stopIdentifier}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="block text-[10px] text-gray-500 dark:text-zinc-400 mt-0.5 truncate hover:text-gray-700 dark:hover:text-zinc-200"
-                      >
-                        arriving at {pred.stpnm || pred.stopName}
-                      </Link>
-                    )}
-                  </div>
-                  {/* Vehicle badge in lower right */}
-                  <div className="absolute bottom-1 right-1">
-                    <VehicleBadge vehicleId={pred.vid} size="xs" active={isActive} notTracking={pred.vid && !hasVehicle} />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
-
-      {/* Bikeshare status - after arrivals block */}
-      {hasBikeshare && (
-        <div className="flex-shrink-0 -mt-px">
-          <div className="grayHeader !mt-0">Bike stations</div>
-          <ul className="list-none m-0">
-            {favoriteBikeshare.map((station) => {
-              const status = bikeshareStatus[station.station_id];
-              const eBikes = status?.vehicle_types_available
-                ?.filter((v) => v.vehicle_type_id !== "ICONIC")
-                .reduce((sum, v) => sum + v.count, 0) || 0;
-
-              return (
-                <li
-                  key={station.station_id}
-                  className="flex items-center gap-3 py-3 px-3 border-b border-gray-200 dark:border-zinc-700 last:border-none"
-                >
-                  {/* Circular red badge with white bike icon */}
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faBicycle} className="text-white text-xs" />
-                  </div>
-                  <Link
-                    to={`/${station.agency?.slug?.current}/station/${station.station_id}`}
-                    className="flex-1 min-w-0 truncate hover:underline text-sm font-medium"
-                  >
-                    {station.name}
-                  </Link>
-                  {status ? (
-                    <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-zinc-300 flex-shrink-0">
-                      <span className="flex items-center gap-1" title="Bikes available">
-                        <FontAwesomeIcon icon={faBicycle} className="text-xs" />
-                        <span className="font-semibold">{status.num_bikes_available}</span>
-                      </span>
-                      <span className="flex items-center gap-1" title="E-bikes available">
-                        <FontAwesomeIcon icon={faBolt} className="text-xs" />
-                        <span className="font-semibold">{eBikes}</span>
-                      </span>
-                      <span className="flex items-center gap-1" title="Docks available">
-                        <FontAwesomeIcon icon={faParking} className="text-xs" />
-                        <span className="font-semibold">{status.num_docks_available}</span>
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-gray-400">Loading...</span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+  // Custom header for predictions panel with carousel controls
+  const predictionsHeader = (
+    <div className="grayHeader flex items-center justify-between">
+      <span>Upcoming arrivals</span>
+      {/* Only show controls here if not externally controlled (i.e., not in widescreen mode) */}
+      {!isExternallyControlled && carouselMode && filteredPredictions.length > 0 && (
+        <div className="flex items-center gap-2">
+          {pinnedPrediction && (
+            <span className="text-[10px] text-blue-500 flex items-center gap-1">
+              <FontAwesomeIcon icon={faThumbtack} />
+              pinned
+            </span>
+          )}
+          <button
+            onClick={() => {
+              if (pinnedPrediction) {
+                setPinnedPrediction(null);
+              } else {
+                setCarouselMode(!carouselMode);
+              }
+            }}
+            className="text-[10px] text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300"
+            title={pinnedPrediction ? "Resume carousel" : (carouselMode ? "Pause carousel" : "Start carousel")}
+          >
+            <FontAwesomeIcon icon={pinnedPrediction || !carouselMode ? faPlay : faPause} />
+          </button>
         </div>
       )}
-
-      {/* Countdown timer in bottom left */}
-      <div className="absolute bottom-1 left-2 text-[10px] text-gray-300 dark:text-zinc-600 font-mono">
-        {countdown}s
-      </div>
     </div>
+  );
+
+  // Bikeshare section for predictions panel
+  const bikeshareSection = hasBikeshare && (
+    <div className="flex-shrink-0 -mt-px">
+      <div className="grayHeader !mt-0">Bike stations</div>
+      <ul className="list-none m-0">
+        {favoriteBikeshare.map((station) => {
+          const status = bikeshareStatus[station.station_id];
+          const eBikes = status?.vehicle_types_available
+            ?.filter((v) => v.vehicle_type_id !== "ICONIC")
+            .reduce((sum, v) => sum + v.count, 0) || 0;
+
+          return (
+            <li
+              key={station.station_id}
+              className="flex items-center gap-3 py-3 px-3 border-b border-gray-200 dark:border-zinc-700 last:border-none"
+            >
+              {/* Circular red badge with white bike icon */}
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
+                <FontAwesomeIcon icon={faBicycle} className="text-white text-xs" />
+              </div>
+              <Link
+                to={`/${station.agency?.slug?.current}/station/${station.station_id}`}
+                className="flex-1 min-w-0 truncate hover:underline text-sm font-medium"
+              >
+                {station.name}
+              </Link>
+              {status ? (
+                <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-zinc-300 flex-shrink-0">
+                  <span className="flex items-center gap-1" title="Bikes available">
+                    <FontAwesomeIcon icon={faBicycle} className="text-xs" />
+                    <span className="font-semibold">{status.num_bikes_available}</span>
+                  </span>
+                  <span className="flex items-center gap-1" title="E-bikes available">
+                    <FontAwesomeIcon icon={faBolt} className="text-xs" />
+                    <span className="font-semibold">{eBikes}</span>
+                  </span>
+                  <span className="flex items-center gap-1" title="Docks available">
+                    <FontAwesomeIcon icon={faParking} className="text-xs" />
+                    <span className="font-semibold">{status.num_docks_available}</span>
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs text-gray-400">Loading...</span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+
+  // Predictions panel using shared PredictionsList component
+  const PredictionsPanel = () => (
+    <PredictionsList
+      predictions={filteredPredictions}
+      vehicles={vehicles}
+      loading={loading}
+      header={predictionsHeader}
+      isActive={isPredictionActive}
+      isPinned={(pred) => pinnedPrediction?.vid === pred.vid && pinnedPrediction?.stpid === pred.stpid}
+      onPredictionClick={handlePredictionClick}
+      getRouteData={getRouteForPrediction}
+      showStopName={true}
+      countdown={countdown}
+    >
+      {bikeshareSection}
+    </PredictionsList>
   );
 
   // Map panel

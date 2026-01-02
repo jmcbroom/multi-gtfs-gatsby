@@ -79,3 +79,13 @@
     height: 0;
   }
 }
+
+.timetable-columns {
+  column-rule: 1px solid rgb(234 233 229);
+}
+
+@media (prefers-color-scheme: dark) {
+  .timetable-columns {
+    column-rule: 1px solid rgb(39 39 42);
+  }
+}
