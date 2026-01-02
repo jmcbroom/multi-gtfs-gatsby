@@ -329,26 +329,36 @@ export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
 
     // find the pattern and direction for this vehicle
     let pattern = patterns.find((p) => p.pid === v.pid);
+    const rtdirLower = pattern?.rtdir?.toLowerCase() || "";
 
-    let direction =
-      route.directions.find(
-        (d) =>
-          d.directionDescription
-            .toLowerCase()
-            .indexOf(pattern?.rtdir.toLowerCase()) > -1
-      ) || "unknown";
+    // Try matching pattern.rtdir to directionDescription (handles "EAST" -> "Eastbound")
+    let direction = route.directions.find((d) => {
+      const descLower = d.directionDescription?.toLowerCase() || "";
+      return descLower === rtdirLower ||
+             descLower.includes(rtdirLower) ||
+             rtdirLower.includes(descLower.replace("bound", ""));
+    });
 
-    if (direction == "unknown") {
-      direction = route.directions.find(
-        (d) =>
-          d.directionHeadsign
-            .toLowerCase()
-            .indexOf(v.des?.toLowerCase().split(" to ")[1]) > -1
-      ) || "unknown"
+    // Fallback: try matching vehicle destination to headsign
+    if (!direction && v.des) {
+      const desLower = v.des.toLowerCase();
+      // Try "to X" format first
+      const afterTo = desLower.split(" to ")[1];
+      if (afterTo) {
+        direction = route.directions.find((d) =>
+          d.directionHeadsign?.toLowerCase().includes(afterTo)
+        );
+      }
+      // Try matching full destination to headsign
+      if (!direction) {
+        direction = route.directions.find((d) =>
+          d.directionHeadsign?.toLowerCase().includes(desLower) ||
+          desLower.includes(d.directionHeadsign?.toLowerCase() || "")
+        );
+      }
     }
 
-    if (direction === undefined || direction === "unknown") {
-
+    if (!direction) {
       // special case for DDOT 3
       if (v.des === "Downtown" && v.rt === "3") {
         direction = route.directions.find(
@@ -389,6 +399,11 @@ export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
     // get the next stops from the pattern and distance traveled
     let nextStops = pattern?.pt.filter((p) => p.pdist > v.pdist && p.stpid);
 
+    // calculate max pattern distance for progress bar
+    const patternMaxDist = pattern?.pt?.length > 0
+      ? Math.max(...pattern.pt.map(p => p.pdist || 0))
+      : 0;
+
     if (agency.slug.current === "transit-windsor") {
       // get the next stop from the route direction
       // let nextStop = direction.stops.find((s) => s.stopId === v.stpid);
@@ -396,26 +411,45 @@ export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
       //   nextStops = [nextStop];
       // }
     }
+    // Skip vehicles where we couldn't find a direction
+    if (!direction) {
+      console.log('No direction match for vehicle:', {
+        vid: v.vid,
+        route: v.rt,
+        destination: v.des,
+        patternRtdir: pattern?.rtdir,
+        availableDirections: route.directions?.map(d => ({
+          id: d.directionId,
+          desc: d.directionDescription,
+          headsign: d.directionHeadsign
+        }))
+      });
+      return null;
+    }
+
     // return a GeoJSON feature
     return {
       type: "Feature",
       properties: {
         ...v,
         ...route,
+        trips,
         agency: agency.slug.current,
         description: direction.directionDescription || `unknown`,
         headsign: direction.directionHeadsign || `unknown`,
+        directionId: direction.directionId,
         nextStop: nextStops ? nextStops[0] : null,
         nextStops: nextStops ? nextStops : null,
         bearing: parseInt(v.hdg),
         vehicleIcon: "bus",
+        patternMaxDist,
       },
       geometry: {
         type: "Point",
         coordinates: [parseFloat(v.lon), parseFloat(v.lat)],
       },
     };
-  });
+  }).filter(Boolean);
 
   return {
     type: "FeatureCollection",
@@ -620,14 +654,45 @@ export const matchPredictionToRoute = (prediction, routes, patterns) => {
   )[0];
 
   if(!route) {
+    console.log('matchPredictionToRoute: No route found for prediction:', {
+      rt: prediction.rt,
+      rtdir: prediction.rtdir,
+      agency: prediction.agency,
+      availableRoutes: routes.map(r => ({ shortName: r.routeShortName, feedIndex: r.feedIndex }))
+    });
     return null
   }
 
-  let direction = route.directions?.filter(
-    (direction) =>
-      direction.directionDescription.toLowerCase().slice(0, 3) ===
-      prediction.rtdir.toLowerCase().slice(0, 3)
-  )[0];
+  const rtdirLower = prediction.rtdir?.toLowerCase() || "";
+
+  // Try matching rtdir to directionDescription (handles "WEST" -> "Westbound")
+  let direction = route.directions?.find((d) => {
+    const descLower = d.directionDescription?.toLowerCase() || "";
+    return descLower === rtdirLower ||
+           descLower.includes(rtdirLower) ||
+           rtdirLower.includes(descLower.replace("bound", ""));
+  });
+
+  // Fallback: try matching rtdir to headsign
+  if (!direction) {
+    direction = route.directions?.find((d) => {
+      const headsignLower = d.directionHeadsign?.toLowerCase() || "";
+      return headsignLower.includes(rtdirLower) ||
+             rtdirLower.includes(headsignLower);
+    });
+  }
+
+  if (!direction) {
+    console.log('matchPredictionToRoute: No direction match:', {
+      rt: prediction.rt,
+      rtdir: prediction.rtdir,
+      availableDirections: route.directions?.map(d => ({
+        id: d.directionId,
+        desc: d.directionDescription,
+        headsign: d.directionHeadsign
+      }))
+    });
+  }
 
   // Slightly insane workaround for TheRide
   if (
