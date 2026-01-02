@@ -104,7 +104,7 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
           scrollbarWidth: 'thin',
         }}
       >
-        <table className="tabular" style={{tableLayout: 'fixed'}}>
+        <table className="tabular mx-auto" style={{tableLayout: 'fixed'}}>
           <thead className="z-10" style={{ position: 'sticky', top: 0 }}>
             <tr className="bg-white dark:bg-black">
               {timepoints.map((s, k) => (
