@@ -301,32 +301,6 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
       },
     });
 
-    // create bikeshare map page
-    createPage({
-      path: `/${b.node.slug.current}/map`,
-      component: path.resolve("./src/templates/bikeshare-page.tsx"),
-      context: {
-        id: b.node.id,
-        feedUrl: b.node.feedUrl,
-        slug: b.node.slug.current,
-        data: stations,
-        initialTab: "map",
-      },
-    });
-
-    // create bikeshare station list page
-    createPage({
-      path: `/${b.node.slug.current}/stations`,
-      component: path.resolve("./src/templates/bikeshare-page.tsx"),
-      context: {
-        id: b.node.id,
-        feedUrl: b.node.feedUrl,
-        slug: b.node.slug.current,
-        data: stations,
-        initialTab: "stations",
-      },
-    });
-
     // create bikeshare fares page
     createPage({
       path: `/${b.node.slug.current}/fares`,
@@ -354,5 +328,96 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
         },
       });
     });
+  }
+
+  // Create Transit Center pages
+  const transitCenters = await graphql(`
+    query {
+      allSanityTransitCenter {
+        nodes {
+          name
+          slug {
+            current
+          }
+          stops {
+            agency {
+              slug {
+                current
+              }
+              currentFeedIndex
+              stopIdentifierField
+            }
+            stopId
+            label
+          }
+          bikeshareStations {
+            bikeshare {
+              slug {
+                current
+              }
+              feedUrl
+              color {
+                hex
+              }
+            }
+            stationId
+            label
+          }
+        }
+      }
+    }
+  `);
+
+  if (transitCenters.data?.allSanityTransitCenter?.nodes) {
+    for (const tc of transitCenters.data.allSanityTransitCenter.nodes) {
+      if (!tc.slug?.current) continue;
+
+      // Collect unique feed indexes and stop identifiers
+      const feedIndexes = [];
+      const stopIdentifiers = [];
+      if (tc.stops) {
+        for (const stop of tc.stops) {
+          if (stop.agency?.currentFeedIndex && !feedIndexes.includes(stop.agency.currentFeedIndex)) {
+            feedIndexes.push(stop.agency.currentFeedIndex);
+          }
+          if (stop.stopId && !stopIdentifiers.includes(stop.stopId)) {
+            stopIdentifiers.push(stop.stopId);
+          }
+        }
+      }
+
+      // Collect bikeshare station info grouped by feed URL
+      const bikeshareByFeed = {};
+      if (tc.bikeshareStations) {
+        for (const bs of tc.bikeshareStations) {
+          if (!bs.bikeshare?.feedUrl || !bs.stationId) continue;
+          const feedUrl = bs.bikeshare.feedUrl;
+          if (!bikeshareByFeed[feedUrl]) {
+            bikeshareByFeed[feedUrl] = {
+              feedUrl,
+              slug: bs.bikeshare.slug?.current,
+              color: bs.bikeshare.color?.hex,
+              stationIds: [],
+              labels: {},
+            };
+          }
+          bikeshareByFeed[feedUrl].stationIds.push(bs.stationId);
+          if (bs.label) {
+            bikeshareByFeed[feedUrl].labels[bs.stationId] = bs.label;
+          }
+        }
+      }
+
+      createPage({
+        path: `/transit-center/${tc.slug.current}`,
+        component: path.resolve("./src/templates/transit-center-page.js"),
+        context: {
+          slug: tc.slug.current,
+          feedIndexes: feedIndexes.length > 0 ? feedIndexes : [0],
+          stopIdentifiers: stopIdentifiers.length > 0 ? stopIdentifiers : [""],
+          bikeshareFeeds: Object.values(bikeshareByFeed),
+        },
+      });
+    }
   }
 };

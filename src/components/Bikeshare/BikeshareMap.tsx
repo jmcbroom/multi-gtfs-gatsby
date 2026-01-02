@@ -16,14 +16,18 @@ interface BikeshareMapProps {
   showLegend?: boolean;
   legendText?: string;
   includeNearbyStops?: boolean;
+  onBoundsChange?: (bounds: [number, number, number, number] | null) => void;
+  bikeshareSlug?: string;
 }
 
-const BikeshareMap:React.FC<BikeshareMapProps> = ({ 
-  stationsFc, 
-  nearbyStopsFc, 
-  showLegend = false, 
+const BikeshareMap:React.FC<BikeshareMapProps> = ({
+  stationsFc,
+  nearbyStopsFc,
+  showLegend = false,
   legendText = "Station colors indicate bike availability. Zoom in to see exact bike counts.",
-  includeNearbyStops = false 
+  includeNearbyStops = false,
+  onBoundsChange,
+  bikeshareSlug = "mogo"
 }) => {
 
   const map = useRef<any>();
@@ -51,7 +55,7 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({
     if (features.length > 0) {
       const feature = features[0];
       // navigate to station page
-      navigate(`/mogo/station/${feature.id}`)
+      navigate(`/${bikeshareSlug}/station/${feature.id}`)
     }
 
     const stopFeatures = map.current.queryRenderedFeatures(e.point, {
@@ -94,6 +98,32 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({
   };
 
   const handleMoveEnd = () => {
+    if (onBoundsChange && map.current) {
+      const bounds = map.current.getBounds();
+      if (bounds) {
+        onBoundsChange([
+          bounds.getWest(),
+          bounds.getSouth(),
+          bounds.getEast(),
+          bounds.getNorth()
+        ]);
+      }
+    }
+  };
+
+  const handleLoad = () => {
+    // Report initial bounds after map loads
+    if (onBoundsChange && map.current) {
+      const bounds = map.current.getBounds();
+      if (bounds) {
+        onBoundsChange([
+          bounds.getWest(),
+          bounds.getSouth(),
+          bounds.getEast(),
+          bounds.getNorth()
+        ]);
+      }
+    }
   };
 
   const initialViewState = {
@@ -101,6 +131,7 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({
     fitBoundsOptions: {
       padding: 50,
       maxZoom: 17,
+      linear: true,
     },
   };
 
@@ -117,6 +148,7 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onMoveEnd={handleMoveEnd}
+          onLoad={handleLoad}
           interactiveLayerIds={["bikeshare-point", "secondary-stops-points", "secondary-stops-labels"]}
         >
           <NavigationControl showCompass={false} />
