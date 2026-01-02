@@ -150,14 +150,14 @@ const TripMap = ({
   // Handle bounds updates - prioritize focused leg bounds
   useEffect(() => {
     if (map.current && focusedLegBounds) {
-      map.current.fitBounds(focusedLegBounds, { padding: 80, maxZoom: 17 });
+      map.current.fitBounds(focusedLegBounds, { padding: 80, maxZoom: 17, linear: true });
     }
   }, [focusedLegBounds]);
 
   // Handle full bounds updates (when no leg is focused)
   useEffect(() => {
     if (map.current && fullBounds && focusedLegIndex === null) {
-      map.current.fitBounds(fullBounds, { padding: 50, maxZoom: 16 });
+      map.current.fitBounds(fullBounds, { padding: 50, maxZoom: 16, linear: true });
     }
   }, [fullBounds, focusedLegIndex]);
 

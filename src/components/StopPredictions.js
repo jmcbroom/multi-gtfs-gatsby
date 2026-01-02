@@ -1,8 +1,6 @@
-import * as Accordion from "@radix-ui/react-accordion";
-import React from "react";
-import "../styles/accordion.css";
-import { matchPredictionToRoute, matchPredictionToVehicle } from "../util";
-import PredictionListItem from "./PredictionListItem";
+import React, { useCallback } from "react";
+import { matchPredictionToRoute } from "../util";
+import PredictionsList from "./PredictionsList";
 
 const StopPredictions = ({
   predictions,
@@ -14,39 +12,47 @@ const StopPredictions = ({
   vehicles,
   patterns
 }) => {
-  return (
-    <div>
-      <div className="grayHeader">Next buses here (real-time information)</div>
-      <Accordion.Root
-        className="AccordionRoot"
-        type="single"
-        defaultValue={null}
-        disabled={agency.slug.current === 'transit-windsor'}
-        onValueChange={(value) => {
-          setTrackedBus(value);
-        }}
-        collapsible
-      >
-        {predictions.map((prediction, idx) => {
-          const matched = matchPredictionToRoute(prediction, routes, patterns);
-          const route = matched?.route;
-          const direction = matched?.direction;
-          const vehicle = vehicles ? matchPredictionToVehicle(prediction, vehicles) : null;
+  // Match prediction to route data for display
+  // If direction can't be matched, don't show headsign (bus may be on previous direction before turning around)
+  const getRouteData = useCallback((prediction) => {
+    const matched = matchPredictionToRoute(prediction, routes, patterns);
+    if (!matched) {
+      return {
+        route: {
+          routeShortName: prediction.rt,
+          displayShortName: prediction.rt,
+          routeLongName: "",
+          routeColor: "#666",
+          routeTextColor: "#fff",
+        },
+        direction: null,
+      };
+    }
+    return {
+      route: matched.route,
+      direction: matched.direction || null,
+    };
+  }, [routes, patterns]);
 
-          return (
-            <PredictionListItem
-              {...route}
-              agency={agency}
-              prediction={prediction}
-              vehicle={vehicle}
-              direction={direction}
-              key={prediction.vid}
-              className="px-2"
-            />
-          );
-        })}
-      </Accordion.Root>
-    </div>
+  // Handle click to pin/unpin
+  const handlePredictionClick = useCallback((pred) => {
+    if (trackedBus === pred.vid) {
+      setTrackedBus(null); // Unpin
+    } else {
+      setTrackedBus(pred.vid); // Pin
+    }
+  }, [trackedBus, setTrackedBus]);
+
+  return (
+    <PredictionsList
+      predictions={predictions}
+      vehicles={vehicles}
+      pinnedId={trackedBus}
+      onPredictionClick={handlePredictionClick}
+      getRouteData={getRouteData}
+      header="Next buses here (real-time)"
+      agencySlug={agency.slug.current}
+    />
   );
 };
 

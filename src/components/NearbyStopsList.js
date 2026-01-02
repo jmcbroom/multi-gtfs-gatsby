@@ -391,7 +391,7 @@ const NearbyStopsList = ({ sanityAgencies, favoriteStops = [] }) => {
     if (bounds) {
       mapInstance.fitBounds(
         [[bounds[0], bounds[1]], [bounds[2], bounds[3]]],
-        { padding: 40, maxZoom: 15, duration: 0 }
+        { padding: 40, maxZoom: 15, duration: 0, linear: true }
       );
     }
   };

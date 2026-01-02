@@ -5,7 +5,7 @@ import AgencySlimHeader from "../components/AgencySlimHeader";
 import { TripPlannerBox } from "../components/TripPlanner";
 import { createRouteData } from "../util";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCompass, faPlane } from "@fortawesome/free-solid-svg-icons";
+import { faCompass, faPlane, faBuilding } from "@fortawesome/free-solid-svg-icons";
 
 /**
  * The home page.
@@ -69,7 +69,29 @@ const IndexPage = ({ data }) => {
         </div>
       </div>
 
-      
+      {/* Transit Centers */}
+      {data.allSanityTransitCenter.edges.length > 0 && (
+        <div>
+          <h2 className="pl-3 md:pl-0">Major transit centers</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 px-3 md:px-0">
+            {data.allSanityTransitCenter.edges.map((e) => (
+              <Link
+                to={`/transit-center/${e.node.slug.current}`}
+                key={e.node.slug.current}
+                className="bg-gray-100 dark:bg-zinc-800 p-3 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
+              >
+                <h3 className="text-base font-semibold mb-1">{e.node.name}</h3>
+                {e.node.description && (
+                  <p className="text-sm text-gray-600 dark:text-zinc-400 m-0 line-clamp-2">
+                    <PortableText content={e.node.description} />
+                  </p>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div>
         <h2 className="pl-3 md:pl-0">Local bus systems</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -195,6 +217,7 @@ const IndexPage = ({ data }) => {
         ))}
         </div>
       </div>
+
     </div>
   );
 };
@@ -240,6 +263,17 @@ export const query = graphql`
           slug {
             current
           }
+        }
+      }
+    }
+    allSanityTransitCenter {
+      edges {
+        node {
+          name
+          slug {
+            current
+          }
+          description: _rawDescription
         }
       }
     }

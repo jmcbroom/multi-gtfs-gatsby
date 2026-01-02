@@ -90,31 +90,29 @@ const RouteHeader = ({
 
   if (showFavorite) {
     return (
-      <div className="bg-gray-200 dark:bg-zinc-900 flex items-center justify-between">
-        <Link to={url} className="flex items-center justify-start gap-2 flex-grow py-2 px-3 md:py-3 md:px-4">
-          <RouteBadge route={route} size='large' />
+      <div className="bg-gray-200 dark:bg-zinc-900 flex items-center gap-2 py-1.5 px-2 md:py-2 md:px-3">
+        <FontAwesomeIcon
+          icon={faStar}
+          size="lg"
+          className={
+            isFavoriteRoute
+              ? "text-yellow-500 dark:text-yellow-600 cursor-pointer"
+              : "text-gray-400 dark:text-zinc-600 cursor-pointer"
+          }
+          onClick={() => {
+            if (isFavoriteRoute === false) {
+              addFavoriteRoute(indexedRoute);
+            } else {
+              removeFavoriteRoute(indexedRoute, favoriteRoutes);
+            }
+          }}
+        />
+        <Link to={url} className="flex items-center gap-2">
+          <RouteBadge route={route} size='medium' />
           <span className='font-semibold text-sm md:text-base'>
             {routeLongName}
           </span>
         </Link>
-        <div className="flex items-center justify-between gap-2 px-3 md:px-4">
-          <FontAwesomeIcon
-            icon={faStar}
-            size="lg"
-            className={
-              isFavoriteRoute
-                ? "text-yellow-500 dark:text-yellow-600 cursor-pointer"
-                : "text-gray-400 dark:text-zinc-600 cursor-pointer"
-            }
-            onClick={() => {
-              if (isFavoriteRoute === false) {
-                addFavoriteRoute(indexedRoute);
-              } else {
-                removeFavoriteRoute(indexedRoute, favoriteRoutes);
-              }
-            }}
-          />
-        </div>
       </div>
     );
   }

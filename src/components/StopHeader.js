@@ -43,27 +43,27 @@ const StopHeader = ({
 }) => {
   return (
     <div className="mb-2 bg-gray-200 dark:bg-zinc-900 flex items-center justify-between p-2">
-      <div className="flex items-center gap-1.5 md:gap-2">
-        <h1 className="text-sm md:text-base font-semibold m-0">{stopName}</h1>
-        {stopType === 'bus' && <span className="hidden md:inline"><StopBadge stopId={stopIdentifier} size="medium" /></span>}
-        {stopType === 'bus' && <span className="md:hidden"><StopBadge stopId={stopIdentifier} size="small" /></span>}
-      </div>
-      <FontAwesomeIcon
-        icon={faStar}
-        size="lg"
-        className={
-          isFavoriteStop
-            ? "text-yellow-500 dark:text-yellow-600"
-            : "text-gray-400 dark:text-zinc-600"
-        }
-        onClick={() => {
-          if (isFavoriteStop === false) {
-            addFavoriteStop(indexedStop, stopType);
-          } else {
-            removeFavoriteStop(indexedStop, favoriteStops, stopType);
+      <div className="flex items-center gap-2">
+        <FontAwesomeIcon
+          icon={faStar}
+          size="lg"
+          className={
+            isFavoriteStop
+              ? "text-yellow-500 dark:text-yellow-600 cursor-pointer"
+              : "text-gray-400 dark:text-zinc-600 cursor-pointer"
           }
-        }}
-      />
+          onClick={() => {
+            if (isFavoriteStop === false) {
+              addFavoriteStop(indexedStop, stopType);
+            } else {
+              removeFavoriteStop(indexedStop, favoriteStops, stopType);
+            }
+          }}
+        />
+        <h1 className="text-sm md:text-base font-semibold m-0">{stopName}</h1>
+      </div>
+      {stopType === 'bus' && <span className="hidden md:inline"><StopBadge stopId={stopIdentifier} size="medium" /></span>}
+      {stopType === 'bus' && <span className="md:hidden"><StopBadge stopId={stopIdentifier} size="small" /></span>}
     </div>
   );
 };

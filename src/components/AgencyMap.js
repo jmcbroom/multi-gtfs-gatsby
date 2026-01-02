@@ -263,6 +263,7 @@ const AgencyMap = ({ routesFc, stopsFc, agency }) => {
     fitBoundsOptions: {
       padding: 50,
       maxZoom: 17,
+      linear: true,
     },
   };
 

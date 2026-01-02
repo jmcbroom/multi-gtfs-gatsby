@@ -13,7 +13,9 @@ import SiteFooter from "./SiteFooter";
  * @returns
  */
 export default function Layout({ children, pageContext, location }) {
-  const isFullWidth = location?.pathname === '/departure-board' || location?.pathname === '/departure-board/';
+  const isFullWidth = location?.pathname === '/departure-board' || location?.pathname === '/departure-board/' ||
+    location?.pathname === '/region-map' || location?.pathname === '/region-map/' ||
+    location?.pathname?.startsWith('/transit-center/');
   const data = useStaticQuery(graphql`
     query {
       allSanityAgency {

@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useLiveQuery } from "dexie-react-hooks";
 import { graphql } from "gatsby";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useTick } from "../hooks/useTick";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopHeader from "../components/StopHeader";
@@ -43,37 +43,40 @@ const Stop = ({ data, pageContext }) => {
     feedIndex: agencyData.feedIndex,
   };
 
-  let { stopLon, stopLat, stopName, stopCode, stopId, routes, times } =
+  let { stopLon, stopLat, stopName, stopCode, stopId, routes: rawRoutes, times } =
     data.postgres.stop[0];
 
   let stopIdentifier = getStopIdentifier({ stopId, stopCode }, sanityAgency);
 
-  routes.forEach((r) => {
-    // find the matching sanityRoute
+  // Memoize routes processing to avoid overfetching
+  const routes = useMemo(() => {
+    return rawRoutes.map((r) => {
+      // find the matching sanityRoute
+      let matching = sanityRoutes.edges
+        .map((e) => e.node)
+        .filter((sr) => sr.shortName === r.routeShortName && sr.agency.currentFeedIndex === agencyData.feedIndex);
 
-    let matching = sanityRoutes.edges
-      .map((e) => e.node)
-      .filter((sr) => sr.shortName === r.routeShortName && sr.agency.currentFeedIndex === agencyData.feedIndex);
+      // let's override the route attributes with those from Sanity
+      if (matching.length === 1) {
+        r = createRouteData(r, matching[0]);
+      }
 
-    // let's override the route attributes with those from Sanity
-    if (matching.length === 1) {
-      r = createRouteData(r, matching[0]);
-    }
+      // find in trip directions
+      let matchingDirection = indexedStop.tripDirections.find(
+        (td) => td.routeId === r.routeShortName
+      );
+      if (matchingDirection && r.directions) {
+        r.directions = r.directions.filter((d) => d.directionId === matchingDirection.directionId);
+        if (r.directions[0]) {
+          r.directions[0].tripCount = matchingDirection.tripCount;
+        }
+      }
 
-    // find in trip directions
-    let matchingDirection = indexedStop.tripDirections.find(
-      (td) => td.routeId === r.routeShortName
-    );
-    if (matchingDirection) {
-      r.directions = r.directions?.filter((d) => d.directionId === matchingDirection.directionId);
-      
-      r.directions[0].tripCount = matchingDirection.tripCount;
-    }
-  });
-
-  routes = routes
+      return r;
+    })
     .sort((a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName))
     .sort((a, b) => a.mapPriority > b.mapPriority);
+  }, [rawRoutes, sanityRoutes.edges, agencyData.feedIndex, indexedStop.tripDirections]);
 
   const stopFc = {
     type: "FeatureCollection",
@@ -99,60 +102,52 @@ const Stop = ({ data, pageContext }) => {
 
   // get stop route patterns
   const [patterns, setPatterns] = useState(null);
+  const agencySlug = sanityAgency.slug.current;
   useEffect(() => {
     fetch(
-      `/.netlify/functions/patterns?agency=${
-        sanityAgency.slug.current
-      }&routeId=${routes.map((r) => r.routeShortName).join(",")}`
+      `/.netlify/functions/patterns?agency=${agencySlug}&routeId=${routes.map((r) => r.routeShortName).join(",")}`
     )
       .then((r) => r.json())
       .then((d) => {
         setPatterns(d);
       });
-  }, [sanityAgency.slug, routes]);
+  }, [agencySlug, routes]);
 
   // transit windsor-specific code: get stop code from API
   const [twStopCode, setTwStopCode] = useState(null);
   useEffect(() => {
-    if (sanityAgency.slug.current !== "transit-windsor") return;
-    else
-      fetch(
-        `/.netlify/functions/stoplist?stopId=${stopId}&agency=${sanityAgency.slug.current}`
-      )
-        .then((r) => r.json())
-        .then((d) => {
-          setTwStopCode(d[0].stopID);
-        });
-  }, [sanityAgency.slug, stopId]);
+    if (agencySlug !== "transit-windsor") return;
+    fetch(
+      `/.netlify/functions/stoplist?stopId=${stopId}&agency=${agencySlug}`
+    )
+      .then((r) => r.json())
+      .then((d) => {
+        setTwStopCode(d[0].stopID);
+      });
+  }, [agencySlug, stopId]);
 
+  const realTimeEnabled = sanityAgency.realTimeEnabled;
   useEffect(() => {
-    if (!sanityAgency.realTimeEnabled) return;
+    if (!realTimeEnabled) return;
 
     // transit windsor-specific code: assign new stop code from API
     // TODO: remove/abstract this
     let stopToFetch = stopCode;
-    if (
-      sanityAgency.slug.current === "transit-windsor" &&
-      (!twStopCode || !patterns)
-    ) {
+    if (agencySlug === "transit-windsor" && (!twStopCode || !patterns)) {
       return;
     }
-    if (
-      sanityAgency.slug.current === "transit-windsor" &&
-      twStopCode &&
-      patterns
-    ) {
+    if (agencySlug === "transit-windsor" && twStopCode && patterns) {
       stopToFetch = twStopCode;
     }
 
     fetch(
-      `/.netlify/functions/stop?stopId=${stopToFetch}&agency=${sanityAgency.slug.current}`
+      `/.netlify/functions/stop?stopId=${stopToFetch}&agency=${agencySlug}`
     )
       .then((r) => r.json())
       .then((d) => {
         // transit windsor-specific transformation code
         // TODO: remove/abstract this
-        if (sanityAgency.slug.current === "transit-windsor") {
+        if (agencySlug === "transit-windsor") {
           let trips = [];
           d.grpByPtrn.forEach((ptrn) => {
             let matchingPattern = patterns.find(
@@ -190,18 +185,18 @@ const Stop = ({ data, pageContext }) => {
     now,
     twStopCode,
     patterns,
-    sanityAgency.realTimeEnabled,
-    sanityAgency.slug,
+    realTimeEnabled,
+    agencySlug,
     stopCode,
   ]);
 
   useEffect(() => {
-    if (!sanityAgency.realTimeEnabled || !predictions) return;
-    if (sanityAgency.slug.current === "transit-windsor") return;
+    if (!realTimeEnabled || !predictions) return;
+    if (agencySlug === "transit-windsor") return;
     fetch(
       `/.netlify/functions/vehicle?vehicleIds=${predictions
         .map((prd) => prd.vid)
-        .join(",")}&agency=${sanityAgency.slug.current}`
+        .join(",")}&agency=${agencySlug}`
     )
       .then((r) => r.json())
       .then((d) => {
@@ -214,7 +209,7 @@ const Stop = ({ data, pageContext }) => {
           return;
         }
       });
-  }, [predictions, sanityAgency.realTimeEnabled, sanityAgency.slug]);
+  }, [predictions, realTimeEnabled, agencySlug]);
 
   let [trackedBus, setTrackedBus] = useState(null);
 
@@ -240,6 +235,15 @@ const Stop = ({ data, pageContext }) => {
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
+          <StopMap
+            agency={agencyData}
+            stopFc={stopFc}
+            routes={routes}
+            times={times}
+            trackedBus={trackedBus}
+            predictions={predictions}
+            vehicles={vehicles}
+          />
           {predictions && (
             <StopPredictions
               trackedBus={trackedBus}
@@ -252,16 +256,6 @@ const Stop = ({ data, pageContext }) => {
               patterns={patterns}
             />
           )}
-          <StopMap
-            agency={agencyData}
-            stopFc={stopFc}
-            routes={routes}
-            times={times}
-            trackedBus={trackedBus}
-            predictions={predictions}
-            vehicles={vehicles}
-          />
-          <NearbyBikeshare nearbyBikeshare={pageContext.nearbyBikeshare} />
         </div>
         <div>
           <StopTimesHere
@@ -270,10 +264,11 @@ const Stop = ({ data, pageContext }) => {
             agency={agencyData}
             serviceDays={serviceDays}
           />
+          <StopTransfers stop={indexedStop} nearbyStops={indexedStop.nearby} routes={sanityRoutes.edges.map(e => e.node)} agencies={sanityAgencies.edges.map(e => e.node)} />
+          <NearbyBikeshare nearbyBikeshare={pageContext.nearbyBikeshare} />
           {["ddot", "smart"].indexOf(agencyData.slug.current) > -1 && (
             <StopAccessibility stop={indexedStop} />
           )}
-          <StopTransfers stop={indexedStop} nearbyStops={indexedStop.nearby} routes={sanityRoutes.edges.map(e => e.node)} agencies={sanityAgencies.edges.map(e => e.node)} />
         </div>
       </div>
     </div>

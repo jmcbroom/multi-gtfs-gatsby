@@ -74,7 +74,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
   return (
     <div>
       <div className="grayHeader">This stop's bus schedule</div>
-      <div className="flex items-center justify-between gap-2 p-2 bg-gray-100 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 bg-gray-100 dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700">
         <ServicePicker
           services={allTimes}
           service={service}
@@ -97,17 +97,17 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
       </div>
 
       {viewMode === "combined" ? (
-        <div className="flex flex-col gap-2 p-2">
-          <span className="text-gray-500 text-sm py-1">
+        <div className="bg-gray-50 dark:bg-zinc-900 p-3">
+          <span className="text-xs text-gray-400 dark:text-zinc-500">
             {allTimes[service].length > 0
-              ? null
+              ? `All routes arriving at this stop:`
               : `There is no service on ${
                 service.startsWith("s")
                 ? `${service.slice(0,1).toUpperCase()}${service.slice(1)}s.`
                 : `weekdays`
               }`}
           </span>
-          <ul ref={listRef} className="flex flex-col gap-1 list-none ml-0 max-h-96 overflow-y-auto">
+          <ul ref={listRef} className="flex flex-col gap-0.5 list-none ml-0 mt-2 max-h-96 overflow-y-auto">
             {allTimes[service].map((trip) => {
               const routeData = getRouteForTrip(trip);
               return (
@@ -115,14 +115,15 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                   className="flex items-center gap-2 py-0.5"
                   key={trip.tripId}
                 >
-                  <span className="w-16 flex-shrink-0">
+                  <span className="w-14 flex-shrink-0">
                     <StopTimeLabel arrivalTime={trip.arrivalTime} ampm={true} />
                   </span>
-                  <RouteSlim {...routeData} direction={{ directionHeadsign: trip.tripHeadsign }} size="small" />
+                  <RouteSlim {...routeData} direction={{ directionHeadsign: trip.tripHeadsign }} size="xs" link={`/${agency.slug.current}/route/${routeData.displayShortName || routeData.routeShortName}`} />
                 </li>
               );
             })}
           </ul>
+          <p className="text-xs text-gray-400 dark:text-zinc-500 mt-2">PM times shown in <strong>bold.</strong></p>
         </div>
       ) : (
         <Accordion.Root
@@ -143,7 +144,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="flex flex-col gap-2 mt-2">
-                    <span className="text-gray-500 text-sm py-1">
+                    <span className="text-xs text-gray-400 dark:text-zinc-500">
                       {timesByRoute[route.routeShortName][service].length > 0
                         ? `Buses arrive here at:`
                         : `There is no service on this route on ${
@@ -153,8 +154,7 @@ const StopTimesHere = ({ times, routes, agency, serviceDays }) => {
                         }`}
                     </span>
                     <ul
-                      className="columns-4 sm:columns-5 md:columns-6 gap-2 text-center list-none ml-0"
-                      style={{ columnRule: '1px solid rgb(234 233 229)' }}
+                      className="columns-4 sm:columns-5 md:columns-6 gap-2 text-center list-none ml-0 timetable-columns"
                     >
                       {timesByRoute[route.routeShortName][service].map((trip) => (
                         <li

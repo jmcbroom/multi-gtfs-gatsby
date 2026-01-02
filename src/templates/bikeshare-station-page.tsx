@@ -64,9 +64,24 @@ const BikeshareStationPage = ({ data, pageContext }) => {
 
   let nearbyStops = data.postgres.nearbyStops;
 
+  // Filter to only stops that have routes matching in Sanity (same logic as StopTransfers)
+  const filteredNearbyStops = nearbyStops.filter((stop: any) => {
+    const agency = sanityAgencies.find((a: any) => a.currentFeedIndex === stop.feedIndex);
+    if (!agency) return false;
+
+    // Check if any of this stop's trip directions have a matching route in Sanity
+    return stop.tripDirections?.some((td: any) => {
+      return sanityRoutes.some((rt: any) =>
+        rt.shortName === td.routeId &&
+        rt.agency.currentFeedIndex === stop.feedIndex
+      );
+    });
+  });
+
   let nearbyStopsFc = {
     type: "FeatureCollection" as const,
-    features: nearbyStops.map((stop: any) => {
+    features: filteredNearbyStops.map((stop: any) => {
+      const agency = sanityAgencies.find((sa: any) => sa.currentFeedIndex === stop.feedIndex);
       return {
         type: "Feature" as const,
         id: stop.stopId,
@@ -82,7 +97,7 @@ const BikeshareStationPage = ({ data, pageContext }) => {
           offset: [1, 0],
           anchor: "left",
           justify: "left",
-          agency: sanityAgencies.find(sa => sa.currentFeedIndex === stop.feedIndex).slug.current,
+          agency: agency?.slug?.current,
         },
       };
     }),
@@ -180,7 +195,7 @@ const BikeshareStationPage = ({ data, pageContext }) => {
               <p>Loading station status..</p>
             </div>
           )}
-          <StopTransfers stop={indexedStop} nearbyStops={nearbyStops} routes={sanityRoutes} agencies={sanityAgencies} />
+          <StopTransfers stop={indexedStop} nearbyStops={filteredNearbyStops} routes={sanityRoutes} agencies={sanityAgencies} />
         </div>
         <div>
           <BikeshareMap 

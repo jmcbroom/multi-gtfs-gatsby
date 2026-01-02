@@ -52,6 +52,7 @@ const ShapeInput = React.forwardRef((props, ref) => {
         displayControlsDefault: false,
         controls: {
           line_string: true,
+          polygon: true,
           trash: true,
         },
       });

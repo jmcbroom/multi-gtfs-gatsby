@@ -88,7 +88,8 @@ const RouteMap = ({
       padding: mapPadding,
       bearing: mapBearing,
       offset: mapOffset,
-      maxZoom: 17
+      maxZoom: 17,
+      linear: true,
     },
   };
 

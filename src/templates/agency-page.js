@@ -204,7 +204,6 @@ const Agency = ({ data, pageContext, location }) => {
             <div>
               <h4>Feed information</h4>
               <p className="ml-2">The currently published GTFS feed is valid from: <b>{startDate}</b> to <b>{endDate}</b>.</p>
-              {/* if end date > today, add warning */}
               {endDate < new Date().toISOString().split("T")[0] && (
                 <p className="text-red-400 font-semibold mt-3 ml-2">
                   <FontAwesomeIcon icon={faExclamationTriangle} />{" "}

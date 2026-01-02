@@ -95,6 +95,7 @@ const StopMap = ({
     map.current.fitBounds(bbox(stopAndVehicleFc), {
       padding: 50,
       maxZoom: 17.25,
+      linear: true,
     });
   }
 
