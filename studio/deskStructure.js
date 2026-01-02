@@ -1,4 +1,4 @@
-import { faBusSimple, FaCity, FaLongArrowAltRight, FaMap, FaBiking, FaComment } from "react-icons/fa";
+import { FaBus, FaCity, FaLongArrowAltRight, FaMap, FaBiking, FaComment, FaBuilding } from "react-icons/fa";
 
 export default S =>
   S.list()
@@ -8,7 +8,7 @@ export default S =>
       S.listItem().title("Transit agencies").icon(FaMap).child(S.documentTypeList("agency")),
       S.listItem()
         .title("Routes by agency")
-        .icon(faBusSimple)
+        .icon(FaBus)
         .child(
           S.documentTypeList("agency")
             .title("Routes by agency")
@@ -25,6 +25,10 @@ export default S =>
         .title("Bikeshare systems")
         .icon(FaBiking)
         .child(S.documentTypeList("bikeshare")),
+      S.listItem()
+        .title("Transit Centers")
+        .icon(FaBuilding)
+        .child(S.documentTypeList("transitCenter")),
       S.divider(),
       // S.listItem().title("Destinations").icon(FaCity).child(S.documentTypeList("destination")),
       // S.listItem()

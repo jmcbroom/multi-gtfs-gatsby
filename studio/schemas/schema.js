@@ -14,6 +14,9 @@ import journey from "./journey";
 import journeyPartDestTime from "./journeyPartDestTime";
 
 import bikeshare from "./bikeshare";
+import transitCenter from "./transitCenter";
+import transitCenterStop from "./transitCenterStop";
+import transitCenterBikeshare from "./transitCenterBikeshare";
 import comment from "./comment";
 
 export default [
@@ -39,4 +42,9 @@ export default [
 
   // GBFS
   bikeshare,
+
+  // Transit Centers
+  transitCenter,
+  transitCenterStop,
+  transitCenterBikeshare,
 ];
