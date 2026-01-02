@@ -24,15 +24,35 @@ const RouteSlim = ({
   const NameWrapper = link ? Link : React.Fragment;
   const nameProps = link ? { to: link } : {};
 
+  const sizes = {
+    xs: {
+      gap: "gap-1.5",
+      name: "text-xs mb-0 font-medium leading-3",
+      direction: "text-[10px] text-gray-500 dark:text-gray-400 text-left font-medium",
+    },
+    small: {
+      gap: "gap-1.5",
+      name: "text-xs mb-0 font-medium leading-4",
+      direction: "text-xs text-gray-500 dark:text-gray-400 text-left font-medium",
+    },
+    medium: {
+      gap: "gap-2",
+      name: "text-sm mb-0 font-medium leading-4",
+      direction: "text-xs text-gray-500 dark:text-gray-400 text-left font-medium",
+    },
+  };
+
+  const sizeConfig = sizes[size] || sizes.medium;
+
   return (
-    <div className={"flex items-center justify-start gap-2"}>
+    <div className={`flex items-center justify-start ${sizeConfig.gap}`}>
       <RouteBadge route={{ displayShortName, routeColor, routeTextColor }} size={size} />
       <div className="flex flex-col items-start justify-around">
         <NameWrapper {...nameProps}>
-          <h2 className="text-sm mb-0 font-medium leading-4">{routeLongName}</h2>
+          <h2 className={sizeConfig.name}>{routeLongName}</h2>
         </NameWrapper>
         {(direction?.directionDescription || direction?.directionHeadsign) && (
-          <span className="text-xs text-gray-500 dark:text-gray-400 text-left font-medium">
+          <span className={sizeConfig.direction}>
             {direction.directionDescription
               ? `${direction.directionDescription.replace("bound", "")} to ${direction.directionHeadsign}`
               : `to ${direction.directionHeadsign}`}
