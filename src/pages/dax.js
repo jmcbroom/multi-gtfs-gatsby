@@ -46,25 +46,26 @@ const Dax = ({ data }) => {
   sanityRoute.directions.forEach((dir) => {
     // set timepoint = 1 for each stopTime that is a timepoint
     trips.forEach((trip) => {
-      trip.stopTimes.forEach((st, idx) => {
+      trip.stopTimes.forEach((st) => {
           st.timepoint = 1;
       });
     });
 
     longTrips.forEach((trip) => {
-      trip.stopTimes.forEach((st, idx) => {
+      trip.stopTimes.forEach((st) => {
         st.timepoint = 1;
       });
     });
   });
 
+  // Note: serviceDays is overridden below, but we still pass trips for consistency
   let serviceDays = getServiceDays(
-    serviceCalendars.filter((sc) =>
-      data.agency.serviceIds.includes(sc.serviceId)
-    )
+    serviceCalendars,
+    null,
+    trips
   );
   serviceDays = {
-    'daily': 'c_70310_b_82262_d_127'
+    'daily': ['c_70310_b_82262_d_127']
   }
 
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
@@ -278,6 +279,8 @@ export const query = graphql`
             friday
             saturday
             serviceId
+            startDate
+            endDate
           }
         }
       }

@@ -17,6 +17,7 @@ exports.handler = async function(event) {
     ddot: `http://myddotbus.com/bustime/api/v3/getvehicles?key=${process.env.DDOT_KEY}&format=json&rt=${routeId}`,
     smart: `http://bustime.smartbus.org/bustime/api/v3/getvehicles?key=${process.env.SMART_KEY}&format=json&rt=${routeId}`,
     theride: `http://rt.theride.org/bustime/api/v3/getvehicles?key=${process.env.THERIDE_KEY}&format=json&rt=${routeId}`,
+    umich: `https://mbus.ltp.umich.edu/bustime/api/v3/getvehicles?key=${process.env.UMICH_KEY}&format=json&rt=${routeId}`,
     'transit-windsor': `https://windsor.mytransitride.com/api/VehicleStatuses?patternIds=${patterns},`
   };
 

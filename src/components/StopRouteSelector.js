@@ -7,7 +7,11 @@ const StopRouteSelector = ({ routes, agency, selectedRoute, setSelectedRoute }) 
       <div className="grayHeader">Routes that stop here</div>
       <div className="p-2 bg-gray-50 dark:bg-zinc-900">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {routes.map((route) => (
+          {routes.filter(route => route.routeShortName !== '1000').map((route) => {
+            if (!route.directions) {
+              console.log('Route missing directions:', route);
+            }
+            return (
             <button
               key={route.displayShortName}
               onClick={() => setSelectedRoute(selectedRoute === route.routeShortName ? null : route.routeShortName)}
@@ -17,9 +21,10 @@ const StopRouteSelector = ({ routes, agency, selectedRoute, setSelectedRoute }) 
                   : 'border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:border-gray-400 dark:hover:border-zinc-500'
               }`}
             >
-              <RouteSlim {...route} agency={agency} direction={route.directions[0]} size="small" />
+              <RouteSlim {...route} agency={agency} direction={route.directions?.[0]} size="small" />
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

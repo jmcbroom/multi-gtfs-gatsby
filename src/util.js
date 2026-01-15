@@ -72,6 +72,8 @@ export const shortenStopName = (stopName) => {
     ["Ypsilanti Transit Center", "YTC"],
     ["Dearborn Transit Center", "DTC"],
     ["Royal Oak Transit Center", "RO TC"],
+    ["Central Campus Transit Center", "CCTC"],
+    ["Central Campus TC", "CCTC"]
   ];
 
   let result = stopName;
@@ -207,32 +209,64 @@ export const sortTripsByFrequentTimepoint = (trips) => {
 
 /**
  * Convert GTFS service calendars into the specific days of the week.
+ * Filters to only currently active services and supports multiple service IDs per day type.
  * @param {*} serviceCalendars: an array of a feed's Calendars, describing which days of the week are applicable for that service
- * @returns an object whose keys are `weekday`, `saturday`, `sunday` and the corresponding serviceId values
+ * @param {string} currentDate: optional date string (YYYYMMDD format) to filter by. Defaults to today.
+ * @param {Array} trips: optional array of trip objects to help determine which service IDs actually have trips
+ * @returns an object whose keys are `weekday`, `saturday`, `sunday` and values are ARRAYS of serviceIds
  */
-export const getServiceDays = (serviceCalendars) => {
+export const getServiceDays = (serviceCalendars, currentDate = null, trips = null) => {
+  // Use current date if not provided
+  if (!currentDate) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    currentDate = `${year}${month}${day}`;
+  }
 
-  // let's figure out which service ID is which
+  // Filter to only currently active services (where today is between start_date and end_date)
+  let activeCalendars = serviceCalendars.filter((sc) => {
+    // If no date fields, include the service (backwards compatibility)
+    if (!sc.startDate && !sc.endDate) {
+      return true;
+    }
+
+    // Remove hyphens from dates to ensure consistent YYYYMMDD format for comparison
+    const startDate = (sc.startDate || '00000000').replace(/-/g, '');
+    const endDate = (sc.endDate || '99999999').replace(/-/g, '');
+
+    return currentDate >= startDate && currentDate <= endDate;
+  });
+
+  // If date filtering removed ALL calendars, fall back to using all calendars
+  // This handles cases where GTFS data has outdated or future date ranges
+  if (activeCalendars.length === 0 && serviceCalendars.length > 0) {
+    console.warn('Date filtering excluded all service calendars. Using all calendars as fallback.');
+    activeCalendars = serviceCalendars;
+  }
+
+  // Initialize with arrays instead of null
   let serviceDays = {
-    weekday: null,
-    saturday: null,
-    sunday: null,
+    weekday: [],
+    saturday: [],
+    sunday: [],
   };
 
   let weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"];
 
-  serviceCalendars.forEach((sc) => {
-
+  activeCalendars.forEach((sc) => {
     // evaluate all weekdays of the service calendar
     let weekdayMatches = weekdays.map((day) => sc[day] === 1);
 
-    // all weekdayMatches are true => assign weekday
+    // Weekday service: any weekday is true and Sat/Sun are false
+    // This handles full Mon-Fri service as well as partial weekday services (e.g., Mon-Thu, Fri only)
     if (
-      weekdayMatches.every((e) => e) &&
+      weekdayMatches.some((e) => e) &&
       sc.saturday === 0 &&
       sc.sunday === 0
     ) {
-      serviceDays.weekday = sc.serviceId;
+      serviceDays.weekday.push(sc.serviceId);
     }
     // all weekdayMatches are false + match only Sat or Sun
     if (
@@ -240,14 +274,14 @@ export const getServiceDays = (serviceCalendars) => {
       sc.saturday === 1 &&
       sc.sunday === 0
     ) {
-      serviceDays.saturday = sc.serviceId;
+      serviceDays.saturday.push(sc.serviceId);
     }
     if (
       weekdayMatches.every((e) => !e) &&
       sc.sunday === 1 &&
       sc.saturday === 0
     ) {
-      serviceDays.sunday = sc.serviceId;
+      serviceDays.sunday.push(sc.serviceId);
     }
 
     // all weekdayMatches are false + match both Sat and Sun
@@ -256,37 +290,100 @@ export const getServiceDays = (serviceCalendars) => {
       sc.sunday === 1 &&
       sc.saturday === 1
     ) {
-      serviceDays.saturday = sc.serviceId;
-      serviceDays.sunday = sc.serviceId;
+      serviceDays.saturday.push(sc.serviceId);
+      serviceDays.sunday.push(sc.serviceId);
     }
 
-    // all weekdayMatches are false + match both Sat and Sun
+    // weekday + saturday service
     if (
       weekdayMatches.every((e) => e) &&
       sc.sunday === 0 &&
       sc.saturday === 1
     ) {
-      serviceDays.saturday = sc.serviceId;
-      serviceDays.weekday = sc.serviceId;
+      serviceDays.saturday.push(sc.serviceId);
+      serviceDays.weekday.push(sc.serviceId);
     }
 
+    // all days service
     if (
       weekdayMatches.every((e) => e) &&
       sc.sunday === 1 &&
       sc.saturday === 1
     ) {
-      serviceDays.weekday = sc.serviceId;
-      serviceDays.saturday = sc.serviceId;
-      serviceDays.sunday = sc.serviceId;
+      serviceDays.weekday.push(sc.serviceId);
+      serviceDays.saturday.push(sc.serviceId);
+      serviceDays.sunday.push(sc.serviceId);
     }
   });
 
-  // if there's still no weekday match, assign the wednesday serviceCalendar
-  if (!serviceDays.weekday) {
-    serviceDays.weekday = serviceCalendars.find(
-      (sc) => sc.wednesday === 1
-    ).serviceId;
+  // if there's still no weekday match, assign any wednesday serviceCalendar
+  if (serviceDays.weekday.length === 0) {
+    const wednesdayService = activeCalendars.find((sc) => sc.wednesday === 1);
+    if (wednesdayService) {
+      serviceDays.weekday.push(wednesdayService.serviceId);
+    }
   }
+
+  // Deduplicate: When multiple service IDs match the same day type, keep only one
+  // Prefer service IDs that actually have trips (if trips data provided)
+  Object.keys(serviceDays).forEach((day) => {
+    if (serviceDays[day].length > 1) {
+      // Get the calendars for these service IDs
+      const calendarsForDay = activeCalendars.filter((sc) =>
+        serviceDays[day].includes(sc.serviceId)
+      );
+
+      let chosenCalendar;
+
+      // If we have trips data, prefer service IDs that have trips
+      if (trips && trips.length > 0) {
+        const tripServiceIds = new Set(trips.map(t => t.serviceId));
+        const calendarsWithTrips = calendarsForDay.filter(sc =>
+          tripServiceIds.has(sc.serviceId)
+        );
+
+        if (calendarsWithTrips.length > 0) {
+          // If multiple services have trips, prefer the most recent one
+          calendarsWithTrips.sort((a, b) => {
+            const aEnd = (a.endDate || '99999999').replace(/-/g, '');
+            const bEnd = (b.endDate || '99999999').replace(/-/g, '');
+            if (aEnd !== bEnd) return bEnd.localeCompare(aEnd);
+
+            const aStart = (a.startDate || '00000000').replace(/-/g, '');
+            const bStart = (b.startDate || '00000000').replace(/-/g, '');
+            return bStart.localeCompare(aStart);
+          });
+          chosenCalendar = calendarsWithTrips[0];
+        } else {
+          // No services have trips, fall back to date-based selection
+          calendarsForDay.sort((a, b) => {
+            const aEnd = (a.endDate || '99999999').replace(/-/g, '');
+            const bEnd = (b.endDate || '99999999').replace(/-/g, '');
+            if (aEnd !== bEnd) return bEnd.localeCompare(aEnd);
+
+            const aStart = (a.startDate || '00000000').replace(/-/g, '');
+            const bStart = (b.startDate || '00000000').replace(/-/g, '');
+            return bStart.localeCompare(aStart);
+          });
+          chosenCalendar = calendarsForDay[0];
+        }
+      } else {
+        // No trips data provided, fall back to date-based selection
+        calendarsForDay.sort((a, b) => {
+          const aEnd = (a.endDate || '99999999').replace(/-/g, '');
+          const bEnd = (b.endDate || '99999999').replace(/-/g, '');
+          if (aEnd !== bEnd) return bEnd.localeCompare(aEnd);
+
+          const aStart = (a.startDate || '00000000').replace(/-/g, '');
+          const bStart = (b.startDate || '00000000').replace(/-/g, '');
+          return bStart.localeCompare(aStart);
+        });
+        chosenCalendar = calendarsForDay[0];
+      }
+
+      serviceDays[day] = [chosenCalendar.serviceId];
+    }
+  });
 
   return serviceDays;
 };
@@ -294,7 +391,7 @@ export const getServiceDays = (serviceCalendars) => {
 /**
  * Group a route's trips by the serviceDay (weekday/sat/sun)
  * @param {Array} trips: an array of trip objects
- * @param {Object} serviceDays: getServiceDays returned value
+ * @param {Object} serviceDays: getServiceDays returned value (now contains arrays of serviceIds)
  * @returns a grouping of trips by weekday, saturday, sunday
  */
 export const getTripsByServiceDay = (trips, serviceDays) => {
@@ -305,8 +402,10 @@ export const getTripsByServiceDay = (trips, serviceDays) => {
   };
 
   Object.keys(serviceDays).forEach((day) => {
-    let thisDayTrips = trips.filter(
-      (trip) => trip.serviceId === serviceDays[day]
+    const serviceIdsForDay = serviceDays[day];
+    // serviceDays[day] is now an array, so check if trip.serviceId is in that array
+    let thisDayTrips = trips.filter((trip) =>
+      serviceIdsForDay.includes(trip.serviceId)
     );
     tripsByServiceDay[day] = thisDayTrips;
   });
@@ -317,7 +416,7 @@ export const getTripsByServiceDay = (trips, serviceDays) => {
 /**
  * Group a route's trips by service day & direction
  * @param {*} trips: an array of trip objects
- * @param {*} serviceDays: getServiceDays returned value
+ * @param {*} serviceDays: getServiceDays returned value (now contains arrays of serviceIds)
  * @param {*} headsignsByDirectionId: an object whose keys are directionId and values an array of distinct tripHeadsigns in that direction
  * @returns a nested object whose top keys are serviceDays (weekday/saturday/sunday), intermediate keys the directionId, and values are the trips which fall in that filter
  */
@@ -331,10 +430,11 @@ export const getTripsByServiceAndDirection = (
 
   Object.keys(serviceDays).forEach((day) => {
     tripsByServiceAndDirection[day] = {};
+    const serviceIdsForDay = serviceDays[day];
     Object.keys(headsignsByDirectionId).forEach((dir) => {
       let filteredTrips = trips.filter(
         (trip) =>
-          trip.serviceId === serviceDays[day] &&
+          serviceIdsForDay.includes(trip.serviceId) &&
           trip.directionId === parseInt(dir)
       );
       if (filteredTrips.length > 0) {
@@ -367,8 +467,12 @@ export const getHeadsignsByDirectionId = (trips, sanityRoute) => {
   });
 
   if (sanityRoute) {
-    sanityRoute.directions.forEach((dir, idx) => {
+    sanityRoute.directions.forEach((dir) => {
       let directionId = dir.directionId;
+      // Initialize if this direction doesn't exist in GTFS trips data
+      if (!headsignsByDirectionId[directionId]) {
+        headsignsByDirectionId[directionId] = { headsigns: [] };
+      }
       if (dir.directionHeadsign) {
         headsignsByDirectionId[directionId].headsigns = [dir.directionHeadsign];
       }

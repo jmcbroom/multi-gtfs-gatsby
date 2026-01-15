@@ -14,10 +14,24 @@ query plan($from: InputCoordinates!, $to: InputCoordinates!, $date: String, $tim
       numberOfTransfers
       legs {
         mode
-        start { scheduledTime }
-        end { scheduledTime }
+        realTime
+        start {
+          scheduledTime
+          estimated {
+            time
+            delay
+          }
+        }
+        end {
+          scheduledTime
+          estimated {
+            time
+            delay
+          }
+        }
         from { name lat lon stop { gtfsId code } }
         to { name lat lon stop { gtfsId code } }
+        intermediateStops { name gtfsId }
         route { shortName longName color agency { gtfsId name } }
         trip { directionId }
         headsign
@@ -124,10 +138,18 @@ exports.handler = async function (event) {
                 numberOfTransfers: itin.numberOfTransfers,
                 legs: (itin.legs || []).map(leg => ({
                   mode: leg.mode,
-                  startTime: leg.start?.scheduledTime ? new Date(leg.start.scheduledTime).getTime() : null,
-                  endTime: leg.end?.scheduledTime ? new Date(leg.end.scheduledTime).getTime() : null,
+                  realTime: leg.realTime || false,
+                  startTime: leg.start?.estimated?.time
+                    ? new Date(leg.start.estimated.time).getTime()
+                    : (leg.start?.scheduledTime ? new Date(leg.start.scheduledTime).getTime() : null),
+                  endTime: leg.end?.estimated?.time
+                    ? new Date(leg.end.estimated.time).getTime()
+                    : (leg.end?.scheduledTime ? new Date(leg.end.scheduledTime).getTime() : null),
+                  startDelay: leg.start?.estimated?.delay || null,
+                  endDelay: leg.end?.estimated?.delay || null,
                   from: leg.from,
                   to: leg.to,
+                  intermediateStops: leg.intermediateStops || [],
                   route: leg.route,
                   trip: leg.trip,
                   headsign: leg.headsign,

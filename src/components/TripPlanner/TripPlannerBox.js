@@ -118,8 +118,8 @@ const TripPlannerBox = () => {
   };
 
   return (
-    <div className="bg-gray-100 dark:bg-zinc-800 p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="bg-gray-100 dark:bg-zinc-800 p-3 md:p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
         {/* Row 1: From */}
         <div className="flex gap-2">
           {origin?.name === "Current location" ? (
@@ -190,18 +190,18 @@ const TripPlannerBox = () => {
         </div>
 
         {/* Row 2: Date/Time */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 md:gap-2">
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-2 py-1.5 text-sm bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
+            className="flex-1 min-w-[120px] px-2 py-1.5 text-sm bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
           />
           <input
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="px-2 py-1.5 text-sm bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
+            className="flex-1 min-w-[100px] px-2 py-1.5 text-sm bg-white dark:bg-zinc-700 border border-gray-300 dark:border-zinc-600 rounded text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none"
           />
           <div className="inline-flex rounded bg-gray-200 dark:bg-zinc-700 p-0.5">
             <button

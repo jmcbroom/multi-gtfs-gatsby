@@ -15,3 +15,6 @@ yarn-error.log
 *_routes.ndjson
 
 jsconfig.json
+
+plugins/
+notebooks/

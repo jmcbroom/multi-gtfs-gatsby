@@ -63,22 +63,6 @@ const NearbyStopsList = ({ sanityAgencies, favoriteStops = [], customLocation = 
                    sanityHeadsign.includes(headsignLower);
           });
         }
-
-        // Debug logging
-        console.log(`[NearbyStops] Route ${otpRoute.shortName}:`, {
-          otpDirectionId,
-          otpHeadsign,
-          sanityDirections: sanityRoute.directions?.map(d => ({
-            id: d.directionId,
-            headsign: d.directionHeadsign,
-            description: d.directionDescription
-          })),
-          matchedDirection: matchedDirection ? {
-            id: matchedDirection.directionId,
-            headsign: matchedDirection.directionHeadsign,
-            description: matchedDirection.directionDescription
-          } : 'NO MATCH'
-        });
       }
 
       // Combine all headsigns into a single string
@@ -154,12 +138,6 @@ const NearbyStopsList = ({ sanityAgencies, favoriteStops = [], customLocation = 
         const data = await response.json();
 
         if (data.data?.nearest?.edges) {
-          // Log the raw OTP feed IDs for debugging
-          console.log('OTP feed IDs:', data.data.nearest.edges.map(e => ({
-            gtfsId: e.node.place?.gtfsId,
-            stopName: e.node.place?.name,
-            agencyName: e.node.place?.routes?.[0]?.agency?.name
-          })));
 
           const stops = data.data.nearest.edges
             .map((edge) => edge.node)

@@ -8,8 +8,6 @@ const ItineraryCard = ({
   itinerary,
   isSelected,
   onClick,
-  onMouseEnter,
-  onMouseLeave,
 }) => {
   const { duration, numberOfTransfers, legs, start, end } = itinerary;
   const totalWalkDuration = legs.reduce(
@@ -20,11 +18,9 @@ const ItineraryCard = ({
   return (
     <div
       onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
       className={`
         bg-gray-100 dark:bg-zinc-900
-        border-2 rounded-lg p-2 cursor-pointer
+        border-2 rounded-lg p-1.5 md:p-2 cursor-pointer
         transition-all
         ${
           isSelected
@@ -34,16 +30,16 @@ const ItineraryCard = ({
       `}
     >
       {/* Summary row */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col w-36 md:w-40">
-          <div className="font-semibold leading-tight">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col w-28 md:w-40">
+          <div className="font-semibold leading-tight text-sm md:text-base">
             {formatDuration(duration)}
           </div>
-          <div className="text-xs text-gray-500 dark:text-zinc-400 leading-tight">
+          <div className="text-[10px] md:text-xs text-gray-500 dark:text-zinc-400 leading-tight">
             {formatTime(start)} – {formatTime(end)}
           </div>
         </div>
-        <div className="flex items-center flex-wrap gap-[4px]">
+        <div className="flex items-center flex-wrap gap-[3px] md:gap-[4px] flex-1 justify-end">
           {legs
             .filter((leg) => leg.mode !== "WALK" || leg.distance >= 200)
             .map((leg, idx, filteredLegs) => (
@@ -52,7 +48,7 @@ const ItineraryCard = ({
                 {idx < filteredLegs.length - 1 && (
                   <FontAwesomeIcon
                     icon={faArrowRight}
-                    className="text-gray-500 dark:text-zinc-400 text-[8px]"
+                    className="text-gray-500 dark:text-zinc-400 text-[7px] md:text-[8px]"
                   />
                 )}
               </React.Fragment>

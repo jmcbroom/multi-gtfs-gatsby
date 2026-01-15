@@ -78,10 +78,12 @@ const Route = ({ data, pageContext, location }) => {
       });
   });
 
+  // Don't filter calendars here - let getServiceDays use the trips data to find the right service IDs
+  // This handles cases where a route uses service IDs not in the agency's main serviceIds list
   let serviceDays = getServiceDays(
-    serviceCalendars.filter((sc) =>
-      data.agency.serviceIds.includes(sc.serviceId)
-    )
+    serviceCalendars, // pass all calendars
+    null, // use current date
+    trips  // pass trips so deduplication can prefer service IDs with actual trips
   );
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
@@ -92,7 +94,7 @@ const Route = ({ data, pageContext, location }) => {
   );
 
   if (sanityRoute) {
-    sanityRoute.directions.forEach((dir, idx) => {
+    sanityRoute.directions.forEach((dir) => {
       if (dir.directionHeadsign) {
         headsignsByDirectionId[dir.directionId][0] = dir.directionHeadsign;
       }
@@ -523,6 +525,8 @@ export const query = graphql`
             friday
             saturday
             serviceId
+            startDate
+            endDate
           }
         }
       }

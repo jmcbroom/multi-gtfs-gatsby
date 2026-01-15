@@ -2,23 +2,18 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { graphql, Link } from "gatsby";
 import React from "react";
 import PortableText from "react-portable-text";
-import AgencyMap from "../components/AgencyMap";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import RouteHeader from "../components/RouteHeader";
 import RouteSlim from "../components/RouteSlim";
+import SystemMap from "../components/SystemMap";
 import { createAgencyData, createRouteData } from "../util";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { getStopIdentifier } from "../stopUtils";
 
-const Agency = ({ data, pageContext, location }) => {
+const Agency = ({ data, pageContext }) => {
 
   let gtfsAgency = data.postgres.agencies[0];
   let sanityAgency = data.allSanityAgency.edges[0].node;
   let agencyData = createAgencyData(gtfsAgency, sanityAgency);
-
-
-  let { startDate, endDate } = gtfsAgency.feedInfo;
-
 
   let {
     agencyUrl,
@@ -36,7 +31,7 @@ const Agency = ({ data, pageContext, location }) => {
     .filter((r) => r.trips.totalCount > 0)
     .sort((a, b) => a.implicitSort - b.implicitSort);
   // match gtfsRoutes with the sanityRoutes
-  routes.forEach((r) => {
+  routes = routes.map((r) => {
     // find the matching sanityRoute
     let matching = sanityRoutes.filter(
       (sr) => sr.shortName === r.routeShortName
@@ -44,67 +39,39 @@ const Agency = ({ data, pageContext, location }) => {
 
     // let's override the route attributes with those from Sanity
     if (matching.length === 1) {
-      r = createRouteData(r, matching[0]);
+      return createRouteData(r, matching[0]);
     }
+    return r;
   });
 
   let allRoutes = Object.assign([], routes.filter(r => r.directions));
 
-  // create a GeoJSON feature collection with all the agency's route's directional GeoJSON features.
-  let allRouteFeatures = [];
+  // Process timepoints for each route
+  allRoutes.forEach((route) => {
+    if (!route.directions || !route.longTrips) return;
 
-  routes.forEach((route) => {
-    if (!route.directions) {
-      return;
-    }
-    else {
+    route.directions.forEach((dir) => {
+      let timepoints = dir.directionTimepoints || [];
 
-      route?.directions?.forEach((direction) => {
-        let feature = JSON.parse(direction.directionShape)[0];
-        
-        feature.properties = {
-          routeColor: route.routeColor,
-          routeLongName: route.routeLongName,
-          routeShortName: route.routeShortName,
-          displayShortName: route.displayShortName,
-          routeTextColor: route.routeTextColor,
-          mapPriority: route.mapPriority,
-          directionDescription: direction.directionDescription,
-          directionHeadsign: direction.directionHeadsign,
-          directionId: direction.directionId,
-        };
-        
-        allRouteFeatures.push(feature);
-      });
-    }
+      // Mark timepoints in stop times
+      route.longTrips
+        .filter((trip) => trip.directionId === dir.directionId)
+        .forEach((trip) => {
+          // Always mark first and last stops as timepoints
+          if (trip.stopTimes && trip.stopTimes.length > 0) {
+            trip.stopTimes[0].timepoint = 1;
+            trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
+
+            // Mark stops that are in the timepoints array
+            trip.stopTimes.forEach((st) => {
+              if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
+                st.timepoint = 1;
+              }
+            });
+          }
+        });
+    });
   });
-
-  let allRouteFc = {
-    type: "FeatureCollection",
-    features: allRouteFeatures,
-  };
-
-  // Create stops feature collection for the system map
-  // Use the agency's stopIdentifierField to determine the correct identifier for URLs
-  let stopIdentifierField = sanityAgency.stopIdentifierField || "stopCode";
-  let stopsFc = {
-    type: "FeatureCollection",
-    features: data.postgres.stops.map((stop) => ({
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [stop.stopLon, stop.stopLat],
-      },
-      properties: {
-        stopId: stop.stopId,
-        stopCode: stop[stopIdentifierField] || stop.stopCode || stop.stopId,
-        stopName: stop.stopName,
-        offset: [0, 0.8],
-        anchor: "top",
-        justify: "center",
-      },
-    })),
-  };
 
   // generate human-readable text for fare info
   fareAttributes = fareAttributes?.map((fare) => {
@@ -137,8 +104,29 @@ const Agency = ({ data, pageContext, location }) => {
     return fare;
   });
 
+  // Create stops feature collection for SystemMap component
+  let stopIdentifierField = sanityAgency.stopIdentifierField || "stopCode";
+  let stopsFc = {
+    type: "FeatureCollection",
+    features: data.postgres.stops.map((stop) => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [stop.stopLon, stop.stopLat],
+      },
+      properties: {
+        stopId: stop.stopId,
+        stopCode: stop[stopIdentifierField] || stop.stopCode || stop.stopId,
+        stopName: stop.stopName,
+        offset: [0, 0.8],
+        anchor: "top",
+        justify: "center",
+      },
+    })),
+  };
+
   return (
-    <div className="py-4">
+    <>
       <AgencySlimHeader agency={agencyData} />
       <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
         <Tabs.List className="tabList" aria-label="Manage your account">
@@ -201,16 +189,6 @@ const Agency = ({ data, pageContext, location }) => {
                 ))}
               </div>
             </div>
-            <div>
-              <h4>Feed information</h4>
-              <p className="ml-2">The currently published GTFS feed is valid from: <b>{startDate}</b> to <b>{endDate}</b>.</p>
-              {endDate < new Date().toISOString().split("T")[0] && (
-                <p className="text-red-400 font-semibold mt-3 ml-2">
-                  <FontAwesomeIcon icon={faExclamationTriangle} />{" "}
-                  This schedule may be out of date.
-                </p>
-              )}
-            </div>
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="routes">
@@ -226,11 +204,16 @@ const Agency = ({ data, pageContext, location }) => {
           </div>
         </Tabs.Content>
         <Tabs.Content className="tabContent" value="map">
-          <p className="grayHeader">System map</p>
-          <AgencyMap agency={agencyData} routesFc={allRouteFc} stopsFc={stopsFc} />
+          <SystemMap
+            routes={allRoutes}
+            stopsFc={stopsFc}
+            agencySlug={pageContext.agencySlug}
+            agencyName={agencyData.name}
+            agencyData={agencyData}
+          />
         </Tabs.Content>
       </Tabs.Root>
-    </div>
+    </>
   );
 };
 
@@ -261,6 +244,26 @@ export const query = graphql`
           trips: tripsByFeedIndexAndRouteId {
             totalCount
           }
+          longTrips: longestTripsList {
+            tripId
+            directionId
+            direction
+            serviceId
+            stopTimes: stopTimesByFeedIndexAndTripIdList(
+              orderBy: STOP_SEQUENCE_ASC
+            ) {
+              stopId
+              stop: stopByFeedIndexAndStopId {
+                stopCode
+                stopId
+                stopName
+                stopLon
+                stopLat
+              }
+              timepoint
+              stopSequence
+            }
+          }
         }
         feedInfo: feedInfoByFeedIndex {
           startDate: feedStartDate
@@ -274,6 +277,8 @@ export const query = graphql`
             friday
             saturday
             serviceId
+            startDate
+            endDate
           }
         }
         fareAttributes: fareAttributesByFeedIndexAndAgencyIdList(

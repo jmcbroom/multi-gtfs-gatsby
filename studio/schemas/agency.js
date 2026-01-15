@@ -32,6 +32,13 @@ export default {
       },
     },
     {
+      name: "sortOrder",
+      title: "Sort order",
+      description: "Order in which this agency should appear in lists (lower numbers first)",
+      type: "number",
+      validation: Rule => Rule.integer().min(0)
+    },
+    {
       name: "agencyId",
       title: "Agency ID",
       description: "The ID of the transit agency -- this is usually 1",

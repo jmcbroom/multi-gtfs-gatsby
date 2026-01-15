@@ -1,7 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPersonWalking, faBusSimple, faTrain, faShip, faBicycle } from "@fortawesome/free-solid-svg-icons";
-import { formatDuration, formatDistance, formatTime } from "../../tripPlannerUtils";
+import { faPersonWalking, faBusSimple, faTrain, faShip, faBicycle, faWifi } from "@fortawesome/free-solid-svg-icons";
+import { formatDuration, formatDistance, formatTime, formatDelay, shouldShowRealtimeBadge } from "../../tripPlannerUtils";
 import { getStopUrlFromOtp, getRouteUrlFromOtp } from "../../stopUtils";
 import RouteSlim from "../RouteSlim";
 
@@ -34,9 +34,6 @@ const ItineraryLeg = ({ leg, index, isLast, onHover }) => {
         onMouseLeave={() => onHover && onHover(null)}
       >
         <div className="w-8 flex justify-center items-center relative">
-          {!isLast && (
-            <div className="absolute top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-zinc-600"></div>
-          )}
           <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center z-10 relative">
             <FontAwesomeIcon icon={faPersonWalking} className="text-white text-[10px]" />
           </div>
@@ -70,9 +67,9 @@ const ItineraryLeg = ({ leg, index, isLast, onHover }) => {
         </div>
       </div>
       <div className="flex-1 text-sm py-3">
-        <div className="flex justify-between items-center text-xs text-gray-500 dark:text-zinc-400 mb-2">
-          <div>
-            Board at{' '}
+        <div className="flex justify-between items-center text-xs mb-2">
+          <div className="text-gray-500 dark:text-zinc-400">
+            <span className="font-semibold text-gray-700 dark:text-zinc-300">Board</span> at{' '}
             {fromStopUrl ? (
               <a
                 href={fromStopUrl}
@@ -87,17 +84,43 @@ const ItineraryLeg = ({ leg, index, isLast, onHover }) => {
               leg.from?.name
             )}
           </div>
-          <div className="font-semibold">{formatTime(leg.startTime)}</div>
+          <div className="flex flex-col items-end">
+            <div className="flex items-center gap-1">
+              {shouldShowRealtimeBadge(leg) && (
+                <FontAwesomeIcon icon={faWifi} className="text-green-500 text-[8px]" title="Real-time data" />
+              )}
+              <div className="font-semibold text-gray-900 dark:text-zinc-100">
+                {formatTime(leg.startTime)}
+              </div>
+            </div>
+            {formatDelay(leg.startDelay) && (
+              <span className="text-[9px] text-gray-500 dark:text-zinc-400 leading-tight">
+                {formatDelay(leg.startDelay)}
+              </span>
+            )}
+          </div>
         </div>
-        <div className="mb-2">
-          {routeUrl ? (
-            <a
-              href={routeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-80"
-              onClick={(e) => e.stopPropagation()}
-            >
+        <div className="flex justify-between items-center mb-2">
+          <div>
+            {routeUrl ? (
+              <a
+                href={routeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-80"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <RouteSlim
+                  routeShortName={leg.route?.shortName}
+                  displayShortName={leg.route?.shortName}
+                  routeLongName={leg.route?.longName}
+                  routeColor={`#${leg.route?.color || '666666'}`}
+                  routeTextColor={`#${leg.route?.textColor || 'ffffff'}`}
+                  direction={leg.sanityDirection || { directionHeadsign: leg.sanityHeadsign || leg.headsign }}
+                  size="small"
+                />
+              </a>
+            ) : (
               <RouteSlim
                 routeShortName={leg.route?.shortName}
                 displayShortName={leg.route?.shortName}
@@ -107,22 +130,17 @@ const ItineraryLeg = ({ leg, index, isLast, onHover }) => {
                 direction={leg.sanityDirection || { directionHeadsign: leg.sanityHeadsign || leg.headsign }}
                 size="small"
               />
-            </a>
-          ) : (
-            <RouteSlim
-              routeShortName={leg.route?.shortName}
-              displayShortName={leg.route?.shortName}
-              routeLongName={leg.route?.longName}
-              routeColor={`#${leg.route?.color || '666666'}`}
-              routeTextColor={`#${leg.route?.textColor || 'ffffff'}`}
-              direction={leg.sanityDirection || { directionHeadsign: leg.sanityHeadsign || leg.headsign }}
-              size="small"
-            />
+            )}
+          </div>
+          {leg.mode !== 'WALK' && leg.intermediateStops && (
+            <span className="text-[9px] text-gray-500 dark:text-zinc-400">
+              {leg.intermediateStops.length + 1} stop{leg.intermediateStops.length + 1 !== 1 ? 's' : ''}
+            </span>
           )}
         </div>
-        <div className="flex justify-between items-center text-xs text-gray-500 dark:text-zinc-400">
-          <div>
-            Exit at{' '}
+        <div className="flex justify-between items-center text-xs">
+          <div className="text-gray-500 dark:text-zinc-400">
+            <span className="font-semibold text-gray-700 dark:text-zinc-300">Exit</span> at{' '}
             {toStopUrl ? (
               <a
                 href={toStopUrl}
@@ -137,7 +155,21 @@ const ItineraryLeg = ({ leg, index, isLast, onHover }) => {
               leg.to?.name
             )}
           </div>
-          <div className="font-semibold">{formatTime(leg.endTime)}</div>
+          <div className="flex flex-col items-end">
+            <div className="flex items-center gap-1">
+              {shouldShowRealtimeBadge(leg) && (
+                <FontAwesomeIcon icon={faWifi} className="text-green-500 text-[8px]" title="Real-time data" />
+              )}
+              <div className="font-semibold text-gray-900 dark:text-zinc-100">
+                {formatTime(leg.endTime)}
+              </div>
+            </div>
+            {formatDelay(leg.endDelay) && (
+              <span className="text-[9px] text-gray-500 dark:text-zinc-400 leading-tight">
+                {formatDelay(leg.endDelay)}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>

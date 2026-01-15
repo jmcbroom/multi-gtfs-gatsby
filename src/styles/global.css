@@ -98,6 +98,7 @@ p {
 
 th {
   @apply bg-gray-200;
+  @apply dark:bg-zinc-800;
   @apply py-2;
   @apply px-4;
   @apply font-semibold;
@@ -105,6 +106,7 @@ th {
 
 td {
   @apply bg-white;
+  @apply dark:bg-zinc-900;
   @apply text-sm;
   @apply p-1.5;
 }
@@ -179,4 +181,26 @@ footer {
 @keyframes progressShrink {
   from { transform: scaleX(1); }
   to { transform: scaleX(0); }
+}
+
+/* Hide Mapbox logo and attribution */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
+
+/* Smaller map controls on mobile */
+@media (max-width: 768px) {
+  .mapboxgl-ctrl-group button {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .mapboxgl-ctrl-group {
+    border-radius: 3px !important;
+  }
+
+  .mapboxgl-ctrl-icon {
+    transform: scale(0.8);
+  }
 }

@@ -278,12 +278,13 @@ const TripPlannerPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [itineraries, setItineraries] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(null);
   const [hoveredLegIndex, setHoveredLegIndex] = useState(null);
   const [hoveredItineraryIndex, setHoveredItineraryIndex] = useState(null);
   const [focusedLegIndex, setFocusedLegIndex] = useState(null);
   const [sortBy, setSortBy] = useState("fastest");
   const [mobileInputsExpanded, setMobileInputsExpanded] = useState(true);
+  const [mobileShowDetails, setMobileShowDetails] = useState(false);
   const hoverTimeoutRef = React.useRef(null);
 
   // Sort itineraries
@@ -345,7 +346,7 @@ const TripPlannerPage = () => {
     setLoading(true);
     setError(null);
     setItineraries([]);
-    setSelectedIndex(0);
+    setSelectedIndex(null);
     setFocusedLegIndex(null);
 
     try {
@@ -422,6 +423,11 @@ const TripPlannerPage = () => {
     }
   }, [itineraries.length]);
 
+  // Reset detail view when itineraries change
+  useEffect(() => {
+    setMobileShowDetails(false);
+  }, [itineraries]);
+
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser");
@@ -464,12 +470,13 @@ const TripPlannerPage = () => {
     setTime(now.toTimeString().split(" ")[0].substring(0, 5));
     setArriveBy(false);
     setItineraries([]);
-    setSelectedIndex(0);
+    setSelectedIndex(null);
     setFocusedLegIndex(null);
     setError(null);
+    setMobileShowDetails(false);
   };
 
-  const selectedItinerary = sortedItineraries[selectedIndex] || null;
+  const selectedItinerary = selectedIndex !== null ? sortedItineraries[selectedIndex] : null;
 
   if (!theme) {
     return null;
@@ -514,13 +521,13 @@ const TripPlannerPage = () => {
   // Itinerary list component
   const ItineraryList = () => (
     <div>
-      <div className="flex items-center justify-between mb-2">
+      {/* <div className="flex items-center justify-between mb-2">
         <div className="text-sm text-gray-500 dark:text-zinc-400">
           {sortedItineraries.length} option
           {sortedItineraries.length !== 1 && "s"}
         </div>
         <SortButtons />
-      </div>
+      </div> */}
       <div className="space-y-2 mb-4">
         {sortedItineraries.map((itinerary, index) => (
           <ItineraryCard
@@ -528,11 +535,9 @@ const TripPlannerPage = () => {
             itinerary={itinerary}
             isSelected={index === selectedIndex}
             onClick={() => {
-              setSelectedIndex(index);
+              setSelectedIndex(index === selectedIndex ? null : index);
               setFocusedLegIndex(null);
             }}
-            onMouseEnter={() => setHoveredItineraryIndex(index)}
-            onMouseLeave={() => setHoveredItineraryIndex(null)}
           />
         ))}
       </div>
@@ -543,7 +548,6 @@ const TripPlannerPage = () => {
           itinerary={selectedItinerary}
           originName={origin?.name}
           destinationName={destination?.name}
-          onLegHover={handleLegHover}
         />
       )}
     </div>
@@ -726,8 +730,9 @@ const TripPlannerPage = () => {
         </div>
       </div>
 
-      {/* Mobile: Map and results */}
-      <div className="md:hidden flex flex-col">
+      {/* Mobile: Map and options/details */}
+      <div className="md:hidden flex flex-col flex-1 min-h-0">
+        {/* Map */}
         <div className="h-[220px] flex-shrink-0">
           <TripMap
             itineraries={sortedItineraries}
@@ -742,29 +747,62 @@ const TripPlannerPage = () => {
           />
         </div>
 
-        {/* Mobile: Leg stepper */}
-        {selectedItinerary && (
-          <div className="border-t border-gray-200 dark:border-zinc-700">
-            <LegStepper
-              itinerary={selectedItinerary}
-              focusedLegIndex={focusedLegIndex}
-              setFocusedLegIndex={setFocusedLegIndex}
-            />
-          </div>
-        )}
-
-        {/* Mobile: Results panel */}
-        <div className="p-4 border-t border-gray-200 dark:border-zinc-800">
-          {sortedItineraries.length > 0 ? (
-            <ItineraryList />
+        {/* Trip options or details */}
+        <div className="flex-1 overflow-y-auto border-t border-gray-200 dark:border-zinc-800">
+          {!mobileShowDetails ? (
+            /* Options list view */
+            sortedItineraries.length > 0 ? (
+              <div className="p-2 space-y-2 bg-white dark:bg-zinc-800">
+                {sortedItineraries.map((itinerary, index) => (
+                  <ItineraryCard
+                    key={index}
+                    itinerary={itinerary}
+                    isSelected={index === selectedIndex}
+                    onClick={() => {
+                      if (index === selectedIndex) {
+                        // Deselect
+                        setSelectedIndex(null);
+                        setMobileShowDetails(false);
+                      } else {
+                        // Select and show details
+                        setSelectedIndex(index);
+                        setMobileShowDetails(true);
+                      }
+                      setFocusedLegIndex(null);
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 text-gray-400 dark:text-zinc-500 text-sm bg-gray-50 dark:bg-zinc-900">
+                {origin && destination
+                  ? loading
+                    ? "Finding routes..."
+                    : "No routes found"
+                  : "Enter origin and destination to plan a trip"}
+              </div>
+            )
           ) : (
-            <div className="text-gray-400 dark:text-zinc-500 text-sm">
-              {origin && destination
-                ? loading
-                  ? "Finding routes..."
-                  : "No routes found"
-                : "Enter origin and destination to plan a trip"}
-            </div>
+            /* Detail view */
+            selectedItinerary && (
+              <div className="bg-white dark:bg-zinc-800 p-3 space-y-3">
+                {/* Show selected option summary - click to deselect */}
+                <ItineraryCard
+                  itinerary={selectedItinerary}
+                  isSelected={true}
+                  onClick={() => {
+                    setSelectedIndex(null);
+                    setMobileShowDetails(false);
+                  }}
+                />
+
+                <ItineraryDetails
+                  itinerary={selectedItinerary}
+                  originName={origin?.name}
+                  destinationName={destination?.name}
+                />
+              </div>
+            )
           )}
         </div>
       </div>

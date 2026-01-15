@@ -15,6 +15,8 @@ const DirectionPicker = ({ directions, direction, setDirection }) => {
     southbound: `Southbound`,
     eastbound: `Eastbound`,
     westbound: `Westbound`,
+    inbound: `Inbound`,
+    outbound: `Outbound`,
   };
 
   return (

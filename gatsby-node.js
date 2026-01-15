@@ -261,6 +261,12 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
         .map((e) => e.node)
         .filter((sr) => sr.shortName === r.routeShortName);
 
+      // Skip if there's no published Sanity route
+      if (matchingSanityRoute.length === 0) {
+        console.log(`Skipping route ${r.routeShortName} (${r.routeLongName}) - no published Sanity route found`);
+        return;
+      }
+
       if (matchingSanityRoute.length === 1) {
         if (matchingSanityRoute[0].displayShortName) {
           short = matchingSanityRoute[0].displayShortName;

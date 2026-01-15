@@ -343,3 +343,55 @@ export function createStopMarkers(itinerary) {
 
   return { type: 'FeatureCollection', features: stops };
 }
+
+/**
+ * Parse ISO 8601 duration string to seconds
+ * @param {string} duration - ISO 8601 duration string like "PT120S"
+ * @returns {number} Duration in seconds, or 0 if invalid
+ */
+function parseIsoDuration(duration) {
+  if (!duration || typeof duration !== 'string') return 0;
+
+  // Match PT[hours]H[minutes]M[seconds]S pattern, with optional negative sign
+  const regex = /^(-)?PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$/;
+  const match = duration.match(regex);
+
+  if (!match) return 0;
+
+  const negative = match[1] === '-';
+  const hours = parseInt(match[2] || '0', 10);
+  const minutes = parseInt(match[3] || '0', 10);
+  const seconds = parseFloat(match[4] || '0');
+
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  return negative ? -totalSeconds : totalSeconds;
+}
+
+/**
+ * Format delay in seconds to human-readable text
+ * @param {number|string} delay - Delay in seconds or ISO 8601 duration (negative = early)
+ * @returns {string|null} Formatted delay like "2 min late", "1 min early", or null if on-time
+ */
+export function formatDelay(delay) {
+  if (!delay) return null;
+
+  // Convert ISO 8601 duration to seconds if needed
+  let delaySeconds = typeof delay === 'string' ? parseIsoDuration(delay) : delay;
+
+  if (Math.abs(delaySeconds) < 30) {
+    return null;  // Don't show anything for on-time
+  }
+
+  const absMinutes = Math.round(Math.abs(delaySeconds) / 60);
+  const isLate = delaySeconds > 0;
+  return `${absMinutes}m ${isLate ? 'late' : 'early'}`;
+}
+
+/**
+ * Check if a leg should show real-time indicator
+ * @param {Object} leg - Leg object with realTime and mode properties
+ * @returns {boolean} Whether to show real-time indicator (green dot)
+ */
+export function shouldShowRealtimeBadge(leg) {
+  return leg.realTime === true && leg.mode !== 'WALK';
+}

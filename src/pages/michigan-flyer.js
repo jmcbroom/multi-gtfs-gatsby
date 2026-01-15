@@ -57,13 +57,14 @@ const MichiganFlyer = ({ data }) => {
     });
   });
 
+  // Note: serviceDays is overridden below, but we still pass trips for consistency
   let serviceDays = getServiceDays(
-    serviceCalendars.filter((sc) =>
-      data.agency.serviceIds.includes(sc.serviceId)
-    )
+    serviceCalendars,
+    null,
+    trips
   );
   serviceDays = {
-    'daily': 'c_21150_b_29130_d_127'
+    'daily': ['c_21150_b_29130_d_127']
   }
 
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
@@ -275,6 +276,8 @@ export const query = graphql`
             friday
             saturday
             serviceId
+            startDate
+            endDate
           }
         }
       }

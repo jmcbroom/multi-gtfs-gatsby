@@ -895,7 +895,8 @@ for (const style in styles) {
         "text-halo-color": style === "light" ?
           "hsl(0, 0%, 100%)" :
           "hsl(0, 0%, 25%)",
-        "text-halo-width": 4,
+        "text-halo-width": 2,
+        "text-halo-blur": 0.5,
         "text-color": style === "light" ?
           "hsl(0, 0%, 0%)" :
           "hsl(0, 0%, 100%)",

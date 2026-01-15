@@ -24,6 +24,7 @@ export default function Layout({ children, pageContext, location }) {
             currentFeedIndex
             name
             fullName
+            sortOrder
             color {
               hex
             }

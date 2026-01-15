@@ -117,7 +117,7 @@ const Bikeshare = ({ data, pageContext, location }) => {
   }, [stationsFc, mapBounds, filters]);
 
   return (
-    <div className="mt-4">
+    <>
       <AgencySlimHeader agency={bikeshare} />
 
       <Tabs.Root className="tabRoot" defaultValue={pageContext.initialTab}>
@@ -236,7 +236,7 @@ const Bikeshare = ({ data, pageContext, location }) => {
           <PortableText content={bikeshare.fareContent} />
         </Tabs.Content>
       </Tabs.Root>
-    </div>
+    </>
   );
 };
 

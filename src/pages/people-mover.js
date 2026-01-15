@@ -38,56 +38,53 @@ const PeopleMover = ({ data }) => {
     // set timepoint = 1 for each stopTime that is a timepoint
     trips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
-      trip.stopTimes.forEach((st, idx) => {
+      trip.stopTimes.forEach((st) => {
         st.timepoint = 1;
       });
       trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
-      // remove "Southbound/Northbound" from stop names
+      // remove directional suffixes from stop names
       trip.stopTimes.forEach((st) => {
-        if (st.stop.stopName.includes("Southbound")) {
-          st.stop.stopName = st.stop.stopName
-            .replace(" - Southbound", "")
-            .trim();
-        }
-        if (st.stop.stopName.includes("Northbound")) {
-          st.stop.stopName = st.stop.stopName
-            .replace(" - Northbound", "")
-            .trim();
-        }
-        st.stop.stopName = st.stop.stopName.replace("St", "").trim();
-        st.stop.stopName = st.stop.stopName.replace("Ave", "").trim();
+        st.stop.stopName = st.stop.stopName
+          .replace(" - Southbound", "")
+          .replace(" - Northbound", "")
+          .replace(" - Eastbound", "")
+          .replace(" - Westbound", "")
+          .replace(" - Inbound", "")
+          .replace(" - Outbound", "")
+          .replace("St", "")
+          .replace("Ave", "")
+          .trim();
       });
     });
 
     // same for longTrips
     longTrips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
-      trip.stopTimes.forEach((st, idx) => {
+      trip.stopTimes.forEach((st) => {
         st.timepoint = 1;
       });
       trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
-      // remove "Southbound/Northbound" from stop names
+      // remove directional suffixes from stop names
       trip.stopTimes.forEach((st) => {
-        if (st.stop.stopName.includes("Southbound")) {
-          st.stop.stopName = st.stop.stopName
-            .replace(" - Southbound", "")
-            .trim();
-        }
-        if (st.stop.stopName.includes("Northbound")) {
-          st.stop.stopName = st.stop.stopName
-            .replace(" - Northbound", "")
-            .trim();
-        }
-        st.stop.stopName = st.stop.stopName.replace("St", "").trim();
-        st.stop.stopName = st.stop.stopName.replace("Ave", "").trim();
+        st.stop.stopName = st.stop.stopName
+          .replace(" - Southbound", "")
+          .replace(" - Northbound", "")
+          .replace(" - Eastbound", "")
+          .replace(" - Westbound", "")
+          .replace(" - Inbound", "")
+          .replace(" - Outbound", "")
+          .replace("St", "")
+          .replace("Ave", "")
+          .trim();
       });
     });
   });
 
+  // Pass all calendars and let getServiceDays filter based on trips
   let serviceDays = getServiceDays(
-    serviceCalendars.filter((sc) =>
-      data.agency.serviceIds.includes(sc.serviceId)
-    )
+    serviceCalendars,
+    null, // use current date
+    trips  // pass trips for smart deduplication
   );
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
   let headsignsByDirectionId = getHeadsignsByDirectionId(trips, sanityRoute);
@@ -98,7 +95,7 @@ const PeopleMover = ({ data }) => {
   );
 
   if (sanityRoute) {
-    sanityRoute.directions.forEach((dir, idx) => {
+    sanityRoute.directions.forEach((dir) => {
       if (dir.directionHeadsign) {
         headsignsByDirectionId[dir.directionId][0] = dir.directionHeadsign;
       }
@@ -116,12 +113,6 @@ const PeopleMover = ({ data }) => {
     weekday: tripsByServiceAndDirection.weekday,
     weekend: tripsByServiceAndDirection.saturday,
   };
-
-  let defaultService = "weekday";
-
-  if (dayOfWeek() === "sunday" || dayOfWeek() === "saturday") {
-    defaultService = "weekend";
-  }
 
   return (
     <div>
@@ -320,6 +311,8 @@ export const query = graphql`
             friday
             saturday
             serviceId
+            startDate
+            endDate
           }
         }
       }

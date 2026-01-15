@@ -44,14 +44,17 @@ const Stop = ({ data, pageContext }) => {
     feedIndex: agencyData.feedIndex,
   };
 
-  let { stopLon, stopLat, stopName, stopCode, stopId, routes: rawRoutes, times } =
+  let { stopLon, stopLat, stopName, stopCode, stopId, routes: rawRoutes, times: rawTimes } =
     data.postgres.stop[0];
+
+  // Filter out route 1000 from times
+  let times = rawTimes.filter(t => t.trip?.route?.routeShortName !== '1000');
 
   let stopIdentifier = getStopIdentifier({ stopId, stopCode }, sanityAgency);
 
   // Memoize routes processing to avoid overfetching
   const routes = useMemo(() => {
-    return rawRoutes.map((r) => {
+    return rawRoutes.filter(r => r.routeShortName !== '1000').map((r) => {
       // find the matching sanityRoute
       let matching = sanityRoutes.edges
         .map((e) => e.node)
@@ -336,6 +339,8 @@ export const query = graphql`
             friday
             saturday
             serviceId
+            startDate
+            endDate
           }
         }
       }

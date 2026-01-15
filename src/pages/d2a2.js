@@ -72,11 +72,13 @@ const D2A2 = ({ data }) => {
     });
   });
 
+  // Pass all calendars (except the excluded one) and let getServiceDays filter based on trips
   let serviceDays = getServiceDays(
     serviceCalendars.filter((sc) =>
-      data.agency.serviceIds.includes(sc.serviceId)
-      && sc.serviceId !== "c_70310_b_82262_d_127"
-    )
+      sc.serviceId !== "c_70310_b_82262_d_127"
+    ),
+    null, // use current date
+    trips  // pass trips for smart deduplication
   );
 
   let tripsByServiceDay = getTripsByServiceDay(trips, serviceDays);
@@ -88,7 +90,7 @@ const D2A2 = ({ data }) => {
   );
 
   if (sanityRoute) {
-    sanityRoute.directions.forEach((dir, idx) => {
+    sanityRoute.directions.forEach((dir) => {
       if (dir.directionHeadsign) {
         headsignsByDirectionId[dir.directionId][0] = dir.directionHeadsign;
       }
@@ -303,6 +305,8 @@ export const query = graphql`
             friday
             saturday
             serviceId
+            startDate
+            endDate
           }
         }
       }

@@ -17,6 +17,7 @@ export const useSanityAgencies = () => {
               currentFeedIndex
               otpFeedId
               gtfsRtVehiclePositions
+              sortOrder
               color {
                 hex
               }
@@ -26,6 +27,7 @@ export const useSanityAgencies = () => {
               slug {
                 current
               }
+              agencyType
             }
           }
         }

@@ -206,7 +206,7 @@ const StopMap = ({
     : null;
 
   return (
-    <div id="map" style={{ height: 350 }} className="mb-8 relative">
+    <div id="map" className="mb-8 min-h-[240px] h-[200px] md:h-96 relative">
       <div className="grayHeader flex justify-between items-center">
         <span>Stop map</span>
         {userHasMoved && (

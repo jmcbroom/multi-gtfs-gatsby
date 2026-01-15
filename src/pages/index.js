@@ -20,6 +20,11 @@ const IndexPage = ({ data }) => {
       (ag) => ag.feedIndex === sa.currentFeedIndex
     )[0];
     return { ...sa, ...filtered };
+  }).sort((a, b) => {
+    // Sort by sortOrder (agencies without sortOrder go to the end)
+    if (a.sortOrder === null || a.sortOrder === undefined) return 1;
+    if (b.sortOrder === null || b.sortOrder === undefined) return -1;
+    return a.sortOrder - b.sortOrder;
   });
 
   let sanityRoutes = data.allSanityRoute.edges.map((e) => e.node);
@@ -44,16 +49,9 @@ const IndexPage = ({ data }) => {
     });
   });
 
-  // sort agencies by their `name` property:
-  let order = ["DDOT", "SMART", "TheRide", "Transit Windsor"];
-
   let otherServices = merged.filter((a) => a.agencyType !== "local-bus");
 
-  merged = merged
-    .sort((a, b) => {
-      return order.indexOf(a.name) - order.indexOf(b.name);
-    })
-    .filter((a) => a.agencyType === "local-bus");
+  merged = merged.filter((a) => a.agencyType === "local-bus");
 
   return (
     <div className="py-4 flex flex-col gap-4 md:gap-6">
@@ -68,29 +66,6 @@ const IndexPage = ({ data }) => {
           <TripPlannerBox />
         </div>
       </div>
-
-      {/* Transit Centers */}
-      {data.allSanityTransitCenter.edges.length > 0 && (
-        <div>
-          <h2 className="pl-3 md:pl-0">Major transfer points</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 px-3 md:px-0">
-            {data.allSanityTransitCenter.edges.map((e) => (
-              <Link
-                to={`/transit-center/${e.node.slug.current}`}
-                key={e.node.slug.current}
-                className="bg-gray-100 dark:bg-zinc-800 p-3 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
-              >
-                <h3 className="text-base font-semibold mb-1">{e.node.name}</h3>
-                {e.node.description && (
-                  <div className="text-sm text-gray-600 dark:text-zinc-400 m-0 line-clamp-2">
-                    <PortableText content={e.node.description} />
-                  </div>
-                )}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div>
         <h2 className="pl-3 md:pl-0">Local bus systems</h2>
@@ -227,12 +202,13 @@ export const query = graphql`
     indexPage: sanityIndexPage(_id: { eq: "index-page-content" }) {
       indexPageContent: _rawHomepageContent
     }
-    allSanityAgency(sort: { fields: name }) {
+    allSanityAgency {
       edges {
         node {
           currentFeedIndex
           name
           fullName
+          sortOrder
           color {
             hex
           }
@@ -263,17 +239,6 @@ export const query = graphql`
           slug {
             current
           }
-        }
-      }
-    }
-    allSanityTransitCenter {
-      edges {
-        node {
-          name
-          slug {
-            current
-          }
-          description: _rawDescription
         }
       }
     }

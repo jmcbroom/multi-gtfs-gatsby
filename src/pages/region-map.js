@@ -26,10 +26,14 @@ const RegionMapPage = ({ data }) => {
   const [agenciesInitialized, setAgenciesInitialized] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [sortMode, setSortMode] = useState("agency"); // agency, route, frequency
-  const [visibleRouteKeys, setVisibleRouteKeys] = useState(null);
 
   let { sanityAgencies } = useSanityAgencies();
-  sanityAgencies = sanityAgencies.edges.map((edge) => edge.node);
+  sanityAgencies = sanityAgencies.edges.map((edge) => edge.node).sort((a, b) => {
+    // Sort by sortOrder (agencies without sortOrder go to the end)
+    if (a.sortOrder === null || a.sortOrder === undefined) return 1;
+    if (b.sortOrder === null || b.sortOrder === undefined) return -1;
+    return a.sortOrder - b.sortOrder;
+  });
   let gtfsAgencies = data.postgres.agencies;
 
   let { sanityRoutes } = useSanityRoutes();
@@ -53,7 +57,7 @@ const RegionMapPage = ({ data }) => {
     }
   }, [agenciesInitialized, activeFeedIndices]);
 
-  // Build agency lookup for names/colors
+  // Build agency lookup for names/colors/sortOrder
   const agencyLookup = useMemo(() => {
     const lookup = {};
     sanityAgencies.forEach((agency) => {
@@ -63,6 +67,7 @@ const RegionMapPage = ({ data }) => {
         color: agency.color?.hex || "#666",
         textColor: agency.textColor?.hex || "#fff",
         slug: agency.slug?.current,
+        sortOrder: agency.sortOrder,
       };
     });
     return lookup;
@@ -179,21 +184,13 @@ const RegionMapPage = ({ data }) => {
     (ft) => visibleAgencies.has(ft.properties.feedIndex)
   );
 
-  // Derive unique routes from filtered features, filtered by viewport
+  // Derive unique routes from filtered features
   const allVisibleRoutes = useMemo(() => {
-    // First get unique routes
     const uniqueRoutes = uniqBy(filteredFeatures, (ft) =>
       `${ft.properties.feedIndex}-${ft.properties.routeShortName}`
     );
-    // Then filter by viewport if we have visible route keys
-    const viewportFiltered = visibleRouteKeys
-      ? uniqueRoutes.filter((ft) => {
-          const key = `${ft.properties.feedIndex}-${ft.properties.routeShortName}`;
-          return visibleRouteKeys.has(key);
-        })
-      : uniqueRoutes;
-    return viewportFiltered.map((ft) => ft.properties);
-  }, [filteredFeatures, visibleRouteKeys]);
+    return uniqueRoutes.map((ft) => ft.properties);
+  }, [filteredFeatures]);
 
   let routeFeatureCollection = {
     type: "FeatureCollection",
@@ -208,7 +205,7 @@ const RegionMapPage = ({ data }) => {
   const map = useRef();
   const routeListRef = useRef();
 
-  // Scroll to selected route when it changes or when visible routes update
+  // Scroll to selected route when it changes
   useEffect(() => {
     if (selectedRoute && routeListRef.current) {
       const routeKey = `${selectedRoute.feedIndex}-${selectedRoute.routeShortName}`;
@@ -223,7 +220,7 @@ const RegionMapPage = ({ data }) => {
         container.scrollTo({ top: scrollTop, behavior: 'smooth' });
       }
     }
-  }, [selectedRoute, visibleRouteKeys, sortMode]);
+  }, [selectedRoute, sortMode]);
 
   const handleRouteClick = useCallback((route) => {
     const routeKey = `${route.feedIndex}-${route.routeShortName}`;
@@ -254,7 +251,20 @@ const RegionMapPage = ({ data }) => {
     switch (sortMode) {
       case "agency":
         return sorted.sort((a, b) => {
-          if (a.feedIndex !== b.feedIndex) return a.feedIndex - b.feedIndex;
+          // First sort by agency sortOrder
+          const aAgencySortOrder = agencyLookup[a.feedIndex]?.sortOrder;
+          const bAgencySortOrder = agencyLookup[b.feedIndex]?.sortOrder;
+
+          // Handle null/undefined sortOrder (put at end)
+          if (aAgencySortOrder === null || aAgencySortOrder === undefined) return 1;
+          if (bAgencySortOrder === null || bAgencySortOrder === undefined) return -1;
+
+          // If different agencies, sort by agency sortOrder
+          if (aAgencySortOrder !== bAgencySortOrder) {
+            return aAgencySortOrder - bAgencySortOrder;
+          }
+
+          // Within same agency, sort by route priority, then number
           if ((a.mapPriority || 4) !== (b.mapPriority || 4)) return (a.mapPriority || 4) - (b.mapPriority || 4);
           const aNum = parseInt(a.routeShortName) || 999;
           const bNum = parseInt(b.routeShortName) || 999;
@@ -273,37 +283,13 @@ const RegionMapPage = ({ data }) => {
       default:
         return sorted;
     }
-  }, [allVisibleRoutes, sortMode]);
+  }, [allVisibleRoutes, sortMode, agencyLookup]);
 
   // Group routes by agency when in agency mode
   const groupedRoutes = useMemo(() => {
     if (sortMode !== "agency") return null;
     return groupBy(sortedRoutes, "feedIndex");
   }, [sortedRoutes, sortMode]);
-
-  // Get visible route keys from rendered features
-  const updateVisibleRoutes = useCallback(() => {
-    if (!map.current) return;
-    const m = map.current.getMap ? map.current.getMap() : map.current;
-    if (!m || !m.queryRenderedFeatures) return;
-
-    const routeLayers = ["routes-1", "routes-2", "routes-3", "routes-4"];
-    const visibleFeatures = m.queryRenderedFeatures(undefined, { layers: routeLayers });
-
-    const visibleKeys = new Set(
-      visibleFeatures.map(ft => `${ft.properties.feedIndex}-${ft.properties.routeShortName}`)
-    );
-    setVisibleRouteKeys(visibleKeys);
-  }, []);
-
-  const handleMoveEnd = useCallback(() => {
-    updateVisibleRoutes();
-  }, [updateVisibleRoutes]);
-
-  const handleLoad = useCallback(() => {
-    // Small delay to ensure layers are rendered
-    setTimeout(updateVisibleRoutes, 100);
-  }, [updateVisibleRoutes]);
 
   if (!theme) {
     return null;
@@ -465,6 +451,37 @@ const RegionMapPage = ({ data }) => {
     setHoveredRoute(null);
   };
 
+  const handleMapClick = (e) => {
+    if (!map.current) return;
+
+    // Query for route features at click point (check lines, labels, and highlight layers)
+    const features = map.current.queryRenderedFeatures(e.point, {
+      layers: [
+        "routes-1", "routes-2", "routes-3", "routes-4",
+        "route-labels-1", "route-labels-2", "route-labels-3", "route-labels-4",
+        "routes-highlight-line", "routes-highlight-label",
+      ],
+    });
+
+    if (features.length > 0) {
+      const feature = features[0];
+      const route = {
+        feedIndex: feature.properties.feedIndex,
+        routeShortName: feature.properties.routeShortName,
+        displayShortName: feature.properties.displayShortName,
+        routeLongName: feature.properties.routeLongName,
+        routeColor: feature.properties.routeColor,
+        routeTextColor: feature.properties.routeTextColor,
+        agencyName: feature.properties.agencyName,
+        link: feature.properties.link,
+        tripCount: feature.properties.tripCount,
+        mapPriority: feature.properties.mapPriority,
+        serviceDays: feature.properties.serviceDays,
+      };
+      handleRouteClick(route);
+    }
+  };
+
   const toggleAgency = (feedIndex) => {
     setVisibleAgencies((prev) => {
       const next = new Set(prev);
@@ -554,19 +571,19 @@ const RegionMapPage = ({ data }) => {
             {r.serviceDays && (
               <div className="mb-3">
                 <div className="text-xs text-gray-600 dark:text-gray-400">
-                  {r.serviceDays.weekday && r.serviceDays.saturday && r.serviceDays.sunday
+                  {r.serviceDays.weekday?.length > 0 && r.serviceDays.saturday?.length > 0 && r.serviceDays.sunday?.length > 0
                     ? "7 days a week"
-                    : r.serviceDays.weekday && r.serviceDays.saturday && !r.serviceDays.sunday
+                    : r.serviceDays.weekday?.length > 0 && r.serviceDays.saturday?.length > 0 && r.serviceDays.sunday?.length === 0
                     ? "Weekdays & Saturday"
-                    : r.serviceDays.weekday && !r.serviceDays.saturday && r.serviceDays.sunday
+                    : r.serviceDays.weekday?.length > 0 && r.serviceDays.saturday?.length === 0 && r.serviceDays.sunday?.length > 0
                     ? "Weekdays & Sunday"
-                    : r.serviceDays.weekday && !r.serviceDays.saturday && !r.serviceDays.sunday
+                    : r.serviceDays.weekday?.length > 0 && r.serviceDays.saturday?.length === 0 && r.serviceDays.sunday?.length === 0
                     ? "Weekdays only"
-                    : r.serviceDays.saturday && r.serviceDays.sunday
+                    : r.serviceDays.saturday?.length > 0 && r.serviceDays.sunday?.length > 0
                     ? "Weekends only"
-                    : r.serviceDays.saturday
+                    : r.serviceDays.saturday?.length > 0
                     ? "Saturday only"
-                    : r.serviceDays.sunday
+                    : r.serviceDays.sunday?.length > 0
                     ? "Sunday only"
                     : "Limited service"}
                 </div>
@@ -653,8 +670,7 @@ const RegionMapPage = ({ data }) => {
           initialViewState={initialViewState}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          onMoveEnd={handleMoveEnd}
-          onLoad={handleLoad}
+          onClick={handleMapClick}
           style={{ width: "100%", height: "100%" }}
         >
           <NavigationControl showCompass={false} />
@@ -687,9 +703,6 @@ const RegionMapPage = ({ data }) => {
                 <div className="text-xs text-gray-600 dark:text-gray-400">
                   {hoveredRoute.agencyName}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  ~{hoveredRoute.tripCount} daily trips
-                </div>
               </div>
             </Popup>
           )}
@@ -716,18 +729,26 @@ const RegionMapPage = ({ data }) => {
 
           <div ref={routeListRef} className="flex-1 overflow-y-auto">
             {/* Grouped by agency mode */}
-            {sortMode === "agency" && groupedRoutes && Object.entries(groupedRoutes).map(([feedIndex, agencyRoutes]) => {
-              const agencyInfo = agencyLookup[parseInt(feedIndex)];
-              return (
-                <div
-                  key={feedIndex}
-                  className="border-l-4"
-                  style={{ borderLeftColor: agencyInfo?.color || "#666" }}
-                >
-                  {agencyRoutes.map((r) => renderRouteItem(r))}
-                </div>
-              );
-            })}
+            {sortMode === "agency" && groupedRoutes && Object.entries(groupedRoutes)
+              .sort(([aFeedIndex], [bFeedIndex]) => {
+                const aSortOrder = agencyLookup[parseInt(aFeedIndex)]?.sortOrder;
+                const bSortOrder = agencyLookup[parseInt(bFeedIndex)]?.sortOrder;
+                if (aSortOrder === null || aSortOrder === undefined) return 1;
+                if (bSortOrder === null || bSortOrder === undefined) return -1;
+                return aSortOrder - bSortOrder;
+              })
+              .map(([feedIndex, agencyRoutes]) => {
+                const agencyInfo = agencyLookup[parseInt(feedIndex)];
+                return (
+                  <div
+                    key={feedIndex}
+                    className="border-l-4"
+                    style={{ borderLeftColor: agencyInfo?.color || "#666" }}
+                  >
+                    {agencyRoutes.map((r) => renderRouteItem(r))}
+                  </div>
+                );
+              })}
 
             {/* Flat list for other sort modes */}
             {sortMode !== "agency" && sortedRoutes.map((r) => renderRouteItem(r))}
@@ -779,6 +800,8 @@ export const query = graphql`
             friday
             saturday
             serviceId
+            startDate
+            endDate
           }
         }
       }

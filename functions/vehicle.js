@@ -14,7 +14,8 @@ exports.handler = async function(event, context) {
   const urls = {
     ddot: `http://myddotbus.com/bustime/api/v3/getvehicles?key=${process.env.DDOT_KEY}&format=json&vid=${event.queryStringParameters.vehicleIds}`,
     smart: `http://bustime.smartbus.org/bustime/api/v3/getvehicles?key=${process.env.SMART_KEY}&format=json&vid=${event.queryStringParameters.vehicleIds}`,
-    theride: `http://rt.theride.org/bustime/api/v3/getvehicles?key=${process.env.THERIDE_KEY}&format=json&vid=${event.queryStringParameters.vehicleIds}`
+    theride: `http://rt.theride.org/bustime/api/v3/getvehicles?key=${process.env.THERIDE_KEY}&format=json&vid=${event.queryStringParameters.vehicleIds}`,
+    umich: `https://mbus.ltp.umich.edu/bustime/api/v3/getvehicles?key=${process.env.UMICH_KEY}&format=json&vid=${event.queryStringParameters.vehicleIds}`
   };
 
   const url = urls[event.queryStringParameters.agency];
