@@ -1,6 +1,5 @@
 import React from "react";
 import RouteStopsList from "./RouteStopsList";
-import { whatDirectionItRuns } from "./RouteIntroduction";
 
 export const RouteTimepoints = ({ agency, route, trips, headsigns, link=true }) => {
   let directions = Object.keys(headsigns);

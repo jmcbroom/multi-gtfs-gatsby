@@ -10,14 +10,21 @@
   "pnpm": {
     "overrides": {
       "sharp": "^0.34.5"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "sharp",
+      "lmdb",
+      "@parcel/watcher",
+      "msgpackr-extract"
+    ]
   },
   "scripts": {
-    "develop": "gatsby develop",
+    "develop": "concurrently \"gatsby develop\" \"netlify functions:serve\"",
     "start": "gatsby develop",
     "build": "gatsby build",
     "serve": "gatsby serve",
-    "clean": "gatsby clean"
+    "clean": "gatsby clean",
+    "functions": "netlify functions:serve"
   },
   "browserslist": [
     ">0.2%",
@@ -28,19 +35,16 @@
     "not android < 51"
   ],
   "dependencies": {
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@dnd-kit/utilities": "^3.2.2",
     "@fortawesome/fontawesome-svg-core": "^7",
     "@fortawesome/free-solid-svg-icons": "^7",
     "@fortawesome/react-fontawesome": "^3",
     "@graphile-contrib/pg-simplify-inflector": "^6.1.0",
+    "@loadable/component": "^5.16.7",
+    "@mapbox/polyline": "^1.2.1",
     "@mapbox/search-js-react": "^1.5.1",
     "@mdx-js/mdx": "^1.6.22",
     "@mdx-js/react": "^1.6.22",
-    "@radix-ui/react-accordion": "^1.0.1",
     "@radix-ui/react-icons": "^1.1.1",
-    "@radix-ui/react-navigation-menu": "^1.1.1",
     "@radix-ui/react-radio-group": "^1.1.0",
     "@radix-ui/react-tabs": "^1.0.1",
     "@radix-ui/react-toggle-group": "^1.0.4",
@@ -51,6 +55,7 @@
     "@turf/line-slice": "^7.3.1",
     "@turf/nearest-point": "^6.5.0",
     "@turf/nearest-point-on-line": "^6.5.0",
+    "@turf/simplify": "^7.3.1",
     "@types/geojson": "^7946.0.13",
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.45",
@@ -61,6 +66,7 @@
     "dexie-react-hooks": "^1.1.7",
     "dotenv": "^10.0.0",
     "gatsby": "^4",
+    "gatsby-link": "^4.25.0",
     "gatsby-plugin-google-analytics": "^4.4.0",
     "gatsby-plugin-image": "^2",
     "gatsby-plugin-layout": "^3",
@@ -71,24 +77,29 @@
     "gatsby-plugin-postcss": "^5",
     "gatsby-plugin-sharp": "^4",
     "gatsby-plugin-sitemap": "^5",
+    "gatsby-react-router-scroll": "^5.25.0",
+    "gatsby-script": "^1.10.0",
     "gatsby-source-filesystem": "^4",
     "gatsby-source-pg": "^1.0.0-rc.0",
     "gatsby-source-sanity": "^7.4.2",
     "gatsby-transformer-sharp": "^4",
     "gtfs-realtime-bindings": "^1.1.1",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.22",
     "mapbox-gl": "^2.15.0",
     "postcss": "^8.4.5",
     "postgraphile-plugin-connection-filter": "^2.2.2",
+    "prop-types": "^15.8.1",
     "react": "^18",
-    "react-datepicker": "^9.1.0",
     "react-dom": "^18",
     "react-map-gl": "^7.0.21",
     "react-portable-text": "^0.4.3",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.6",
     "sharp": "^0.34.5",
     "tailwindcss": "^3.0.13",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12",
+    "concurrently": "^9.2.1",
+    "http-proxy-middleware": "^3.0.5"
   }
 }

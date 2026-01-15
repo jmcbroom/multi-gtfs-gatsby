@@ -35,8 +35,8 @@ const VehicleBadge = ({ vehicleId, busNumber, vehicleType, size = "small", showI
         inline-flex items-center font-mono font-semibold rounded
         ${sizeConfig.container}
         ${active
-          ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200"
-          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 opacity-60"
+          ? "bg-zinc-200 dark:bg-zinc-600 text-zinc-700 dark:text-zinc-300"
+          : "bg-zinc-100 dark:bg-zinc-700 text-zinc-400 dark:text-zinc-500 opacity-60"
         }
       `}
       title={notTracking ? "Vehicle not reporting location" : undefined}

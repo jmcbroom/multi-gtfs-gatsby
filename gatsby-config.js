@@ -34,7 +34,7 @@ module.exports = {
         theme_color: "#1f2937", // Dark gray theme color
         display: "standalone",
         orientation: "portrait",
-        icon: "src/images/icon.svg",
+        icon: "src/images/icon.png",
         categories: ["travel", "navigation", "utilities"],
         scope: "/",
         lang: "en",

@@ -1,8 +1,7 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { db } from "../db";
 import StopBadge from "./StopBadge";
+import FavoriteButton from "./FavoriteButton";
 
 const addFavoriteStop = (stop, stopType="bus") => {
   if (!db) return;
@@ -41,24 +40,21 @@ const StopHeader = ({
   stopIdentifier,
   stopType="bus",
 }) => {
+  const handleToggleFavorite = () => {
+    if (isFavoriteStop === false) {
+      addFavoriteStop(indexedStop, stopType);
+    } else {
+      removeFavoriteStop(indexedStop, favoriteStops, stopType);
+    }
+  };
+
   return (
     <div className="mb-2 bg-gray-200 dark:bg-zinc-900 flex items-center justify-between p-2">
       <div className="flex items-center gap-2">
-        <FontAwesomeIcon
-          icon={faStar}
+        <FavoriteButton
+          isFavorited={isFavoriteStop}
+          onClick={handleToggleFavorite}
           size="lg"
-          className={
-            isFavoriteStop
-              ? "text-yellow-500 dark:text-yellow-600 cursor-pointer"
-              : "text-gray-400 dark:text-zinc-600 cursor-pointer"
-          }
-          onClick={() => {
-            if (isFavoriteStop === false) {
-              addFavoriteStop(indexedStop, stopType);
-            } else {
-              removeFavoriteStop(indexedStop, favoriteStops, stopType);
-            }
-          }}
         />
         <h1 className="text-sm md:text-base font-semibold m-0">{stopName}</h1>
       </div>

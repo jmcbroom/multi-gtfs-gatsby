@@ -28,7 +28,6 @@ const codeStyles = {
 const NotFoundPage = () => {
   return (
     <main style={pageStyles}>
-      <title>Not found</title>
       <h1 style={headingStyles}>Page not found</h1>
       <p style={paragraphStyles}>
         Sorry{" "}
@@ -52,3 +51,21 @@ const NotFoundPage = () => {
 }
 
 export default NotFoundPage
+
+export const Head = () => {
+  const title = "Page Not Found | transit.det.city";
+  const description = "The page you're looking for doesn't exist.";
+  const url = "https://transit.det.city/404";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={url} />
+    </>
+  );
+};

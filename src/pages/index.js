@@ -5,7 +5,7 @@ import AgencySlimHeader from "../components/AgencySlimHeader";
 import { TripPlannerBox } from "../components/TripPlanner";
 import { createRouteData } from "../util";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCompass, faPlane, faBuilding } from "@fortawesome/free-solid-svg-icons";
+import { faCompass, faPlane } from "@fortawesome/free-solid-svg-icons";
 
 /**
  * The home page.
@@ -72,7 +72,7 @@ const IndexPage = ({ data }) => {
       {/* Transit Centers */}
       {data.allSanityTransitCenter.edges.length > 0 && (
         <div>
-          <h2 className="pl-3 md:pl-0">Major transit centers</h2>
+          <h2 className="pl-3 md:pl-0">Major transfer points</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 px-3 md:px-0">
             {data.allSanityTransitCenter.edges.map((e) => (
               <Link
@@ -82,9 +82,9 @@ const IndexPage = ({ data }) => {
               >
                 <h3 className="text-base font-semibold mb-1">{e.node.name}</h3>
                 {e.node.description && (
-                  <p className="text-sm text-gray-600 dark:text-zinc-400 m-0 line-clamp-2">
+                  <div className="text-sm text-gray-600 dark:text-zinc-400 m-0 line-clamp-2">
                     <PortableText content={e.node.description} />
-                  </p>
+                  </div>
                 )}
               </Link>
             ))}
@@ -327,3 +327,20 @@ export const query = graphql`
 `;
 
 export default IndexPage;
+
+export const Head = () => {
+  const title = "Detroit/Windsor transit information | transit.det.city";
+  const description = "Real-time info, schedules, and maps for DDOT, SMART, TheRide, and Transit Windsor. Plan your trip across the greater Detroit/Windsor area.";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content="https://transit.det.city/" />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href="https://transit.det.city/" />
+    </>
+  );
+};

@@ -2,9 +2,9 @@ import bbox from "@turf/bbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useEffect, useMemo } from "react";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
-import Mapbox, { NavigationControl, Source, Layer } from "react-map-gl";
+import Mapbox, { NavigationControl, GeolocateControl, Source, Layer } from "react-map-gl";
 import { useTheme } from "../../hooks/ThemeContext";
-import _ from "lodash";
+import { cloneDeep } from "lodash-es";
 import dark from "../../styles/mapDark.json";
 import light from "../../styles/mapLight.json";
 import { legsToGeoJSON, createEndpointMarkers, createStopMarkers } from "../../tripPlannerUtils";
@@ -163,7 +163,7 @@ const TripMap = ({
 
   if (!theme) return null;
 
-  const baseStyle = theme === 'dark' ? _.cloneDeep(dark) : _.cloneDeep(light);
+  const baseStyle = theme === 'dark' ? cloneDeep(dark) : cloneDeep(light);
 
   const initialViewState = {
     longitude: -83.05,
@@ -190,11 +190,6 @@ const TripMap = ({
     ];
   };
 
-  // Transit Color
-  const transitColorProp = isOverview
-    ? ["get", "routeColor"]
-    : ["get", "routeColor"]; // Same property
-
   // Line Width
   const getLineWidth = (baseWidth) => {
     if (!isOverview) return baseWidth;
@@ -220,6 +215,7 @@ const TripMap = ({
         cursor={cursor}
       >
         <NavigationControl showCompass={false} />
+        <GeolocateControl />
 
         {/* ----------------- SINGLE VIEW LAYERS ----------------- */}
         {!isOverview && (

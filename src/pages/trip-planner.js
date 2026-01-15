@@ -5,9 +5,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PageHeader from "../components/PageHeader";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import { useSanityAgencies } from "../hooks/useSanityAgencies";
-import _ from "lodash";
+import { debounce } from "lodash-es";
 import {
   ItineraryCard,
+  ItineraryDetails,
   TripMap,
   LegStepper,
   FromToInputs,
@@ -396,7 +397,7 @@ const TripPlannerPage = () => {
 
   const debouncedSubmit = useMemo(
     () =>
-      _.debounce(() => {
+      debounce(() => {
         handleSubmit();
       }, 500),
     [handleSubmit]
@@ -454,6 +455,20 @@ const TripPlannerPage = () => {
     setFocusedLegIndex(null);
   };
 
+  const handleReset = () => {
+    setOrigin(null);
+    setDestination(null);
+    setSettingPoint("origin");
+    const now = new Date();
+    setDate(now.toISOString().split("T")[0]);
+    setTime(now.toTimeString().split(" ")[0].substring(0, 5));
+    setArriveBy(false);
+    setItineraries([]);
+    setSelectedIndex(0);
+    setFocusedLegIndex(null);
+    setError(null);
+  };
+
   const selectedItinerary = sortedItineraries[selectedIndex] || null;
 
   if (!theme) {
@@ -506,25 +521,31 @@ const TripPlannerPage = () => {
         </div>
         <SortButtons />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 mb-4">
         {sortedItineraries.map((itinerary, index) => (
           <ItineraryCard
             key={index}
             itinerary={itinerary}
             isSelected={index === selectedIndex}
-            isExpanded={index === selectedIndex}
             onClick={() => {
-              setSelectedIndex(index === selectedIndex ? null : index);
+              setSelectedIndex(index);
               setFocusedLegIndex(null);
             }}
             onMouseEnter={() => setHoveredItineraryIndex(index)}
             onMouseLeave={() => setHoveredItineraryIndex(null)}
-            onLegHover={index === selectedIndex ? handleLegHover : undefined}
-            originName={origin?.name}
-            destinationName={destination?.name}
           />
         ))}
       </div>
+
+      {/* Separate directions panel */}
+      {selectedItinerary && (
+        <ItineraryDetails
+          itinerary={selectedItinerary}
+          originName={origin?.name}
+          destinationName={destination?.name}
+          onLegHover={handleLegHover}
+        />
+      )}
     </div>
   );
 
@@ -611,15 +632,26 @@ const TripPlannerPage = () => {
                 </div>
               )}
             </div>
-            {origin && destination && (
-              <button
-                onClick={() => setMobileInputsExpanded(false)}
-                className="w-full mt-2 py-1 text-xs text-gray-500 dark:text-zinc-400 flex items-center justify-center gap-1"
-              >
-                <span>Collapse</span>
-                <FontAwesomeIcon icon={faChevronUp} />
-              </button>
-            )}
+            <div className="flex items-center justify-between mt-2">
+              {(origin || destination) && (
+                <button
+                  onClick={handleReset}
+                  className="py-1 px-2 text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300"
+                  title="Reset all inputs"
+                >
+                  Reset
+                </button>
+              )}
+              {origin && destination && (
+                <button
+                  onClick={() => setMobileInputsExpanded(false)}
+                  className="ml-auto py-1 text-xs text-gray-500 dark:text-zinc-400 flex items-center gap-1"
+                >
+                  <span>Collapse</span>
+                  <FontAwesomeIcon icon={faChevronUp} />
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -649,6 +681,15 @@ const TripPlannerPage = () => {
               <div className="flex-shrink-0">
                 <WhenInputs {...whenProps} />
               </div>
+              {(origin || destination) && (
+                <button
+                  onClick={handleReset}
+                  className="flex-shrink-0 px-2 py-1 text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 transition-colors"
+                  title="Reset all inputs"
+                >
+                  Reset
+                </button>
+              )}
             </div>
             {loading && (
               <div className="mt-2 text-sm text-gray-500 dark:text-zinc-400">
@@ -732,3 +773,21 @@ const TripPlannerPage = () => {
 };
 
 export default TripPlannerPage;
+
+export const Head = () => {
+  const title = "Trip Planner | transit.det.city";
+  const description = "Plan your transit trip across Detroit/Windsor with real-time routing.";
+  const url = "https://transit.det.city/trip-planner";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={url} />
+    </>
+  );
+};

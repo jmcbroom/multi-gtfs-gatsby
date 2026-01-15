@@ -6,7 +6,6 @@ import StopHeader from "../components/StopHeader";
 import { graphql } from "gatsby";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../db";
-import _ from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSanityAgencies } from "../hooks/useSanityAgencies";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
@@ -253,3 +252,30 @@ export const query = graphql`
 `;
 
 export default BikeshareStationPage;
+
+export const Head = ({ data, pageContext }) => {
+  const bikeshare = data.allSanityBikeshare?.edges?.[0]?.node;
+  const station = pageContext.station;
+  const stationName = station?.name?.replace("*", "") || "Station";
+  const bikeshareName = bikeshare?.name || "Bikeshare";
+  const address = station?.address || "";
+
+  const title = `${stationName} | ${bikeshareName}`;
+  let description = `${bikeshareName} station at ${stationName}.`;
+  if (address) {
+    description += ` Located at ${address}.`;
+  }
+  description += ` Real-time bike and e-bike availability.`;
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={`https://transit.det.city/${pageContext.slug}/station/${station?.station_id}/`} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={`https://transit.det.city/${pageContext.slug}/station/${station?.station_id}/`} />
+    </>
+  );
+};

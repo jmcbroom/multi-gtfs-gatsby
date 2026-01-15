@@ -3,7 +3,7 @@ import { Link } from "gatsby";
 import StopTimeLabel from "./StopTimeLabel";
 import { faChevronCircleRight, faPlane } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { sortTripsByFrequentTimepoint } from "../util";
+import { sortTripsByFrequentTimepoint, shortenStopName } from "../util";
 import { getStopIdentifier } from "../stopUtils";
 
 const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
@@ -62,14 +62,6 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
   // needed to add this filter back in... but it's interesting to think about letting users see all times.
   timepoints = timepoints.filter(tp => tp.timepoint)
 
-  const shortenTimepointName = (timepointName) => {
-    let split = timepointName.split(' - ');
-    if (split.length > 1) {
-      timepointName = split[0]
-    }
-    return timepointName;
-  }
-
   return (
     <div className="relative mx-auto w-full">
       {/* Scroll shadow indicators */}
@@ -109,10 +101,10 @@ const RouteTimeTable = ({ trips, route, agency, service, direction }) => {
             <tr className="bg-white dark:bg-black">
               {timepoints.map((s, k) => (
                 <th key={`${s.stop.stopCode} + ${k}`} className="text-[10px] md:text-sm pt-1 md:pt-2 timetable-header w-[56px] md:w-40 p-0 bg-white dark:bg-black tabular relative">
-                  <div className="flex flex-col items-center justify-end h-12 md:h-24 bg-white dark:bg-black">
-                    <Link to={`/${agency.slug.current}/stop/${getStopIdentifier(s.stop, agency)}`} className="leading-tight md:leading-none text-[9px] md:text-sm font-bold mb-0.5 md:mb-2 px-0.5 md:px-2">
+                  <div className="flex flex-col items-center justify-end h-12  md:h-16 bg-white dark:bg-black">
+                    <Link to={`/${agency.slug.current}/stop/${getStopIdentifier(s.stop, agency)}`} className="leading-tight md:leading-none text-xs md:text-sm font-bold mb-0.5 md:mb-2 px-0.5 md:px-2">
                       {(s.stop.stopName.includes("DTW") || s.stop.stopName.includes("METRO AIRPORT")) && <FontAwesomeIcon icon={faPlane} size="1x" className="mx-1" />}
-                      {shortenTimepointName(s.stop.stopName)}
+                      {shortenStopName(s.stop.stopName)}
                     </Link>
                     <FontAwesomeIcon icon={faChevronCircleRight} className="relative z-10 bg-white dark:bg-black text-gray-700 dark:text-zinc-400 text-xs md:text-lg" />
                   </div>

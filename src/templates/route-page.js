@@ -20,10 +20,12 @@ import {
   createStopsFc,
   createVehicleFc,
   dayOfWeek,
+  generateRouteOgImageUrl,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
   getTripsByServiceDay,
+  shortenHeadsign,
 } from "../util";
 import { getStopIdentifier } from "../stopUtils";
 
@@ -44,29 +46,36 @@ const Route = ({ data, pageContext, location }) => {
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
-  sanityRoute.directions.forEach((dir, idx) => {
+  sanityRoute.directions.forEach((dir) => {
     // get timepoints for each direction
     let timepoints = dir.directionTimepoints;
     // set timepoint = 1 for each stopTime that is a timepoint
-    trips.forEach((trip) => {
-      trip.stopTimes[0].timepoint = 1;
-      trip.stopTimes.forEach((st) => {
-        if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
-          st.timepoint = 1;
-        }
+    // Only process trips matching this direction
+    trips
+      .filter((trip) => trip.directionId === dir.directionId)
+      .forEach((trip) => {
+        trip.stopTimes.forEach((st) => {
+          if(dir.directionTimepoints.length > 0) {
+            st.timepoint = 0;
+          }
+          if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
+            st.timepoint = 1;
+          }
+        });
+        trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
       });
-      trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
-    });
 
-    longTrips.forEach((trip) => {
-      trip.stopTimes[0].timepoint = 1;
-      trip.stopTimes.forEach((st) => {
-        if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
-          st.timepoint = 1;
-        }
+    longTrips
+      .filter((trip) => trip.directionId === dir.directionId)
+      .forEach((trip) => {
+        trip.stopTimes[0].timepoint = 1;
+        trip.stopTimes.forEach((st) => {
+          if (timepoints.includes(getStopIdentifier(st.stop, agencyData))) {
+            st.timepoint = 1;
+          }
+        });
+        trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
       });
-      trip.stopTimes[trip.stopTimes.length - 1].timepoint = 1;
-    });
   });
 
   let serviceDays = getServiceDays(
@@ -134,7 +143,7 @@ const Route = ({ data, pageContext, location }) => {
     window.history.replaceState({}, "", newUrl);
   }, [direction, service]);
 
-  const now = useTick(sanityAgency.realTimeEnabled);
+  const { now, countdown } = useTick(sanityAgency.realTimeEnabled);
 
   let [patterns, setPatterns] = useState(null);
   let [vehicles, setVehicles] = useState(null);
@@ -228,9 +237,7 @@ const Route = ({ data, pageContext, location }) => {
 
   return (
     <div>
-      <div className="mt-2 md:mt-4">
-        <AgencySlimHeader agency={agencyData} />
-      </div>
+      <AgencySlimHeader agency={agencyData} />
 
       <div className="bg-gray-300 dark:bg-zinc-900">
         <RouteHeader {...gtfsRoute} agency={agencyData} showFavorite={true} />
@@ -268,7 +275,31 @@ const Route = ({ data, pageContext, location }) => {
           </Link>
         </Tabs.List>
         <Tabs.Content className="tabContent" value="">
-          <div className="md:grid md:grid-cols-2 gap-2 pb-6">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-2 pb-6">
+            {sanityRoute && (
+              <div className="order-first md:order-last">
+                <RouteMap
+                  routeFc={createRouteFc(sanityRoute, gtfsRoute)}
+                  stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
+                  timepointsFc={createStopsFc(
+                    sanityRoute,
+                    tripsByServiceAndDirection,
+                    true,
+                    true,
+                    true
+                  )}
+                  vehicleFc={createVehicleFc(
+                    vehicles,
+                    patterns,
+                    routeData,
+                    agencyData,
+                    trips
+                  )}
+                  agency={agencyData}
+                  trackedBus={trackedBus}
+                />
+              </div>
+            )}
             {agencyData.realTimeEnabled && (
               <RoutePredictions
                 vehicles={createVehicleFc(
@@ -280,29 +311,7 @@ const Route = ({ data, pageContext, location }) => {
                 )}
                 predictions={predictions}
                 setTrackedBus={setTrackedBus}
-                now={now}
-              />
-            )}
-            {sanityRoute && (
-              <RouteMap
-                routeFc={createRouteFc(sanityRoute, gtfsRoute)}
-                stopsFc={createStopsFc(sanityRoute, tripsByServiceAndDirection)}
-                timepointsFc={createStopsFc(
-                  sanityRoute,
-                  tripsByServiceAndDirection,
-                  true,
-                  true,
-                  true
-                )}
-                vehicleFc={createVehicleFc(
-                  vehicles,
-                  patterns,
-                  routeData,
-                  agencyData,
-                  trips
-                )}
-                agency={agencyData}
-                trackedBus={trackedBus}
+                countdown={countdown}
               />
             )}
           </div>
@@ -335,7 +344,7 @@ const Route = ({ data, pageContext, location }) => {
             />
           )}
         </Tabs.Content>
-        <Tabs.Content className="tabContent" value="schedule">
+        <Tabs.Content className=" " value="schedule">
           <div className="bg-gray-100 dark:bg-zinc-900 px-3 py-2 md:p-4 md:py-6 flex flex-col gap-2 md:gap-6">
             <DirectionPicker
               directions={headsignsByDirectionId}
@@ -527,15 +536,92 @@ export const Head = ({ data, pageContext }) => {
   const agencyName = data.agency?.name || "";
   const routeShortName = data.route?.displayShortName || data.route?.shortName || "";
   const routeLongName = data.route?.longName || "";
+  const routeColor = data.route?.color?.hex || data.postgres?.agencies?.[0]?.routes?.[0]?.routeColor || "004d99";
+  const directions = data.route?.directions || [];
+  const serviceIds = data.agency?.serviceIds || [];
+  const serviceCalendars = data.postgres?.agencies?.[0]?.feedInfo?.serviceCalendars || [];
+
+  // Generate OG image URL
+  const ogImageUrl = generateRouteOgImageUrl({
+    directions,
+    routeColor,
+    accessToken: process.env.GATSBY_MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN,
+  });
+
+  // Build a description with endpoints from direction headsigns
+  let description = `${agencyName} bus ${routeShortName}`;
+  if (routeLongName) {
+    description += ` ${routeLongName}`;
+  }
+
+  // Extract and shorten headsigns to show endpoints
+  const headsigns = directions
+    .map(d => d.directionHeadsign)
+    .filter(Boolean)
+    .map(h => shortenHeadsign(h));
+
+  if (headsigns.length === 2) {
+    description += `, running between ${headsigns[0]} / ${headsigns[1]}.`;
+  } else if (headsigns.length === 1) {
+    description += `. Serves ${headsigns[0]}.`;
+  }
+
+  // Determine operating days from service calendars
+  const activeCalendars = serviceCalendars.filter(sc => serviceIds.includes(sc.serviceId));
+  const days = {
+    monday: activeCalendars.some(c => c.monday),
+    tuesday: activeCalendars.some(c => c.tuesday),
+    wednesday: activeCalendars.some(c => c.wednesday),
+    thursday: activeCalendars.some(c => c.thursday),
+    friday: activeCalendars.some(c => c.friday),
+    saturday: activeCalendars.some(c => c.saturday),
+    sunday: activeCalendars.some(c => c.sunday),
+  };
+
+  const weekdays = days.monday && days.tuesday && days.wednesday && days.thursday && days.friday;
+  const weekend = days.saturday && days.sunday;
+
+  let operatingDays = "";
+  if (weekdays && weekend) {
+    operatingDays = "daily";
+  } else if (weekdays && days.saturday && !days.sunday) {
+    operatingDays = "Mon-Sat";
+  } else if (weekdays && !days.saturday && !days.sunday) {
+    operatingDays = "Mon-Fri";
+  } else if (!weekdays && weekend) {
+    operatingDays = "Sat-Sun";
+  } else if (days.saturday && !days.sunday) {
+    operatingDays = "Saturdays";
+  } else if (days.sunday && !days.saturday) {
+    operatingDays = "Sundays";
+  } else {
+    // Fallback: list individual days
+    const dayNames = [];
+    if (days.monday) dayNames.push("Mon");
+    if (days.tuesday) dayNames.push("Tue");
+    if (days.wednesday) dayNames.push("Wed");
+    if (days.thursday) dayNames.push("Thu");
+    if (days.friday) dayNames.push("Fri");
+    if (days.saturday) dayNames.push("Sat");
+    if (days.sunday) dayNames.push("Sun");
+    operatingDays = dayNames.join(", ");
+  }
+
+  if (operatingDays) {
+    description += ` Operates ${operatingDays}.`;
+  }
 
   return (
     <>
-      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`}</title>
-      <meta name="description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`} | transit.det.city</title>
+      <meta name="description" content={description} />
       <meta property="og:url" content={`https://transit.det.city/${pageContext.agencySlug}/route/${routeShortName}/`} />
       <meta property="og:type" content="website" />
-      <meta property="og:title" content={`${agencyName} bus route: ${routeShortName} ${routeLongName}`} />
-      <meta property="og:description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <meta property="og:title" content={`${agencyName} Route ${routeShortName}: ${routeLongName}`} />
+      <meta property="og:description" content={description} />
+      {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+      {ogImageUrl && <meta property="og:image:width" content="1200" />}
+      {ogImageUrl && <meta property="og:image:height" content="630" />}
       <link rel="canonical" href={`https://transit.det.city/${pageContext.agencySlug}/route/${routeShortName}/`} />
     </>
   );

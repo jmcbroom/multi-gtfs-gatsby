@@ -22,3 +22,21 @@ const ThankYouPage = () => {
 };
 
 export default ThankYouPage;
+
+export const Head = () => {
+  const title = "Thank You | transit.det.city";
+  const description = "Thank you for your message.";
+  const url = "https://transit.det.city/thank-you";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={url} />
+    </>
+  );
+};

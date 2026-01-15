@@ -22,10 +22,8 @@ const PredictionRow = ({
   stopName,        // Stop name to display
   stopLabel,       // Short label for stop (e.g., "A", "B") - displays as map-style marker
   stopIdentifier,  // Stop identifier for link (may differ from stpid)
-  link,            // Optional route link
   agencySlug,      // Agency slug for links
 }) => {
-  const routeLink = link || (agencySlug && prediction?.rt ? `/${agencySlug}/route/${prediction.rt}` : null);
   const stopLink = stopIdentifier || prediction.stpid;
   // For backwards compatibility: if only isPinned is passed, use it for both
   const highlighted = isActive !== undefined ? isActive : isPinned;
@@ -87,7 +85,6 @@ const PredictionRow = ({
           {...route}
           direction={direction}
           size="small"
-          link={routeLink}
         />
         {highlighted && showStopName && stopName && (
           <Link

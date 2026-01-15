@@ -8,7 +8,6 @@ import PortableText from "react-portable-text";
 import "../styles/tabs.css";
 import {
   createAgencyData,
-  createRouteData,
   dayOfWeek,
   getHeadsignsByDirectionId,
   getServiceDays,
@@ -23,8 +22,8 @@ const components = {
       // Read https://css-tricks.com/use-target_blank/
       const { blank, href } = value
       return blank ?
-        <a href={href} target="_blank" rel="noreferrer">{children} something</a>
-        : <a href={href} target="_blank" rel="noreferrer">{children} something2</a>
+        <a href={href} target="_blank" rel="noreferrer">{children}</a>
+        : <a href={href}>{children}</a>
     }
   }
 }
@@ -76,7 +75,7 @@ const D2A2 = ({ data }) => {
   let serviceDays = getServiceDays(
     serviceCalendars.filter((sc) =>
       data.agency.serviceIds.includes(sc.serviceId)
-      && sc.serviceId != "c_70310_b_82262_d_127"
+      && sc.serviceId !== "c_70310_b_82262_d_127"
     )
   );
 
@@ -97,8 +96,6 @@ const D2A2 = ({ data }) => {
     sanityRoute.mapPriority = 2;
   }
 
-  let routeData = createRouteData(gtfsRoute, sanityRoute);
-
   tripsByServiceDay = {
     weekday: tripsByServiceDay.weekday,
     weekend: tripsByServiceDay.saturday,
@@ -116,10 +113,11 @@ const D2A2 = ({ data }) => {
 
   const [service, setService] = useState(defaultService);
 
+
   return (
     <div>
       <div className="bg-gray-300 dark:bg-zinc-900 mt-4">
-        <RouteHeader {...gtfsRoute} agency={null} />
+        <RouteHeader {...gtfsRoute} agency={agencyData} />
       </div>
 
       <PortableText
@@ -136,7 +134,7 @@ const D2A2 = ({ data }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mt-4 md:gap-8 mb-4">
         <div>
-          <div className="grayHeader -mb-10 z-20 block relative">
+          <div className="grayHeader z-20 block relative">
             Eastbound to Detroit
           </div>
           <RouteTimeTable
@@ -148,7 +146,7 @@ const D2A2 = ({ data }) => {
           />
         </div>
         <div>
-          <div className="grayHeader -mb-10 z-20 block relative text-lg">
+          <div className="grayHeader z-20 block relative text-lg">
             Westbound to Ann Arbor
           </div>
           <RouteTimeTable
@@ -314,19 +312,18 @@ export const query = graphql`
 
 export default D2A2;
 
-export const Head = ({ data }) => {
-  const agencyName = data.agency?.name || "D2A2";
-  const routeShortName = data.route?.displayShortName || data.route?.shortName || "D2A2";
-  const routeLongName = data.route?.longName || "Detroit to Ann Arbor";
+export const Head = () => {
+  const title = "D2A2: Detroit to Ann Arbor | transit.det.city";
+  const description = "Express bus, running daily from downtown Detroit (Grand Circus Park) to Ann Arbor (Blake TC).";
 
   return (
     <>
-      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`}</title>
-      <meta name="description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <title>{title}</title>
+      <meta name="description" content={description} />
       <meta property="og:url" content="https://transit.det.city/d2a2/" />
       <meta property="og:type" content="website" />
-      <meta property="og:title" content={`${agencyName} bus route: ${routeShortName} ${routeLongName}`} />
-      <meta property="og:description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
       <link rel="canonical" href="https://transit.det.city/d2a2/" />
     </>
   );

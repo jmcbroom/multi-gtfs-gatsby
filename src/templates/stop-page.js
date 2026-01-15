@@ -8,6 +8,7 @@ import AgencySlimHeader from "../components/AgencySlimHeader";
 import StopHeader from "../components/StopHeader";
 import StopMap from "../components/StopMap";
 import StopPredictions from "../components/StopPredictions";
+import StopRouteSelector from "../components/StopRouteSelector";
 import StopTimesHere from "../components/StopTimesHere";
 import StopAccessibility from "../components/StopAccessibility";
 import StopTransfers from "../components/StopTransfers";
@@ -96,7 +97,7 @@ const Stop = ({ data, pageContext }) => {
     ],
   };
 
-  const now = useTick(sanityAgency.realTimeEnabled);
+  const { now } = useTick(sanityAgency.realTimeEnabled);
   const [predictions, setPredictions] = useState(null);
   const [vehicles, setVehicles] = useState(null);
 
@@ -212,6 +213,9 @@ const Stop = ({ data, pageContext }) => {
   }, [predictions, realTimeEnabled, agencySlug]);
 
   let [trackedBus, setTrackedBus] = useState(null);
+  let [selectedRoute, setSelectedRoute] = useState(
+    routes.length === 1 ? routes[0].routeShortName : null
+  );
 
   let isFavoriteStop =
     favoriteStops?.filter(
@@ -222,9 +226,7 @@ const Stop = ({ data, pageContext }) => {
 
   return (
     <div>
-      <div className="mt-4">
-        <AgencySlimHeader agency={agencyData} />
-      </div>
+      <AgencySlimHeader agency={agencyData} />
       <StopHeader
         favoriteStops={favoriteStops}
         agency={agencyData}
@@ -243,6 +245,7 @@ const Stop = ({ data, pageContext }) => {
             trackedBus={trackedBus}
             predictions={predictions}
             vehicles={vehicles}
+            selectedRoute={selectedRoute}
           />
           {predictions && (
             <StopPredictions
@@ -254,15 +257,24 @@ const Stop = ({ data, pageContext }) => {
               routes={routes}
               agency={agencyData}
               patterns={patterns}
+              setSelectedRoute={setSelectedRoute}
+              now={now}
             />
           )}
         </div>
         <div>
+          <StopRouteSelector
+            routes={routes}
+            agency={agencyData}
+            selectedRoute={selectedRoute}
+            setSelectedRoute={setSelectedRoute}
+          />
           <StopTimesHere
             times={times}
             routes={routes}
             agency={agencyData}
             serviceDays={serviceDays}
+            selectedRoute={selectedRoute}
           />
           <StopTransfers stop={indexedStop} nearbyStops={indexedStop.nearby} routes={sanityRoutes.edges.map(e => e.node)} agencies={sanityAgencies.edges.map(e => e.node)} />
           <NearbyBikeshare nearbyBikeshare={pageContext.nearbyBikeshare} />
@@ -276,7 +288,28 @@ const Stop = ({ data, pageContext }) => {
 };
 
 export const query = graphql`
-  query StopQuery($feedIndex: Int, $stopId: String) {
+  query StopQuery($feedIndex: Int, $stopId: String, $agencySlug: String) {
+    agency: sanityAgency(slug: { current: { eq: $agencySlug } }) {
+      name
+    }
+    allSanityAgency {
+      edges {
+        node {
+          name
+          currentFeedIndex
+        }
+      }
+    }
+    allSanityBikeshare {
+      edges {
+        node {
+          name
+          slug {
+            current
+          }
+        }
+      }
+    }
     postgres {
       agencies: agenciesList(condition: { feedIndex: $feedIndex }) {
         agencyName
@@ -374,19 +407,101 @@ export default Stop;
 
 export const Head = ({ data, pageContext }) => {
   const stop = data.postgres?.stop?.[0];
-  const agency = data.postgres?.agencies?.[0];
   const stopName = stop?.stopName || "";
   const stopIdentifier = stop?.stopCode || stop?.stopId || "";
-  const agencyName = agency?.agencyName || "";
+  const agencyName = data.agency?.name || "";
+  const routes = stop?.routes || [];
+  const nearbyStops = stop?.nearby || [];
+  const nearbyBikeshare = pageContext.nearbyBikeshare;
+  const allAgencies = data.allSanityAgency?.edges?.map(e => e.node) || [];
+  const allBikeshare = data.allSanityBikeshare?.edges?.map(e => e.node) || [];
+
+  // OG image URL is computed at build time in gatsby-node.js
+  const ogImageUrl = pageContext.ogImageUrl;
+
+  // Build description with routes served
+  let description = `${agencyName} bus stop at ${stopName}`;
+
+  if (routes.length > 0) {
+    const routeNumbers = routes.map(r => `${r.routeShortName} ${r.routeLongName}`).slice(0, 5);
+    if (routes.length <= 5) {
+      description += `, served by route${routes.length > 1 ? "s" : ""} ${routeNumbers.join(", ")}.`;
+    } else {
+      description += `, served by routes ${routeNumbers.join(", ")}, and ${routes.length - 5} more.`;
+    }
+  }
+
+  // List transfers to other agencies with specific routes
+  const currentFeedIndex = pageContext.feedIndex;
+  const transfersByAgency = {};
+
+  nearbyStops
+    .forEach(s => {
+      const agency = allAgencies.find(a => a.currentFeedIndex === s.feedIndex);
+      if (!agency) return;
+
+      if (!transfersByAgency[agency.name]) {
+        transfersByAgency[agency.name] = new Set();
+      }
+
+      // Ignore transfer to same routes (only for OG description)
+      if (s.feedIndex === currentFeedIndex) {
+        return;
+      }
+
+      // Add routes from this stop's tripDirections (for display on page, but skip in OG description)
+      if (s.feedIndex !== currentFeedIndex) {
+        s.tripDirections?.forEach(td => {
+          transfersByAgency[agency.name].add(td.routeId);
+        });
+      }
+      s.tripDirections?.forEach(td => {
+        transfersByAgency[agency.name].add(td.routeId);
+      });
+    });
+
+  const transferParts = Object.entries(transfersByAgency)
+    .map(([agencyName, routeSet]) => {
+      const routeList = [...routeSet].sort((a, b) => {
+        const aNum = parseInt(a) || 999;
+        const bNum = parseInt(b) || 999;
+        return aNum - bNum;
+      }).slice(0, 4);
+      if (routeList.length === 0) {
+        return;
+      }
+
+      if (routeList.length > 0) {
+        return `${agencyName} ${routeList.join(", ")}`;
+      }
+      return agencyName;
+    })
+    .filter(Boolean);
+
+  // Add bikeshare to transfers if nearby
+  if (nearbyBikeshare) {
+    const bikeshare = allBikeshare.find(b => b.slug?.current === nearbyBikeshare.bikeshareSlug);
+    const bikeshareName = bikeshare?.name || "bikeshare";
+    transferParts.push(bikeshareName);
+  }
+
+  if (transferParts.length > 0) {
+    description += ` Nearby transfer to ${transferParts.join(" and ")}.`;
+  }
+
+  const title = `${agencyName} stop: ${stopName} (#${stopIdentifier}) | transit.det.city`;
 
   return (
     <>
-      <title>{`${agencyName} bus stop: ${stopName} (#${stopIdentifier})`}</title>
-      <meta name="description" content={`${agencyName} bus stop: ${stopName} (#${stopIdentifier})`} />
+      <title>{title}</title>
+      <meta name="description" content={description} />
       <meta property="og:url" content={`https://transit.det.city/${pageContext.agencySlug}/stop/${stopIdentifier}/`} />
       <meta property="og:type" content="website" />
-      <meta property="og:title" content={`${agencyName} bus stop: ${stopName} (#${stopIdentifier})`} />
-      <meta property="og:description" content={`${agencyName} bus stop: ${stopName} (#${stopIdentifier})`} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+      {ogImageUrl && <meta property="og:image:width" content="1200" />}
+      {ogImageUrl && <meta property="og:image:height" content="630" />}
       <link rel="canonical" href={`https://transit.det.city/${pageContext.agencySlug}/stop/${stopIdentifier}/`} />
     </>
   );

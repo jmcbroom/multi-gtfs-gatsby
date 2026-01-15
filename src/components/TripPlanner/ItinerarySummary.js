@@ -19,15 +19,15 @@ const ItinerarySummary = ({ leg }) => {
             routeColor: route?.color ? `#${route.color}` : undefined,
             routeTextColor: route?.textColor ? `#${route.textColor}` : undefined
           }}
-          size="small"
+          size="xs"
         />
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-1 px-2 py-1 rounded bg-gray-200 dark:bg-zinc-700 text-gray-500 dark:text-zinc-400">
-      <FontAwesomeIcon icon={getModeIcon(leg.mode)} className="text-sm" />
+    <div className="flex items-center gap-1 py-1 rounded">
+      <FontAwesomeIcon icon={getModeIcon(leg.mode)} className="text-xs" />
     </div>
   );
 };

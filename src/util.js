@@ -1,8 +1,110 @@
 import bearing from "@turf/bearing";
 import centroid from "@turf/centroid";
-import nearestPoint from "@turf/nearest-point";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
-import _ from "lodash";
+import simplify from "@turf/simplify";
+import polyline from "@mapbox/polyline";
+import { groupBy } from "lodash-es";
+
+/**
+ * Shorten a headsign for display in constrained spaces (e.g., OG descriptions).
+ * Applies a series of transformations to reduce length while preserving meaning.
+ * @param {string} headsign - The original headsign text
+ * @returns {string} - The shortened headsign
+ */
+export const shortenHeadsign = (headsign) => {
+  if (!headsign) return "";
+
+  const replacements = [
+    // Common transit abbreviations
+    [/\bTransit Center\b/gi, "TC"],
+    // [/\bTransportation Center\b/gi, "TC"],
+    // [/\bPark and Ride\b/gi, "P&R"],
+    // [/\bPark & Ride\b/gi, "P&R"],
+    // [/\bPark-and-Ride\b/gi, "P&R"],
+    // Directional
+    // [/\bNorthbound\b/gi, "NB"],
+    // [/\bSouthbound\b/gi, "SB"],
+    // [/\bEastbound\b/gi, "EB"],
+    // [/\bWestbound\b/gi, "WB"],
+    // Common words
+    // [/\bDowntown\b/gi, "Dtn"],
+    // [/\bAirport\b/gi, "Airport"],
+    // [/\bUniversity\b/gi, "Univ"],
+    // [/\bCommunity College\b/gi, "CC"],
+    // [/\bHospital\b/gi, "Hosp"],
+    // [/\bMedical Center\b/gi, "Med Ctr"],
+    // [/\bShopping Center\b/gi, "Shop Ctr"],
+    // [/\bMall\b/gi, "Mall"],
+    // Street types
+    // [/\bBoulevard\b/gi, "Blvd"],
+    // [/\bAvenue\b/gi, "Ave"],
+    // [/\bStreet\b/gi, "St"],
+    // [/\bRoad\b/gi, "Rd"],
+    // [/\bDrive\b/gi, "Dr"],
+    // [/\bHighway\b/gi, "Hwy"],
+    // Remove leading "To " if present
+    [/^To\s+/i, ""],
+  ];
+
+  let result = headsign;
+  for (const [pattern, replacement] of replacements) {
+    result = result.replace(pattern, replacement);
+  }
+
+  return result.trim();
+};
+
+/**
+ * Shorten a stop name for display in constrained spaces.
+ * Replaces known transit center names with abbreviations and preserves bay/platform info.
+ * @param {string} stopName - The original stop name
+ * @returns {string} - The shortened stop name
+ */
+export const shortenStopName = (stopName) => {
+  if (!stopName) return "";
+
+  // Known transit centers with their abbreviations
+  const transitCenters = [
+    ["Rosa Parks Transit Center", "RPTC"],
+    ["Jason Hargrove Transit Center", " JHTC"],
+    ["Jason Hargrove TC", " JHTC"],
+    ["Blake Transit Center", "BTC"],
+    ["Ypsilanti Transit Center", "YTC"],
+    ["Dearborn Transit Center", "DTC"],
+    ["Royal Oak Transit Center", "RO TC"],
+  ];
+
+  let result = stopName;
+
+  for (const [pattern, replacement] of transitCenters) {
+    if (typeof pattern === "string") {
+      // Case-insensitive string replacement
+      const regex = new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      result = result.replace(regex, replacement);
+    } else {
+      // Regex replacement
+      result = result.replace(pattern, replacement);
+    }
+  }
+
+  // Clean up any double spaces
+  result = result.replace(/\s+/g, ' ').trim();
+
+  // "Deboarding => Exit"
+  result = result.replace(/Deboarding/g, '').trim();
+  result = result.replace(/EndPt/g, '').trim();
+  
+  // "Northwestern => N'western"
+  result = result.replace(/Northwestern/g, "N'western").trim();
+  result = result.replace(/Hospital/g, "Hosp").trim();
+  result = result.replace(/Martin Luther King/g, "MLK").trim();
+  result = result.replace(/Service Dr(ive)?/g, "Serv Dr").trim();
+
+  // Handle " - " separator: keep it but ensure spacing is clean
+  result = result.replace(/\s*-\s*/g, ' ');
+
+  return result;
+};
 
 /**
  * Convert the GraphQL arrivalTime to a human-readable string.
@@ -381,18 +483,21 @@ export const createVehicleFc = (vehicles, patterns, route, agency, trips) => {
         pattern = patterns.find((p) => p.rtdir === "NORTH");
       }
 
-      if (agency.slug.current === "theride") {
+      if (agency.slug.current === "theride" && pattern?.pt) {
 
         let firstStopTime = pattern.pt.find(pt => pt.stpid)
 
-        let tripWithFirstStop = trips.find(t => {
-          let stopTimes = t.stopTimes
-          let firstStop = stopTimes.find(st => st.stop.stopCode === firstStopTime.stpid)
-          return firstStop
-        })
+        if (firstStopTime) {
+          let tripWithFirstStop = trips.find(t => {
+            let stopTimes = t.stopTimes
+            let firstStop = stopTimes.find(st => st.stop.stopCode === firstStopTime.stpid)
+            return firstStop
+          })
 
-        direction = route.directions.find(d => d.directionId === tripWithFirstStop.directionId)
-
+          if (tripWithFirstStop) {
+            direction = route.directions.find(d => d.directionId === tripWithFirstStop.directionId)
+          }
+        }
       }
     }
 
@@ -487,9 +592,8 @@ export const createStopsFc = (
       return;
     }
 
-    let stops = mostTimepointsTrip.stopTimes
-      .filter((st) => !timepointsOnly || st.timepoint === 1)
-      .map((st) => st.stop);
+    let stopTimes = mostTimepointsTrip.stopTimes
+      .filter((st) => !timepointsOnly || st.timepoint === 1);
 
     let direction = sanityRoute.directions.find(
       (d) => d.directionId === parseInt(key)
@@ -497,7 +601,12 @@ export const createStopsFc = (
 
     let directionFeature = JSON.parse(direction.directionShape)[0];
 
-    stops.forEach((stop) => {
+    stopTimes.forEach((st) => {
+      let stop = st.stop;
+      let isTimepoint = st.timepoint === 1;
+
+      stop.stopName = shortenStopName(stop.stopName)
+
       // create a new GeoJSON feature
       let stopFeature = {
         type: "Feature",
@@ -507,6 +616,7 @@ export const createStopsFc = (
         },
         properties: {
           ...stop,
+          isTimepoint,
           offset: [0, 1.5],
           anchor: "top",
           justify: "center"
@@ -567,7 +677,7 @@ export const createStopsFc = (
   });
 
   if (dedupe) {
-    let groupedByName = _.groupBy(features, (f) => f.properties.stopName)
+    let groupedByName = groupBy(features, (f) => f.properties.stopName)
   
     features = Object.keys(groupedByName).map((k) => {
       
@@ -721,37 +831,6 @@ export const matchPredictionToRoute = (prediction, routes, patterns) => {
   return { route, direction };
 };
 
-export const matchPredictionToVehicle = (prediction, vehicles) => {
-  let vehicle = vehicles.find((v) => v.vid === prediction.vid);
-  return vehicle;
-};
-
-export const createAllStopsFc = ({ allStops, agencies }) => {
-  let allStopsFc = {
-    type: "FeatureCollection",
-    features: [],
-  };
-
-  allStops.forEach((stop) => {
-    let agency = agencies.find((a) => a.currentFeedIndex === stop.feedIndex);
-    let feature = {
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [stop.stopLon, stop.stopLat],
-      },
-      properties: {
-        stopId: stop.stopId,
-        stopName: stop.stopName,
-        stopCode: stop.stopCode,
-        agencySlug: agency.slug.current,
-      },
-    };
-    allStopsFc.features.push(feature);
-  });
-  return allStopsFc;
-};
-
 export const getVehicleType = (routeType) => {
   const vehicles = {
     streetcar: 0,
@@ -774,3 +853,83 @@ export const getVehicleType = (routeType) => {
 
   return vehiclesByType[routeType];
 };
+
+/**
+ * Generate a Mapbox Static API URL for a route's OpenGraph image.
+ * Combines all direction geometries, simplifies using Douglas-Peucker algorithm, and encodes as polyline.
+ *
+ * @param {Object} options
+ * @param {Array} options.directions - Array of direction objects with directionShape (GeoJSON string)
+ * @param {string} options.routeColor - Hex color for the route (with or without #)
+ * @param {string} options.accessToken - Mapbox access token
+ * @param {number} [options.width=1200] - Image width
+ * @param {number} [options.height=630] - Image height
+ * @param {number} [options.tolerance=0.001] - Simplification tolerance in degrees (~100m)
+ * @returns {string|null} - Mapbox Static API URL or null if no valid geometry
+ */
+export const generateRouteOgImageUrl = ({
+  directions,
+  routeColor,
+  accessToken,
+  width = 1200,
+  height = 630,
+  tolerance = 0.001,
+}) => {
+  if (!directions || !directions.length || !accessToken) {
+    return null;
+  }
+
+  // Normalize color (remove # if present)
+  const color = (routeColor || "004d99").replace("#", "");
+
+  // Find the longest shape from all directions (just use one, not all combined)
+  let longestCoords = [];
+
+  directions.forEach((direction) => {
+    if (!direction.directionShape) return;
+
+    try {
+      const features = JSON.parse(direction.directionShape);
+      // Pick the first feature from this direction
+      const feature = features[0];
+      if (feature?.geometry?.coordinates && feature.geometry.coordinates.length > longestCoords.length) {
+        longestCoords = feature.geometry.coordinates;
+      }
+    } catch (e) {
+      // Skip invalid shapes
+    }
+  });
+
+  if (longestCoords.length === 0) {
+    return null;
+  }
+
+  // Create a LineString feature and simplify using Douglas-Peucker algorithm
+  const lineFeature = {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "LineString",
+      coordinates: longestCoords,
+    },
+  };
+
+  const simplified = simplify(lineFeature, { tolerance, highQuality: true });
+  const simplifiedCoords = simplified.geometry.coordinates;
+
+  // Convert to [lat, lng] for polyline encoding (Mapbox polyline expects lat,lng not lng,lat)
+  const latLngCoords = simplifiedCoords.map(([lng, lat]) => [lat, lng]);
+
+  // Encode as polyline
+  const encoded = polyline.encode(latLngCoords);
+
+  // Build the Mapbox Static API URL
+  // Format: path-{strokeWidth}+{strokeColor}({encoded_polyline})
+  const pathOverlay = `path-5+${color}(${encodeURIComponent(encoded)})`;
+
+  // Use 'auto' to let Mapbox calculate the bounding box
+  const url = `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${pathOverlay}/auto/${width}x${height}@2x?padding=40&access_token=${accessToken}`;
+
+  return url;
+};
+

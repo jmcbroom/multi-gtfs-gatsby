@@ -349,3 +349,29 @@ export const query = graphql`
 `;
 
 export default Agency;
+
+export const Head = ({ data, pageContext }) => {
+  const sanityAgency = data.allSanityAgency?.edges?.[0]?.node;
+  const gtfsAgency = data.postgres?.agencies?.[0];
+  const agencyName = sanityAgency?.name || gtfsAgency?.agencyName || "";
+  const fullName = sanityAgency?.fullName || agencyName;
+
+  // Count routes with trips
+  const routes = gtfsAgency?.routes || [];
+  const activeRouteCount = routes.filter(r => r.trips?.totalCount > 0).length;
+
+  const title = `${agencyName} | transit.det.city`;
+  const description = `${fullName} transit information. ${activeRouteCount} bus routes with schedules, maps, and real-time info.`;
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={`https://transit.det.city/${pageContext.agencySlug}/`} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={`https://transit.det.city/${pageContext.agencySlug}/`} />
+    </>
+  );
+};

@@ -1,5 +1,5 @@
 import bbox from "@turf/bbox";
-import _ from "lodash";
+import { cloneDeep } from "lodash-es";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef } from "react";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
@@ -37,7 +37,7 @@ const BikeshareMap:React.FC<BikeshareMapProps> = ({
 
   let boundingBox: any = bbox(stationsFc)
 
-  let style = _.cloneDeep(mapboxStyles[theme]);
+  let style = cloneDeep(mapboxStyles[theme]);
   style.sources.bikeshare.data = stationsFc;
 
   if (nearbyStopsFc) {

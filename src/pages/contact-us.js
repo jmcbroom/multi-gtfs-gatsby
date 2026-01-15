@@ -11,3 +11,21 @@ const ContactPage = () => {
 }
 
 export default ContactPage
+
+export const Head = () => {
+  const title = "Contact Us | transit.det.city";
+  const description = "Get in touch with the transit.det.city team.";
+  const url = "https://transit.det.city/contact-us";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={url} />
+    </>
+  );
+};

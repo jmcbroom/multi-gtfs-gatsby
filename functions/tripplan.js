@@ -1,7 +1,6 @@
-const rp = require('request-promise');
 const { isAllowedOrigin, getCorsOrigin } = require('./lib/cors');
 
-const OTP_GRAPHQL_ENDPOINT = 'https://otp.det.city/otp/gtfs/v1';
+const OTP_GRAPHQL_ENDPOINT = process.env.OTP_GRAPHQL_ENDPOINT || 'https://otp.det.city/otp/gtfs/v1';
 
 // Using the 'plan' query which supports arriveBy
 const PLAN_QUERY = `
@@ -35,23 +34,21 @@ query plan($from: InputCoordinates!, $to: InputCoordinates!, $date: String, $tim
 }
 `;
 
-exports.handler = async function (event, context, callback) {
+exports.handler = async function (event) {
   // Check origin/referer
   if (!isAllowedOrigin(event)) {
-    return callback(null, {
+    return {
       statusCode: 403,
       body: JSON.stringify({ message: 'Forbidden' }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+      headers: { 'Content-Type': 'application/json' }
+    };
   }
 
   const corsOrigin = getCorsOrigin(event);
 
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
-    return callback(null, {
+    return {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': corsOrigin,
@@ -59,14 +56,14 @@ exports.handler = async function (event, context, callback) {
         'Access-Control-Allow-Methods': 'POST, OPTIONS'
       },
       body: ''
-    });
+    };
   }
 
   if (event.httpMethod !== 'POST') {
-    return callback(null, {
+    return {
       statusCode: 405,
-      body: JSON.stringify({ message: 'Method Not Allowed' }),
-    });
+      body: JSON.stringify({ message: 'Method Not Allowed' })
+    };
   }
 
   try {
@@ -98,20 +95,19 @@ exports.handler = async function (event, context, callback) {
       variables.arriveBy = !!arriveBy;
     }
 
-    const response = await rp({
-      uri: OTP_GRAPHQL_ENDPOINT,
+    const response = await fetch(OTP_GRAPHQL_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         query: PLAN_QUERY,
         variables: variables
       })
     });
 
+    const responseText = await response.text();
+
     // Parse the response to transform it for frontend compatibility
-    const parsed = JSON.parse(response);
+    const parsed = JSON.parse(responseText);
 
     // Transform the plan response to match the planConnection structure the frontend expects
     if (parsed.data && parsed.data.plan) {
@@ -146,28 +142,28 @@ exports.handler = async function (event, context, callback) {
         }
       };
 
-      callback(null, {
+      return {
         statusCode: 200,
         body: JSON.stringify(transformed),
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': corsOrigin
         }
-      });
+      };
     } else {
       // Return original response if no plan data
-      callback(null, {
+      return {
         statusCode: 200,
-        body: response,
+        body: responseText,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': corsOrigin
         }
-      });
+      };
     }
   } catch (error) {
     console.error('OTP request error:', error);
-    callback(null, {
+    return {
       statusCode: 500,
       body: JSON.stringify({
         message: 'Error fetching trip plan',
@@ -177,6 +173,6 @@ exports.handler = async function (event, context, callback) {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': corsOrigin
       }
-    });
+    };
   }
 };

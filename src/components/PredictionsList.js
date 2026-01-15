@@ -14,11 +14,10 @@ import PredictionRow from "./PredictionRow";
  * @param {Function} props.onPredictionClick - Handler: (prediction, index) => void
  * @param {Function} props.getRouteData - Function: (prediction) => { route, direction }
  * @param {boolean} props.loading - Show loading state
- * @param {string|ReactNode} props.header - Header text or element
+ * @param {string|ReactNode} props.header - Header text or element (use RealtimeHeader for real-time sections)
  * @param {number} props.maxItems - Limit displayed items (default: 20)
  * @param {boolean} props.showStopName - Whether to show stop name when active
  * @param {string} props.agencySlug - Agency slug for links (optional, falls back to prediction.agencySlug)
- * @param {number} props.countdown - Optional countdown timer value
  * @param {boolean} props.noWrapper - If true, renders just the list without wrapper div
  * @param {ReactNode} props.children - Extra content after the list (e.g., bikeshare section)
  */
@@ -35,7 +34,6 @@ const PredictionsList = ({
   maxItems = 20,
   showStopName = false,
   agencySlug,
-  countdown,
   noWrapper = false,
   children,
 }) => {
@@ -54,7 +52,7 @@ const PredictionsList = ({
       )}
 
       {/* Predictions list */}
-      <div className="flex-1 overflow-y-auto max-h-80 md:max-h-none">
+      <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="p-4 text-gray-500 dark:text-zinc-400 text-sm">
             Loading predictions...
@@ -100,13 +98,6 @@ const PredictionsList = ({
 
       {/* Extra content (e.g., bikeshare) */}
       {children}
-
-      {/* Countdown timer in bottom left */}
-      {countdown !== undefined && (
-        <div className="absolute bottom-1 left-2 text-[10px] text-gray-300 dark:text-zinc-600 font-mono">
-          {countdown}s
-        </div>
-      )}
     </>
   );
 
@@ -115,7 +106,7 @@ const PredictionsList = ({
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col relative pb-6">
+    <div className="flex-1 min-h-0 flex flex-col">
       {content}
     </div>
   );

@@ -8,26 +8,12 @@ import PortableText from "react-portable-text";
 import "../styles/tabs.css";
 import {
   createAgencyData,
-  createRouteData,
-  dayOfWeek,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
   getTripsByServiceDay
 } from "../util";
 import { getStopIdentifier } from "../stopUtils";
-
-const components = {
-  marks: {
-    link: ({value, children}) => {
-      // Read https://css-tricks.com/use-target_blank/
-      const { blank, href } = value
-      return blank ?
-        <a href={href} target="_blank" rel="noreferrer">{children} something</a>
-        : <a href={href} target="_blank" rel="noreferrer">{children} something2</a>
-    }
-  }
-}
 
 const MichiganFlyer = ({ data }) => {
   let gtfsAgency = data.postgres.agencies[0];
@@ -101,8 +87,6 @@ const MichiganFlyer = ({ data }) => {
     sanityRoute.mapPriority = 2;
   }
 
-  let routeData = createRouteData(gtfsRoute, sanityRoute);
-
   let defaultService = "daily";
 
   const [service, setService] = useState(defaultService);
@@ -127,7 +111,7 @@ const MichiganFlyer = ({ data }) => {
       </div>
       <div className="grid grid-cols-1 gap-0 mt-4 md:gap-8 mb-4">
         <div>
-          <div className="grayHeader -mb-4 z-20 block relative">
+          <div className="grayHeader z-20 block relative">
             Eastbound to DTW
           </div>
           <RouteTimeTable
@@ -139,7 +123,7 @@ const MichiganFlyer = ({ data }) => {
           />
         </div>
         <div>
-          <div className="grayHeader -mb-4 z-20 block relative text-lg">
+          <div className="grayHeader z-20 block relative text-lg">
             Westbound to East Lansing
           </div>
           <RouteTimeTable
@@ -300,19 +284,18 @@ export const query = graphql`
 
 export default MichiganFlyer;
 
-export const Head = ({ data }) => {
-  const agencyName = data.agency?.name || "Michigan Flyer";
-  const routeShortName = data.route?.displayShortName || data.route?.shortName || "MF";
-  const routeLongName = data.route?.longName || "Michigan Flyer";
+export const Head = () => {
+  const title = "Michigan Flyer | transit.det.city";
+  const description = "Airport shuttle, running daily between Ann Arbor (Blake TC), East Lansing, and Detroit Metro Airport (DTW).";
 
   return (
     <>
-      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`}</title>
-      <meta name="description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <title>{title}</title>
+      <meta name="description" content={description} />
       <meta property="og:url" content="https://transit.det.city/michigan-flyer/" />
       <meta property="og:type" content="website" />
-      <meta property="og:title" content={`${agencyName} bus route: ${routeShortName} ${routeLongName}`} />
-      <meta property="og:description" content={`${agencyName} bus route ${routeShortName} ${routeLongName}`} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
       <link rel="canonical" href="https://transit.det.city/michigan-flyer/" />
     </>
   );

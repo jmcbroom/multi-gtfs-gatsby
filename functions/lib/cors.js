@@ -2,6 +2,7 @@ const ALLOWED_ORIGINS = [
   'https://transit.det.city',
   'http://localhost:8888',
   'http://localhost:8000',
+  'https://crocused-dona-overabusively.ngrok-free.dev/'
 ];
 
 function isAllowedOrigin(event) {

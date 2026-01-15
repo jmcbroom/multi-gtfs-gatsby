@@ -3,7 +3,7 @@ import { navigate } from "gatsby";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
-import Mapbox, { NavigationControl } from "react-map-gl";
+import Mapbox, { NavigationControl, GeolocateControl } from "react-map-gl";
 import { useMapStyle } from "../hooks/useMapStyle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand } from "@fortawesome/free-solid-svg-icons";
@@ -110,7 +110,7 @@ const RouteMap = ({
     if(!clickStops || !map.current) { return };
 
     let stop = map.current.queryRenderedFeatures(e.point, {
-      layers: ["stops-points"],
+      layers: ["stops-points", "stops-timepoint-points"],
     })[0];
 
     if (stop) {
@@ -195,9 +195,10 @@ const RouteMap = ({
         onMoveStart={handleMoveStart}
         onMoveEnd={handleMoveEnd}
         twoFingerDrag={true}
-        interactiveLayerIds={clickStops ? ["stops-points"] : []}
+        interactiveLayerIds={clickStops ? ["stops-points", "stops-timepoint-points"] : []}
       >
         <NavigationControl showCompass={false} />
+        <GeolocateControl />
       </Mapbox>
     </div>
   );

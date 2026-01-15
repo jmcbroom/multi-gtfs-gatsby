@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
 import RoutePredictionRow from "./RoutePredictionRow";
+import RealtimeHeader from "./RealtimeHeader";
 import { getVehicleType } from "../util";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faWifi, faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import _ from "lodash";
+import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { groupBy } from "lodash-es";
+import { shortenHeadsign } from "../util";
 
 const RoutePredictions = ({
   vehicles,
@@ -11,13 +13,14 @@ const RoutePredictions = ({
   setVisibleVehicles,  // Optional callback to control which vehicles show on map
   predictions,
   routeType = 3,
+  countdown,
 }) => {
   const [activeVehicle, setActiveVehicle] = useState(null);
   const [collapsedDirections, setCollapsedDirections] = useState(new Set());
 
   let directions = vehicles?.features[0]?.properties.directions;
 
-  let vehiclesByDirection = _.groupBy(
+  let vehiclesByDirection = groupBy(
     vehicles?.features,
     "properties.description"
   );
@@ -64,34 +67,21 @@ const RoutePredictions = ({
   // Count total vehicles across all directions for separator logic
   let vehicleIndex = 0;
 
+  const vehicleType = getVehicleType(routeType);
+  const pluralSuffix = vehicleType.slice(-1) === "s" ? "es" : "s";
+  const hasVehicles = vehicles?.features?.length > 0;
+
+  const headerTitle = hasVehicles
+    ? `${vehicles.features.length} ${vehicleType}${vehicles.features.length > 1 ? pluralSuffix : ""} tracked`
+    : `No ${vehicleType}${pluralSuffix} tracked`;
+
   return (
     <div>
-      {vehicles?.features?.length > 0 ? (
-        <div className="grayHeader text-gray-800 dark:text-gray-300 flex items-center justify-between">
-          <div>
-            <div>
-              {vehicles.features.length}
-              {` `}
-              {getVehicleType(routeType)}
-              {vehicles?.features?.length > 1
-                ? getVehicleType(routeType).slice(-1) === "s"
-                  ? `es`
-                  : `s`
-                : ``}{" "}
-              tracked
-            </div>
-          </div>
-          <FontAwesomeIcon icon={faWifi} className="text-green-500" />
-        </div>
-      ) : (
-        <div className="grayHeader text-gray-400 flex items-center justify-between">
-          <div>
-            No {getVehicleType(routeType)}
-            {getVehicleType(routeType).slice(-1) === "s" ? `es` : `s`} tracked
-          </div>
-          <FontAwesomeIcon icon={faWifi} className="text-gray-300" />
-        </div>
-      )}
+      <RealtimeHeader
+        title={headerTitle}
+        countdown={countdown}
+        enabled={hasVehicles}
+      />
 
       {directions &&
         directionKeys.map((direction, dirIdx) => {
@@ -105,7 +95,7 @@ const RoutePredictions = ({
                 className="w-full flex items-center justify-between gap-0 mt-2 cursor-pointer hover:bg-gray-300 dark:hover:bg-zinc-700 transition-colors"
               >
                 <span>
-                  {direction} to {vehiclesInDirection[0]?.properties.headsign}
+                  {direction} to {shortenHeadsign(vehiclesInDirection[0]?.properties.headsign)}
                 </span>
                 <FontAwesomeIcon
                   icon={isCollapsed ? faChevronRight : faChevronDown}

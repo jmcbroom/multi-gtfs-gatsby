@@ -5,7 +5,8 @@ import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import Mapbox, { NavigationControl } from "react-map-gl";
 import bbox from "@turf/bbox";
-import _ from "lodash";
+import { cloneDeep, groupBy, chunk } from "lodash-es";
+import { fetchVehiclesBatched } from "../utils/vehicleFetcher";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBicycle,
@@ -13,12 +14,14 @@ import {
   faParking,
 } from "@fortawesome/free-solid-svg-icons";
 import { useTheme } from "../hooks/ThemeContext";
+import RealtimeHeader from "../components/RealtimeHeader";
 import { useTick } from "../hooks/useTick";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import mapboxStyles from "../styles/styleFactory";
 import PredictionsList from "../components/PredictionsList";
 import RouteBadge from "../components/RouteBadge";
 import RouteSlim from "../components/RouteSlim";
+import DaxDeparture from "../components/DaxDeparture";
 import { getApiStopIdentifier } from "../stopUtils";
 
 const REFRESH_INTERVAL = 30000;
@@ -41,8 +44,7 @@ const TransitCenterPage = ({ data, pageContext }) => {
     );
   }, [transitCenter]);
 
-  const now = useTick(hasRealTime, REFRESH_INTERVAL);
-  const countdown = REFRESH_INTERVAL / 1000;
+  const { now, countdown } = useTick(hasRealTime, REFRESH_INTERVAL);
 
   // Build stop info from pageContext and PostgreSQL data
   const stopsWithData = useMemo(() => {
@@ -112,7 +114,7 @@ const TransitCenterPage = ({ data, pageContext }) => {
       return { mapStyle: null, mapBounds: null };
     }
 
-    const style = _.cloneDeep(mapboxStyles[theme]);
+    const style = cloneDeep(mapboxStyles[theme]);
 
     // Stops feature collection
     const stopsFc = {
@@ -178,7 +180,7 @@ const TransitCenterPage = ({ data, pageContext }) => {
       },
     });
 
-    // Add boundary polygon if present
+    // Add boundary polygon if present (insert after buildings but before roads)
     if (boundaryFeatures && boundaryFeatures.length > 0) {
       const boundaryFc = {
         type: "FeatureCollection",
@@ -186,8 +188,12 @@ const TransitCenterPage = ({ data, pageContext }) => {
       };
       style.sources.boundary = { type: "geojson", data: boundaryFc };
 
+      // Insert after "building" layer so boundary is above buildings but below roads
+      const buildingIndex = style.layers.findIndex((l) => l.id === "building");
+      const insertIndex = buildingIndex !== -1 ? buildingIndex + 1 : 1;
+
       // Add boundary fill layer
-      style.layers.push({
+      style.layers.splice(insertIndex, 0, {
         id: "boundary-fill",
         type: "fill",
         source: "boundary",
@@ -198,7 +204,7 @@ const TransitCenterPage = ({ data, pageContext }) => {
       });
 
       // Add boundary line layer
-      style.layers.push({
+      style.layers.splice(insertIndex + 1, 0, {
         id: "boundary-line",
         type: "line",
         source: "boundary",
@@ -252,7 +258,7 @@ const TransitCenterPage = ({ data, pageContext }) => {
       const allPredictions = [];
 
       // Group stops by agency
-      const stopsByAgency = _.groupBy(stopsWithData, "agency.agencySlug");
+      const stopsByAgency = groupBy(stopsWithData, "agency.agencySlug");
 
       for (const [agencySlug, stops] of Object.entries(stopsByAgency)) {
         const agency = agenciesLookup[agencySlug];
@@ -272,7 +278,7 @@ const TransitCenterPage = ({ data, pageContext }) => {
         }
 
         // Batch into groups of 10
-        const batches = _.chunk(apiStopIdentifiers, 10);
+        const batches = chunk(apiStopIdentifiers, 10);
 
         for (const batch of batches) {
           try {
@@ -286,7 +292,8 @@ const TransitCenterPage = ({ data, pageContext }) => {
             if (responseData["bustime-response"]?.prd) {
               const preds = responseData["bustime-response"].prd.map((p) => {
                 const stopInfo = stopMap[p.stpid] || {};
-                const displayStopName = stopInfo.label || stopInfo.stopName || p.stpnm;
+                const displayStopName =
+                  stopInfo.label || stopInfo.stopName || p.stpnm;
                 return {
                   ...p,
                   stpnm: displayStopName,
@@ -327,40 +334,8 @@ const TransitCenterPage = ({ data, pageContext }) => {
 
       setPredictions(dedupedPredictions);
 
-      // Fetch vehicles for predictions
-      const allVehicles = [];
-      const predictionsByAgency = _.groupBy(allPredictions, "agencySlug");
-
-      for (const [agencySlug, agencyPredictions] of Object.entries(
-        predictionsByAgency
-      )) {
-        const vehicleIds = [
-          ...new Set(agencyPredictions.map((p) => p.vid).filter(Boolean)),
-        ];
-        if (vehicleIds.length === 0) continue;
-
-        try {
-          const response = await fetch(
-            `/.netlify/functions/vehicle?vehicleIds=${vehicleIds.join(
-              ","
-            )}&agency=${agencySlug}`
-          );
-          const vehicleData = await response.json();
-
-          if (vehicleData["bustime-response"]?.vehicle) {
-            const vehiclesWithAgency = vehicleData[
-              "bustime-response"
-            ].vehicle.map((v) => ({
-              ...v,
-              agencySlug,
-            }));
-            allVehicles.push(...vehiclesWithAgency);
-          }
-        } catch (err) {
-          console.error(`Error fetching vehicles for ${agencySlug}:`, err);
-        }
-      }
-
+      // Fetch vehicles for predictions (batched in groups of 10)
+      const allVehicles = await fetchVehiclesBatched(allPredictions, allRoutes);
       setVehicles(allVehicles);
       setLoading(false);
     };
@@ -564,22 +539,36 @@ const TransitCenterPage = ({ data, pageContext }) => {
 
   // Header for predictions list
   const predictionsHeader = (
-    <div className="grayHeader flex items-center justify-between">
-      <span>Departures</span>
-      <span className="text-xs text-gray-400 dark:text-zinc-500">
-        updates in {countdown}s
-      </span>
-    </div>
+    <RealtimeHeader title="Upcoming departures" countdown={countdown} />
   );
 
   return (
-    <div className="h-full flex flex-col p-2 md:p-4">
-      {/* Main content: Name/Departures and Map side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 flex-1 min-h-0">
-        {/* Left: Name + Departures */}
-        <div className="md:col-span-2 flex flex-col min-h-0">
-          <div className="mb-2 px-2 flex-shrink-0">
-            <h1 className="text-xl md:text-2xl font-bold">
+    <div className="flex flex-col md:h-full">
+      {/* Header - mobile only */}
+      <div className="md:hidden px-3 py-2">
+        <h1 className="text-xl font-bold">{transitCenter.name}</h1>
+      </div>
+
+      {/* Main content */}
+      <div className="flex flex-col md:grid md:grid-cols-5 md:gap-4 md:flex-1 md:min-h-0 md:p-4">
+        {/* Map - top on mobile, right on desktop */}
+        <div className="h-[40vh] md:h-auto md:col-span-3 md:order-last">
+          <Mapbox
+            ref={map}
+            mapLib={MapboxGL}
+            mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
+            mapStyle={mapStyle}
+            initialViewState={initialViewState}
+            onLoad={handleMapLoad}
+          >
+            <NavigationControl showCompass={false} />
+          </Mapbox>
+        </div>
+
+        {/* Departures - bottom on mobile, left on desktop */}
+        <div className="md:col-span-2 flex flex-col min-h-0 flex-1 md:flex-initial">
+          <div className="mb-2 px-3 md:px-2 flex-shrink-0">
+            <h1 className="hidden md:block text-2xl font-bold">
               {transitCenter.name}
             </h1>
             {transitCenter.description && (
@@ -589,8 +578,8 @@ const TransitCenterPage = ({ data, pageContext }) => {
               />
             )}
           </div>
-          <div className="px-2 min-h-0 flex-1 flex flex-col">
-            <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="md:px-2 min-h-0 flex-1 flex flex-col overflow-y-auto md:overflow-y-visible">
+            <div className="flex-1 md:overflow-y-auto md:min-h-0">
               <PredictionsList
                 predictions={predictions}
                 vehicles={vehicles}
@@ -601,11 +590,15 @@ const TransitCenterPage = ({ data, pageContext }) => {
                 countdown={countdown}
               />
             </div>
-            {/* Bikeshare availability - always visible */}
-            {bikeshareStations.length > 0 && (
-              <div className="mt-2 pt-2 border-t border-gray-200 dark:border-zinc-700 flex-shrink-0">
-                <div className="grayHeader">Bikeshare</div>
+            {/* Connections: Bikeshare + DAX */}
+            {(bikeshareStations.length > 0 ||
+              transitCenter.slug?.current === "rosa-parks") && (
+              <div className="mt-2 pt-2 border-t border-gray-200 dark:border-zinc-700 flex-shrink-0 px-3 md:px-0">
+                <div className="grayHeader">Connections</div>
                 <div className="flex flex-wrap gap-2 mt-2">
+                  {transitCenter.slug?.current === "rosa-parks" && (
+                    <DaxDeparture />
+                  )}
                   {bikeshareStations.map((station) => {
                     const status = station.status;
                     const bikesAvailable = status?.num_bikes_available ?? "—";
@@ -671,21 +664,6 @@ const TransitCenterPage = ({ data, pageContext }) => {
             )}
           </div>
         </div>
-
-        {/* Right: Map */}
-        <div className="h-[300px] md:h-auto md:col-span-3">
-          <Mapbox
-            ref={map}
-            mapLib={MapboxGL}
-            mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
-            mapStyle={mapStyle}
-            initialViewState={initialViewState}
-            onLoad={handleMapLoad}
-            onZoom={(e) => console.log("zoom:", e.viewState.zoom.toFixed(2))}
-          >
-            <NavigationControl showCompass={false} />
-          </Mapbox>
-        </div>
       </div>
 
       {/* Additional content */}
@@ -695,11 +673,53 @@ const TransitCenterPage = ({ data, pageContext }) => {
         </div>
       )}
 
-      {/* Stop list - grouped by label */}
-      <div className="mt-4 px-2 pb-4">
-        <div className="columns-2 md:columns-3 lg:columns-6 gap-3 space-y-3 h-[30vh]" style={{ columnFill: "auto" }}>
+      {/* Stop list */}
+      <div className="mt-4 pb-4">
+        <div className="grayHeader px-3 md:px-2">All stops</div>
+
+        {/* Mobile: simple list */}
+        <div className="md:hidden">
+          {stopsWithData.map((stop, idx) => (
+            <Link
+              key={idx}
+              to={`/${stop.agency.agencySlug}/stop/${stop.stopId}`}
+              className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 dark:border-zinc-800"
+            >
+              {stop.label && (
+                <div className="w-5 h-5 flex-shrink-0 rounded-full bg-white border border-gray-400 flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-black">{stop.label}</span>
+                </div>
+              )}
+              <span className="flex-1 text-sm truncate">{stop.stopName}</span>
+              {stop.routes?.length > 0 && (
+                <div className="flex gap-0.5 flex-shrink-0">
+                  {stop.routes.slice(0, 3).map((route, ridx) => (
+                    <RouteBadge
+                      key={ridx}
+                      route={{
+                        displayShortName: route.routeShortName,
+                        routeColor: `#${route.routeColor || "666"}`,
+                        routeTextColor: `#${route.routeTextColor || "fff"}`,
+                      }}
+                      size="xs"
+                    />
+                  ))}
+                  {stop.routes.length > 3 && (
+                    <span className="text-xs text-gray-400">+{stop.routes.length - 3}</span>
+                  )}
+                </div>
+              )}
+            </Link>
+          ))}
+        </div>
+
+        {/* Desktop: grid layout */}
+        <div
+          className="hidden md:block columns-3 lg:columns-6 gap-3 space-y-3 h-[30vh] px-2"
+          style={{ columnFill: "auto" }}
+        >
           {Object.entries(
-            _.groupBy(stopsWithData, (s) => s.label || "Other")
+            groupBy(stopsWithData, (s) => s.label || "Other")
           ).map(([label, stops]) => {
             const isSingleStop = stops.length === 1;
             const singleStop = isSingleStop ? stops[0] : null;
@@ -714,12 +734,11 @@ const TransitCenterPage = ({ data, pageContext }) => {
                 className="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-hidden break-inside-avoid"
               >
                 <div className="bg-gray-100 dark:bg-zinc-800 px-2 py-1.5 font-semibold text-sm flex items-center gap-1.5">
-                  {/* Stop label marker */}
                   {label && label !== "Other" && (
-                    <div
-                      className="w-6 h-6 flex-shrink-0 rounded-full bg-white border border-gray-400 flex items-center justify-center"
-                    >
-                      <span className="text-xs font-bold text-black leading-none">{label}</span>
+                    <div className="w-6 h-6 flex-shrink-0 rounded-full bg-white border border-gray-400 flex items-center justify-center">
+                      <span className="text-xs font-bold text-black leading-none">
+                        {label}
+                      </span>
                     </div>
                   )}
                   {isSingleStop ? (
@@ -730,7 +749,9 @@ const TransitCenterPage = ({ data, pageContext }) => {
                       {formatStopName(singleStop.stopName)}
                     </Link>
                   ) : (
-                    <span className="flex-1">{label && label !== "Other" ? "" : label}</span>
+                    <span className="flex-1">
+                      {label && label !== "Other" ? "" : label}
+                    </span>
                   )}
                 </div>
                 {isSingleStop ? (
@@ -775,8 +796,8 @@ const TransitCenterPage = ({ data, pageContext }) => {
                         >
                           {formatStopName(stop.stopName)}
                         </Link>
-                        {stop.routes?.length > 0 && (
-                          stop.routes.length === 1 ? (
+                        {stop.routes?.length > 0 &&
+                          (stop.routes.length === 1 ? (
                             <RouteSlim
                               displayShortName={stop.routes[0].routeShortName}
                               routeShortName={stop.routes[0].routeShortName}
@@ -799,8 +820,7 @@ const TransitCenterPage = ({ data, pageContext }) => {
                                 />
                               ))}
                             </div>
-                          )
-                        )}
+                          ))}
                       </li>
                     ))}
                   </ul>
@@ -877,13 +897,28 @@ export default TransitCenterPage;
 
 export const Head = ({ data }) => {
   const transitCenter = data.sanityTransitCenter;
+  const name = transitCenter?.name || "Transit Center";
+  const stops = transitCenter?.stops || [];
+
+  // Get unique agency names
+  const agencies = [...new Set(stops.map(s => s.agency?.name).filter(Boolean))];
+
+  let description = `Real-time information and bus schedules for ${name}.`;
+  if (agencies.length > 0) {
+    description += ` Served by ${agencies.join(", ")}.`;
+  }
+
+  const title = `${name} | transit.det.city`;
+
   return (
     <>
-      <title>{transitCenter?.name || "Transit Center"} | Detroit Transit</title>
-      <meta
-        name="description"
-        content={`Real-time departures and information for ${transitCenter?.name}`}
-      />
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={`https://transit.det.city/transit-center/${transitCenter?.slug?.current}/`} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={`https://transit.det.city/transit-center/${transitCenter?.slug?.current}/`} />
     </>
   );
 };

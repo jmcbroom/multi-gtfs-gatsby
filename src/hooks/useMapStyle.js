@@ -1,6 +1,6 @@
 import { useTheme } from './ThemeContext';
 import mapboxStyles from '../styles/styleFactory';
-import _ from 'lodash';
+import { cloneDeep } from 'lodash-es';
 
 /**
  * Hook that returns the current theme and a cloned Mapbox style object.
@@ -13,6 +13,6 @@ export function useMapStyle() {
     return { theme: null, style: null };
   }
 
-  const style = _.cloneDeep(mapboxStyles[theme]);
+  const style = cloneDeep(mapboxStyles[theme]);
   return { theme, style };
 }

@@ -1,6 +1,6 @@
 import React from "react";
-import { Link, graphql } from "gatsby";
-import { DiscordLogoIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
+import { Link } from "gatsby";
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCompass, faMap, faPlane, faStar, faTableList } from "@fortawesome/free-solid-svg-icons";
 

@@ -17,7 +17,6 @@ import {
   getTripsByServiceDay,
 } from "../util";
 import RoutePredictions from "../components/RoutePredictions";
-import { set } from "lodash";
 
 const Qline = ({ data }) => {
   let gtfsAgency = data.postgres.agencies[0];
@@ -36,7 +35,7 @@ const Qline = ({ data }) => {
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
-  let [realtime, setRealtime] = useState(null);
+  let [realtime] = useState(null);
 
   // // Fetch realtime data from QLINE API
   // useEffect(() => {
@@ -60,9 +59,7 @@ const Qline = ({ data }) => {
   //   return () => clearInterval(intervalId);
   // }, []);
 
-  sanityRoute.directions.forEach((dir, idx) => {
-    // get timepoints for each direction
-    let timepoints = dir.directionTimepoints;
+  sanityRoute.directions.forEach(() => {
     // set timepoint = 1 for each stopTime that is a timepoint
     trips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
@@ -144,14 +141,6 @@ const Qline = ({ data }) => {
     weekday: tripsByServiceAndDirection.weekday,
     weekend: tripsByServiceAndDirection.saturday,
   };
-
-  let defaultService = "weekday";
-
-  if (dayOfWeek() === "sunday" || dayOfWeek() === "saturday") {
-    defaultService = "weekend";
-  }
-
-  const [service, setService] = useState(defaultService);
 
   const [vehicles, setVehicles] = useState(null);
 

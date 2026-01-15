@@ -1,7 +1,7 @@
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
-import Mapbox, { NavigationControl } from "react-map-gl";
+import Mapbox, { NavigationControl, GeolocateControl } from "react-map-gl";
 import bbox from "@turf/bbox";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import { useMapStyle } from "../hooks/useMapStyle";
@@ -16,6 +16,7 @@ const StopMap = ({
   vehicles,
   trackedBus,
   agency,
+  selectedRoute,
 }) => {
   const { sanityRoutes } = useSanityRoutes();
   const map = useRef();
@@ -32,7 +33,12 @@ const StopMap = ({
 
     const allRoutes = sanityRoutes.edges.map((e) => e.node);
     const fc = { type: "FeatureCollection", features: [] };
-    const shortNames = routes.map((r) => r.routeShortName);
+
+    // If a route is selected, only show that route; otherwise show all routes at this stop
+    const shortNames = selectedRoute
+      ? [selectedRoute]
+      : routes.map((r) => r.routeShortName);
+
     const filtered = allRoutes.filter(
       (r) =>
         r.agency.currentFeedIndex === agency.feedIndex &&
@@ -56,7 +62,7 @@ const StopMap = ({
     });
 
     return fc;
-  }, [sanityRoutes, routes, agency.feedIndex]);
+  }, [sanityRoutes, routes, agency.feedIndex, selectedRoute]);
 
   // Compute vehicle feature collection
   const vehicleFc = useMemo(() => {
@@ -80,6 +86,7 @@ const StopMap = ({
               ],
             },
             properties: {
+              vid: trackedVehicle.vid,
               name: trackedVehicle.vid,
               routeColor: matchingRoute.properties.routeColor,
               routeTextColor: matchingRoute.properties.routeTextColor,
@@ -114,7 +121,23 @@ const StopMap = ({
 
   // Fit to show stop and tracked vehicle only when trackedBus changes
   useEffect(() => {
-    if (!map.current || !trackedBus || trackedBus === lastTrackedBus.current) return;
+    if (!map.current) return;
+
+    // If trackedBus was cleared, reset to stop view
+    if (!trackedBus && lastTrackedBus.current) {
+      lastTrackedBus.current = null;
+      if (stopCoords) {
+        map.current.easeTo({
+          center: stopCoords,
+          zoom: 17.25,
+          duration: 500,
+        });
+        setUserHasMoved(false);
+      }
+      return;
+    }
+
+    if (!trackedBus || trackedBus === lastTrackedBus.current) return;
 
     lastTrackedBus.current = trackedBus;
 
@@ -130,7 +153,7 @@ const StopMap = ({
       });
       setUserHasMoved(true);
     }
-  }, [trackedBus, vehicleFc, stopFc]);
+  }, [trackedBus, vehicleFc, stopFc, stopCoords]);
 
   // Reset to stop-centered view
   const handleResetView = useCallback(() => {
@@ -170,6 +193,18 @@ const StopMap = ({
     zoom: 17.25,
   };
 
+  // Compute maxBounds from all routes with padding
+  const maxBounds = routeFc.features.length > 0
+    ? (() => {
+        const bounds = bbox(routeFc);
+        const padding = 0.02; // ~1-2 miles of padding
+        return [
+          [bounds[0] - padding, bounds[1] - padding],
+          [bounds[2] + padding, bounds[3] + padding]
+        ];
+      })()
+    : null;
+
   return (
     <div id="map" style={{ height: 350 }} className="mb-8 relative">
       <div className="grayHeader flex justify-between items-center">
@@ -191,10 +226,12 @@ const StopMap = ({
         mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
         mapStyle={style}
         initialViewState={initialViewState}
+        maxBounds={maxBounds}
         onMoveStart={handleMoveStart}
         onMoveEnd={handleMoveEnd}
       >
         <NavigationControl showCompass={false} />
+        <GeolocateControl />
       </Mapbox>
     </div>
   );

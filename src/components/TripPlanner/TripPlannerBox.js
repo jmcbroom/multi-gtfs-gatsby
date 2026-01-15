@@ -4,6 +4,16 @@ import { SearchBox } from "@mapbox/search-js-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationCrosshairs, faSpinner } from "@fortawesome/free-solid-svg-icons";
 
+// Placeholder for SSR when SearchBox is null-loaded
+const SearchBoxPlaceholder = ({ placeholder }) => (
+  <input
+    type="text"
+    placeholder={placeholder}
+    disabled
+    className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 rounded"
+  />
+);
+
 // Detroit metro bounding box [west, south, east, north]
 const DETROIT_BBOX = [-84.159, 41.723, -82.375, 43.168];
 
@@ -19,18 +29,25 @@ const TripPlannerBox = () => {
   const [destination, setDestination] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
 
-  // Date/Time state
+  // Date/Time state - use America/Detroit timezone
   const now = new Date();
-  const [date, setDate] = useState(now.toISOString().split("T")[0]);
-  const [time, setTime] = useState(now.toTimeString().split(" ")[0].substring(0, 5));
+  const detroitDate = now.toLocaleDateString('en-CA', { timeZone: 'America/Detroit' }); // YYYY-MM-DD format
+  const detroitTime = now.toLocaleTimeString('en-GB', { timeZone: 'America/Detroit', hour: '2-digit', minute: '2-digit', hour12: false });
+  const [date, setDate] = useState(detroitDate);
+  const [time, setTime] = useState(detroitTime);
   const [arriveBy, setArriveBy] = useState(false);
+
+  const formatPlaceName = (properties) => {
+    const name = properties.name || properties.place_formatted || properties.full_address;
+    return name?.replace(/, United States$/, "");
+  };
 
   const handleOriginRetrieve = (result) => {
     const feature = result.features?.[0];
     if (feature) {
       const [lon, lat] = feature.geometry.coordinates;
       setOrigin({
-        name: feature.properties.name || feature.properties.full_address,
+        name: formatPlaceName(feature.properties),
         lat: lat.toFixed(6),
         lon: lon.toFixed(6),
       });
@@ -42,7 +59,7 @@ const TripPlannerBox = () => {
     if (feature) {
       const [lon, lat] = feature.geometry.coordinates;
       setDestination({
-        name: feature.properties.name || feature.properties.full_address,
+        name: formatPlaceName(feature.properties),
         lat: lat.toFixed(6),
         lon: lon.toFixed(6),
       });
@@ -118,19 +135,25 @@ const TripPlannerBox = () => {
             </div>
           ) : (
             <div className="flex-1">
-              <SearchBox
-                accessToken={
-                  process.env.GATSBY_MAPBOX_ACCESS_TOKEN ||
-                  process.env.MAPBOX_ACCESS_TOKEN
-                }
-                options={{
-                  bbox: DETROIT_BBOX,
-                  proximity: { lng: -83.05, lat: 42.35 },
-                }}
-                placeholder="From..."
-                onRetrieve={handleOriginRetrieve}
-                theme={searchBoxTheme}
-              />
+              {SearchBox ? (
+                <SearchBox
+                  accessToken={
+                    process.env.GATSBY_MAPBOX_ACCESS_TOKEN ||
+                    process.env.MAPBOX_ACCESS_TOKEN
+                  }
+                  options={{
+                    bbox: DETROIT_BBOX,
+                    proximity: { lng: -83.05, lat: 42.35 },
+                    types: "address,place,poi,neighborhood,locality",
+                    poi_category_exclusions: "brand",
+                  }}
+                  placeholder="From..."
+                  onRetrieve={handleOriginRetrieve}
+                  theme={searchBoxTheme}
+                />
+              ) : (
+                <SearchBoxPlaceholder placeholder="From..." />
+              )}
             </div>
           )}
           <button
@@ -148,16 +171,22 @@ const TripPlannerBox = () => {
 
         {/* Row 1: To */}
         <div>
-          <SearchBox
-            accessToken={process.env.MAPBOX_ACCESS_TOKEN}
-            options={{
-              bbox: DETROIT_BBOX,
-              proximity: { lng: -83.05, lat: 42.35 },
-            }}
-            placeholder="To..."
-            onRetrieve={handleDestinationRetrieve}
-            theme={searchBoxTheme}
-          />
+          {SearchBox ? (
+            <SearchBox
+              accessToken={process.env.MAPBOX_ACCESS_TOKEN}
+              options={{
+                bbox: DETROIT_BBOX,
+                proximity: { lng: -83.05, lat: 42.35 },
+                types: "address,place,poi,neighborhood,locality",
+                poi_category_exclusions: "brand",
+              }}
+              placeholder="To..."
+              onRetrieve={handleDestinationRetrieve}
+              theme={searchBoxTheme}
+            />
+          ) : (
+            <SearchBoxPlaceholder placeholder="To..." />
+          )}
         </div>
 
         {/* Row 2: Date/Time */}

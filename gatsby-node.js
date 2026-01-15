@@ -1,5 +1,17 @@
 const path = require(`path`);
 const axios = require("axios");
+const { createProxyMiddleware } = require("http-proxy-middleware");
+
+// Proxy Netlify functions during development
+exports.onCreateDevServer = ({ app }) => {
+  app.use(
+    "/.netlify/functions",
+    createProxyMiddleware({
+      target: "http://localhost:9999/.netlify/functions",
+      changeOrigin: true,
+    })
+  );
+};
 
 // Calculate distance in meters between two lat/lon points using Haversine formula
 const getDistanceMeters = (lat1, lon1, lat2, lon2) => {
@@ -16,6 +28,15 @@ const getDistanceMeters = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+// Generate Mapbox Static API URL for stop OG image
+const generateStopOgImageUrl = ({ stopLat, stopLon, accessToken }) => {
+  if (!stopLat || !stopLon || !accessToken) return null;
+
+  const marker = `pin-l+004d99(${stopLon},${stopLat})`;
+
+  return `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/${marker}/${stopLon},${stopLat},15/1200x630@2x?access_token=${accessToken}`;
+};
+
 exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
   if (stage === "build-html") {
     actions.setWebpackConfig({
@@ -23,6 +44,10 @@ exports.onCreateWebpackConfig = ({ stage, loaders, actions }) => {
         rules: [
           {
             test: /mapbox-gl/,
+            use: loaders.null(),
+          },
+          {
+            test: /@mapbox\/search-js-react/,
             use: loaders.null(),
           },
         ],
@@ -203,6 +228,13 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
         }
       }
 
+      // Generate OG image URL
+      const ogImageUrl = generateStopOgImageUrl({
+        stopLat: s.stopLat,
+        stopLon: s.stopLon,
+        accessToken: process.env.MAPBOX_ACCESS_TOKEN,
+      });
+
       createPage({
         path: `/${a.slug.current}/stop/${s[a.stopIdentifierField]}`,
         component: path.resolve("./src/templates/stop-page.js"),
@@ -212,6 +244,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }) => {
           agencySlug: a.slug.current,
           stopId: s.stopId,
           nearbyBikeshare,
+          ogImageUrl,
         },
       });
     }

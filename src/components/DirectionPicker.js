@@ -1,5 +1,6 @@
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import React from "react";
+import { shortenHeadsign } from "../util";
 
 /**
  * Let the user choose the current direction of travel.
@@ -38,7 +39,7 @@ const DirectionPicker = ({ directions, direction, setDirection }) => {
                 {display[directions[dir].description]}
               </span>
               <span className="text-gray-600 dark:text-zinc-500 text-xs sm:text-sm">
-                to {directions[dir].headsigns[0]}
+                to {shortenHeadsign(directions[dir].headsigns[0])}
               </span>
             </label>
           </div>

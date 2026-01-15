@@ -7,7 +7,6 @@ import { useSanityAgencies } from "../hooks/useSanityAgencies";
 import PageHeader from "../components/PageHeader";
 import { faTableList, faGear, faChevronDown, faPlay, faPause, faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import * as Collapsible from "@radix-ui/react-collapsible";
 
 const DEFAULT_MAX_PREDICTION_TIME = 35;
 
@@ -70,10 +69,8 @@ const DepartureBoardPage = ({ data }) => {
 
   if (!hasFavorites) {
     return (
-      <div className="h-full flex flex-col bg-gray-100 dark:bg-zinc-900">
-        <div className="px-4">
-          <PageHeader title="Departure board" icon={faTableList} />
-        </div>
+      <div className="min-h-screen min-h-dvh flex flex-col bg-gray-100 dark:bg-zinc-900">
+        <PageHeader title="Departure board" icon={faTableList} fullWidth />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center p-8">
             <h1 className="text-2xl font-bold text-gray-700 dark:text-zinc-300 mb-4">
@@ -89,74 +86,74 @@ const DepartureBoardPage = ({ data }) => {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="px-4">
-        <div className="flex items-center justify-between">
-          <PageHeader title="Departure board" icon={faTableList} />
-          <div className="flex items-center gap-2">
-            {/* Play/Pause/Pinned toggle */}
-            <button
-              onClick={handlePlayPauseToggle}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                pinnedPrediction
-                  ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                  : carouselMode
-                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                  : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400"
-              }`}
-              title={pinnedPrediction ? "Unpin and resume carousel" : (carouselMode ? "Pause carousel" : "Start carousel")}
-            >
-              <FontAwesomeIcon
-                icon={pinnedPrediction ? faThumbtack : (carouselMode ? faPause : faPlay)}
-              />
-              <span className="hidden sm:inline text-xs">
-                {pinnedPrediction ? "Pinned" : (carouselMode ? "Playing" : "Paused")}
-              </span>
-            </button>
+    <div className="h-screen h-dvh flex flex-col">
+      <PageHeader title="Departure board" icon={faTableList} fullWidth className="flex-shrink-0">
+        <div className="flex items-center gap-2">
+          {/* Play/Pause/Pinned toggle */}
+          <button
+            onClick={handlePlayPauseToggle}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-colors ${
+              pinnedPrediction
+                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                : carouselMode
+                ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400"
+            }`}
+            title={pinnedPrediction ? "Unpin and resume carousel" : (carouselMode ? "Pause carousel" : "Start carousel")}
+          >
+            <FontAwesomeIcon
+              icon={pinnedPrediction ? faThumbtack : (carouselMode ? faPause : faPlay)}
+            />
+            <span className="hidden sm:inline">
+              {pinnedPrediction ? "Pinned" : (carouselMode ? "Playing" : "Paused")}
+            </span>
+          </button>
 
-            {/* Settings dropdown */}
-            <div className="relative">
-              <Collapsible.Root open={settingsOpen} onOpenChange={setSettingsOpen}>
-                <Collapsible.Trigger className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors">
-                  <FontAwesomeIcon icon={faGear} />
-                  <FontAwesomeIcon
-                    icon={faChevronDown}
-                    className={`text-xs transition-transform ${settingsOpen ? "rotate-180" : ""}`}
-                  />
-                </Collapsible.Trigger>
-                <Collapsible.Content className="absolute right-0 top-full mt-1 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 p-4 z-50 min-w-[250px]">
-                  <div className="text-sm font-medium text-gray-700 dark:text-zinc-300 mb-3">Settings</div>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs text-gray-500 dark:text-zinc-400 mb-1">
-                        Max prediction time
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="range"
-                          min="10"
-                          max="90"
-                          step="5"
-                          value={maxPredictionTime}
-                          onChange={(e) => updateMaxPredictionTime(e.target.value)}
-                          className="flex-1 h-2 bg-gray-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                        />
-                        <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 w-12 text-right">
-                          {maxPredictionTime} min
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">
-                        Hide predictions more than {maxPredictionTime} minutes away
-                      </p>
+          {/* Settings dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setSettingsOpen(!settingsOpen)}
+              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
+            >
+              <FontAwesomeIcon icon={faGear} />
+              <FontAwesomeIcon
+                icon={faChevronDown}
+                className={`text-[10px] transition-transform ${settingsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {settingsOpen && (
+              <div className="absolute right-0 top-full mt-1 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 p-4 z-50 min-w-[250px]">
+                <div className="text-sm font-medium text-gray-700 dark:text-zinc-300 mb-3">Settings</div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 dark:text-zinc-400 mb-1">
+                      Max prediction time
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min="10"
+                        max="90"
+                        step="5"
+                        value={maxPredictionTime}
+                        onChange={(e) => updateMaxPredictionTime(e.target.value)}
+                        className="flex-1 h-2 bg-gray-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 w-12 text-right">
+                        {maxPredictionTime} min
+                      </span>
                     </div>
+                    <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">
+                      Hide predictions more than {maxPredictionTime} minutes away
+                    </p>
                   </div>
-                </Collapsible.Content>
-              </Collapsible.Root>
-            </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
-      <div className="flex-1 overflow-hidden">
+      </PageHeader>
+      <div className="flex-1 min-h-0 overflow-hidden">
         <FavoritesDashboard
           favoriteStops={favoriteStops}
           favoriteBikeshare={favoriteBikeshareStops}
@@ -198,3 +195,21 @@ export const query = graphql`
 `;
 
 export default DepartureBoardPage;
+
+export const Head = () => {
+  const title = "Departure Board | transit.det.city";
+  const description = "View upcoming departures for your favorite stops.";
+  const url = "https://transit.det.city/departure-board";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={url} />
+    </>
+  );
+};

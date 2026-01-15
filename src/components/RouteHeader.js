@@ -1,8 +1,7 @@
 import React from 'react';
 import {Link} from 'gatsby';
 import RouteBadge from './RouteBadge';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import FavoriteButton from './FavoriteButton';
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../db";
 
@@ -47,7 +46,7 @@ const RouteHeader = ({
 }) => {
   const favoriteRoutes = useLiveQuery(() => db?.routes?.toArray());
 
-  let url = `/${displayShortName.toLowerCase()}`
+  let url = `/${(displayShortName || routeShortName || '').toLowerCase()}`
 
   if(agency && agency?.slug.current !== 'd2a2'){
     url = `/${agency.slug.current}/route/${displayShortName}`
@@ -56,6 +55,7 @@ const RouteHeader = ({
   if (displayShortName === 'DPM'){
     url = '/people-mover'
   }
+
 
   let route = {
     displayShortName,
@@ -82,6 +82,11 @@ const RouteHeader = ({
     }
   };
 
+  if (!route.displayShortName) {
+    route.displayShortName = route.routeShortName
+  }
+
+
   let isFavoriteRoute = favoriteRoutes?.filter(
     (route) =>
       route.routeShortName === routeShortName &&
@@ -89,23 +94,20 @@ const RouteHeader = ({
   ).length > 0;
 
   if (showFavorite) {
+    const handleToggleFavorite = () => {
+      if (isFavoriteRoute === false) {
+        addFavoriteRoute(indexedRoute);
+      } else {
+        removeFavoriteRoute(indexedRoute, favoriteRoutes);
+      }
+    };
+
     return (
       <div className="bg-gray-200 dark:bg-zinc-900 flex items-center gap-2 py-1.5 px-2 md:py-2 md:px-3">
-        <FontAwesomeIcon
-          icon={faStar}
+        <FavoriteButton
+          isFavorited={isFavoriteRoute}
+          onClick={handleToggleFavorite}
           size="lg"
-          className={
-            isFavoriteRoute
-              ? "text-yellow-500 dark:text-yellow-600 cursor-pointer"
-              : "text-gray-400 dark:text-zinc-600 cursor-pointer"
-          }
-          onClick={() => {
-            if (isFavoriteRoute === false) {
-              addFavoriteRoute(indexedRoute);
-            } else {
-              removeFavoriteRoute(indexedRoute, favoriteRoutes);
-            }
-          }}
         />
         <Link to={url} className="flex items-center gap-2">
           <RouteBadge route={route} size='medium' />

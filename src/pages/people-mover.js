@@ -1,5 +1,5 @@
 import { graphql } from "gatsby";
-import React, { useState } from "react";
+import React from "react";
 import PortableText from "react-portable-text";
 import RouteHeader from "../components/RouteHeader";
 import RouteTimepoints from "../components/RouteTimepoints";
@@ -34,9 +34,7 @@ const PeopleMover = ({ data }) => {
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
-  sanityRoute.directions.forEach((dir, idx) => {
-    // get timepoints for each direction
-    let timepoints = dir.directionTimepoints;
+  sanityRoute.directions.forEach(() => {
     // set timepoint = 1 for each stopTime that is a timepoint
     trips.forEach((trip) => {
       trip.stopTimes[0].timepoint = 1;
@@ -124,8 +122,6 @@ const PeopleMover = ({ data }) => {
   if (dayOfWeek() === "sunday" || dayOfWeek() === "saturday") {
     defaultService = "weekend";
   }
-
-  const [service, setService] = useState(defaultService);
 
   return (
     <div>

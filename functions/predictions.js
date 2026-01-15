@@ -1,34 +1,43 @@
-let rp = require('request-promise')
 const { isAllowedOrigin, getCorsOrigin } = require('./lib/cors');
 
-exports.handler = function(event, context, callback) {
+exports.handler = async function(event, context) {
   if (!isAllowedOrigin(event)) {
-    return callback(null, {
+    return {
       statusCode: 403,
       body: JSON.stringify({ message: 'Forbidden' }),
       headers: { 'Content-Type': 'application/json' }
-    });
+    };
   }
 
   const corsOrigin = getCorsOrigin(event);
 
-  let urls = {
+  const urls = {
     ddot: `http://myddotbus.com/bustime/api/v3/getpredictions?key=${process.env.DDOT_KEY}&format=json&vid=${event.queryStringParameters.vehicleId}`,
     smart: `http://bustime.smartbus.org/bustime/api/v3/getpredictions?key=${process.env.SMART_KEY}&format=json&vid=${event.queryStringParameters.vehicleId}`,
-    "theride": `http://rt.theride.org/bustime/api/v3/getpredictions?key=${process.env.THERIDE_KEY}&format=json&vid=${event.queryStringParameters.vehicleId}`
+    theride: `http://rt.theride.org/bustime/api/v3/getpredictions?key=${process.env.THERIDE_KEY}&format=json&vid=${event.queryStringParameters.vehicleId}`
+  };
+
+  const url = urls[event.queryStringParameters.agency];
+
+  try {
+    const response = await fetch(url);
+    const body = await response.text();
+    return {
+      statusCode: 200,
+      body: body,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': corsOrigin
+      }
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: 'Error fetching predictions', error: error.message }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': corsOrigin
+      }
+    };
   }
-
-  let url = urls[event.queryStringParameters.agency]
-
-  rp(url)
-    .then(body => {
-      callback(null, {
-        statusCode: 200,
-        body: body,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': corsOrigin
-        }
-      })
-    })
 }

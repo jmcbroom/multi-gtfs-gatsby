@@ -1,15 +1,15 @@
-import { graphql } from "gatsby";
-import React, { useState, useEffect } from "react";
+import { graphql, Link } from "gatsby";
+import React from "react";
 import AgencySlimHeader from "../components/AgencySlimHeader";
 import PageHeader from "../components/PageHeader";
 import { createRouteData } from "../util";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLiveQuery } from "dexie-react-hooks";
-import _ from "lodash";
+import { groupBy } from "lodash-es";
 import StopCard from "../components/StopCard";
 import RouteCard from "../components/RouteCard";
 import BikeshareCard from "../components/Bikeshare/BikeshareCard";
-import NearbyStopsList from "../components/NearbyStopsList";
 import { db } from "../db";
 import { useSanityAgencies } from "../hooks/useSanityAgencies";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
@@ -31,16 +31,11 @@ const FavoritesPage = ({ data }) => {
   const favoriteRoutes = useLiveQuery(() => db?.routes?.toArray());
   const favoriteBikeshareStops = useLiveQuery(() => db?.bikeshare?.toArray());
 
-  // Track if we should show nearby stops (when user started with no favorites)
-  const [showNearbyStops, setShowNearbyStops] = useState(null);
-
-  // Set initial state based on whether user had favorites when page loaded
-  useEffect(() => {
-    if (showNearbyStops === null && favoriteStops !== undefined) {
-      const hadNoFavorites = !favoriteStops?.length && !favoriteRoutes?.length && !favoriteBikeshareStops?.length;
-      setShowNearbyStops(hadNoFavorites);
-    }
-  }, [favoriteStops, favoriteRoutes, favoriteBikeshareStops, showNearbyStops]);
+  // Check if user has no favorites
+  const hasNoFavorites = favoriteStops !== undefined &&
+    !favoriteStops?.length &&
+    !favoriteRoutes?.length &&
+    !favoriteBikeshareStops?.length;
 
   let merged = sanityAgencies.map((sa) => {
     let filtered = agencies.filter(
@@ -76,10 +71,10 @@ const FavoritesPage = ({ data }) => {
     return order.indexOf(a.slug.current) - order.indexOf(b.slug.current);
   });
 
-  let groupedStops = _.groupBy(favoriteStops, "agency.agencySlug");
-  let groupedRoutes = _.groupBy(favoriteRoutes, "agency.agencySlug");
+  let groupedStops = groupBy(favoriteStops, "agency.agencySlug");
+  let groupedRoutes = groupBy(favoriteRoutes, "agency.agencySlug");
 
-  let bikeshareGrouped = _.groupBy(
+  let bikeshareGrouped = groupBy(
     favoriteBikeshareStops,
     "agency.slug.current"
   );
@@ -90,33 +85,23 @@ const FavoritesPage = ({ data }) => {
     ...Object.keys(groupedRoutes),
   ]);
 
-  // Delete handlers
-  const deleteStop = async (stopId) => {
-    if (!db) return;
-    await db.stops.delete(stopId);
-  };
-
-  const deleteRoute = async (routeId) => {
-    if (!db) return;
-    await db.routes.delete(routeId);
-  };
-
-  const deleteBikeshare = async (stationId) => {
-    if (!db) return;
-    await db.bikeshare.delete(stationId);
-  };
-
   return (
     <>
       <PageHeader title="Favorite stops & routes" icon={faStar} />
 
-      {/* Show nearby stops list when user started with no favorites */}
-      {showNearbyStops && (
-        <div className="mb-6">
-          <NearbyStopsList
-            sanityAgencies={sanityAgencies}
-            favoriteStops={favoriteStops || []}
-          />
+      {/* Show link to stops-near-me when user has no favorites */}
+      {hasNoFavorites && (
+        <div className="mb-6 p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg text-center">
+          <p className="text-gray-600 dark:text-zinc-400 mb-3">
+            You don't have any favorites yet.
+          </p>
+          <Link
+            to="/stops-near-me"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            <FontAwesomeIcon icon={faLocationDot} />
+            Find stops near me
+          </Link>
         </div>
       )}
 
@@ -142,14 +127,16 @@ const FavoritesPage = ({ data }) => {
                     <div className="text-sm font-semibold text-gray-600 dark:text-zinc-400 px-2 py-1 bg-gray-50 dark:bg-zinc-800">
                       Favorite Routes
                     </div>
-                    {groupedRoutes[agencySlug].map((route) => (
-                      <RouteCard
-                        key={route.id}
-                        route={route}
-                        agency={agency}
-                        onDelete={() => deleteRoute(route.id)}
-                      />
-                    ))}
+                    <div className="grid grid-cols-1 gap-2 p-2">
+                      {groupedRoutes[agencySlug].map((route) => (
+                        <RouteCard
+                          key={route.id}
+                          route={route}
+                          agency={agency}
+                          variant="card"
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -159,15 +146,20 @@ const FavoritesPage = ({ data }) => {
                     <div className="text-sm font-semibold text-gray-600 dark:text-zinc-400 px-2 py-1 bg-gray-50 dark:bg-zinc-800">
                       Favorite Stops
                     </div>
-                    {groupedStops[agencySlug].map((stop) => (
-                      <StopCard
-                        key={stop.id}
-                        stop={stop}
-                        agency={agency}
-                        routeDirections={stop.tripDirections}
-                        onDelete={() => deleteStop(stop.id)}
-                      />
-                    ))}
+                    <div className="grid grid-cols-1 gap-2 p-2">
+                      {groupedStops[agencySlug].map((stop) => (
+                        <StopCard
+                          key={stop.id}
+                          stop={stop}
+                          agency={agency}
+                          routeDirections={stop.tripDirections}
+                          variant="card"
+                          agencyColor={agency?.color?.hex}
+                          isFavorited={true}
+                          onToggleFavorite={() => db?.stops?.delete(stop.id)}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -183,14 +175,16 @@ const FavoritesPage = ({ data }) => {
                 <div className="text-sm font-semibold text-gray-600 dark:text-zinc-400 px-2 py-1 bg-gray-50 dark:bg-zinc-800">
                   Favorite Bike Stations
                 </div>
-                {bikeshareGrouped[key].map((station) => (
-                  <BikeshareCard
-                    key={station.id}
-                    station={station}
-                    agency={station.agency}
-                    onDelete={() => deleteBikeshare(station.id)}
-                  />
-                ))}
+                <div className="grid grid-cols-1 gap-2 p-2">
+                  {bikeshareGrouped[key].map((station) => (
+                    <BikeshareCard
+                      key={station.id}
+                      station={station}
+                      agency={station.agency}
+                      variant="card"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           );
@@ -232,3 +226,21 @@ export const query = graphql`
 `;
 
 export default FavoritesPage;
+
+export const Head = () => {
+  const title = "Favorites | transit.det.city";
+  const description = "Your saved stops and routes for quick access.";
+  const url = "https://transit.det.city/favorites";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={url} />
+    </>
+  );
+};

@@ -3,27 +3,55 @@ import { Link } from "gatsby";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBicycle } from "@fortawesome/free-solid-svg-icons";
 
-const BikeshareCard = ({ station, agency, onDelete }) => {
+interface BikeshareCardProps {
+  station: {
+    id: string;
+    station_id: string;
+    name: string;
+  };
+  agency: {
+    slug: { current: string };
+    color?: { hex: string };
+  };
+  variant?: "default" | "card";
+}
+
+const BikeshareCard = ({ station, agency, variant = "default" }: BikeshareCardProps) => {
+  const agencyColor = agency?.color?.hex || "#DC2626"; // Default to MoGo red
+
+  if (variant === "default") {
+    return (
+      <div className="bg-gray-200 dark:bg-zinc-800 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none">
+        <div className="flex items-center px-2 py-2">
+          <Link
+            to={`/${agency.slug.current}/station/${station.station_id}`}
+            className="flex items-center gap-2"
+          >
+            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
+              <FontAwesomeIcon icon={faBicycle} className="text-white text-xs" />
+            </div>
+            <span className="plex font-semibold">{station.name}</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Card variant
   return (
-    <div key={station.id} className="relative bg-gray-200 dark:bg-zinc-800 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none">
-      {onDelete && (
-        <button
-          onClick={onDelete}
-          className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center text-gray-300 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 text-xs transition-colors"
-          title="Remove from favorites"
-        >
-          &times;
-        </button>
-      )}
-      <div className="flex items-center justify-between px-2 py-2 pr-6">
+    <div
+      className="block rounded-lg border border-l-4 border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:shadow-sm transition-all overflow-hidden"
+      style={{ borderLeftColor: agencyColor }}
+    >
+      <div className="flex items-center gap-2 p-3">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
+          <FontAwesomeIcon icon={faBicycle} className="text-white text-xs" />
+        </div>
         <Link
           to={`/${agency.slug.current}/station/${station.station_id}`}
-          className="flex items-center gap-2"
+          className="font-medium text-gray-800 dark:text-zinc-200 hover:underline truncate"
         >
-          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
-            <FontAwesomeIcon icon={faBicycle} className="text-white text-xs" />
-          </div>
-          <span className="plex font-semibold">{station.name}</span>
+          {station.name}
         </Link>
       </div>
     </div>

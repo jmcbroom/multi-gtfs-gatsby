@@ -1,5 +1,6 @@
 // Trip Planner Components
 export { default as ItineraryCard } from "./ItineraryCard";
+export { default as ItineraryDetails } from "./ItineraryDetails";
 export { default as ItineraryLeg, getModeIcon } from "./ItineraryLeg";
 export { default as ItinerarySummary } from "./ItinerarySummary";
 export { OriginStep, DestinationStep, TransferStep } from "./ItineraryTimeline";

@@ -1,6 +1,7 @@
 import { Link } from "gatsby";
 import React from "react";
 import { getStopIdentifier } from "../stopUtils";
+import StopBadge from "./StopBadge";
 
 const StopListItem = ({ stopTime, feedIndex, routeColor, agency, small = false, link = true }) => {
   const stopIdentifier = getStopIdentifier(stopTime.stop, agency);
@@ -29,8 +30,8 @@ const StopListItem = ({ stopTime, feedIndex, routeColor, agency, small = false, 
         aria-label={`Stop page for stop ${stopTime.stop.stopName}`}
       >
         <span className="ml-2 text-opacity-100">{stopTime.stop.stopName}</span>
-        <span className="font-mono text-xs text-gray-700 dark:text-neutral-400 bg-gray-200 dark:bg-zinc-900 p-1 mx-3">
-          #{stopIdentifier}
+        <span className="ml-2">
+          <StopBadge stopId={stopIdentifier} size="xs" borderColor={routeColor} />
         </span>
       </Link>
       :

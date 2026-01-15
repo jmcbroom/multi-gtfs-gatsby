@@ -45,10 +45,10 @@ export default function Layout({ children, pageContext, location }) {
     return (
       <ThemeProvider>
         <div className="h-screen flex flex-col overflow-hidden">
-          <header className="bg-primary-light dark:bg-primary-dark bg-opacity-80 px-4 flex-shrink-0">
-            <div className="py-2 flex items-center justify-between relative">
+          <header className="bg-primary-light dark:bg-primary-dark bg-opacity-80 px-3 md:px-4 flex-shrink-0">
+            <div className="py-1.5 md:py-2 flex items-center justify-between relative">
               <Link to={`/`}>
-                <h1 className="header font-bold text-gray-700 dark:text-gray-300 text-xl m-0">
+                <h1 className="header font-bold text-gray-700 dark:text-gray-300 text-base md:text-xl m-0">
                   transit
                   <span className="text-gray-500 dark:text-gray-400">
                     .det.city
@@ -69,10 +69,10 @@ export default function Layout({ children, pageContext, location }) {
   return (
     <ThemeProvider>
       <div className="fill-page">
-        <header className="bg-primary-light dark:bg-primary-dark bg-opacity-80 px-4">
-          <div className="max-w-5xl py-2 mx-auto flex items-center justify-between relative">
+        <header className="bg-primary-light dark:bg-primary-dark bg-opacity-80 px-3 md:px-4">
+          <div className="max-w-5xl py-1.5 md:py-2 mx-auto flex items-center justify-between relative">
             <Link to={`/`}>
-              <h1 className="header font-bold text-gray-700 dark:text-gray-300 text-xl m-0">
+              <h1 className="header font-bold text-gray-700 dark:text-gray-300 text-base md:text-xl m-0">
                 transit
                 <span className="text-gray-500 dark:text-gray-400">
                   .det.city

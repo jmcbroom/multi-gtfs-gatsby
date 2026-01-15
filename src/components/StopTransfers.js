@@ -3,6 +3,7 @@ import { Link } from "gatsby";
 import RouteSlim from "./RouteSlim";
 import StopBadge from "./StopBadge";
 import { getStopIdentifier } from "../stopUtils";
+import { shortenHeadsign, shortenStopName } from "../util";
 
 const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
   // Get trip directions already served at this stop
@@ -95,24 +96,86 @@ const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
 
   return (
     <div>
-      <h4>Nearby transfers</h4>
+      <h4>Transfer to other routes nearby</h4>
       <div className="max-h-96 overflow-auto">
-        {routeEntries.map((entry) => (
-          <div
-            key={`${entry.agency.currentFeedIndex}-${entry.route.routeShortName}`}
-            className="bg-gray-100 dark:bg-zinc-900 border-b border-dotted border-gray-400 dark:border-zinc-700 last:border-none p-2"
-          >
-            <div className="mb-1.5">
-              <RouteSlim
-                {...entry.route}
-                size="xs"
-                link={`/${entry.agency.slug?.current}/route/${entry.route.displayShortName}`}
-              />
-            </div>
-            <div className="ml-1">
-              {Array.from(entry.directions.values())
-                .sort((a, b) => (b.tripCount || 0) - (a.tripCount || 0))
-                .map((dir, idx) => {
+        {routeEntries.map((entry) => {
+          const directions = Array.from(entry.directions.values()).sort(
+            (a, b) => (b.tripCount || 0) - (a.tripCount || 0)
+          );
+
+          // Check if all directions use the same stop
+          const stopIds = new Set(
+            directions.map((d) => getStopIdentifier(d.stop, entry.agency))
+          );
+          const sameStop = stopIds.size === 1 && directions.length > 1;
+
+          // Special case: DDOT stop 8946 should trigger grouping, but use the other stop
+          const hasSpecialStop = directions.some(
+            (d) =>
+              entry.agency.slug?.current === "ddot" &&
+              getStopIdentifier(d.stop, entry.agency) === "8946"
+          );
+          const shouldGroup = sameStop || hasSpecialStop;
+
+          if (shouldGroup) {
+            // Show RouteSlim and stop on same line
+            // If special case, use the non-8946 stop; otherwise use first
+            const dir = hasSpecialStop
+              ? directions.find(
+                  (d) => getStopIdentifier(d.stop, entry.agency) !== "8946"
+                ) || directions[0]
+              : directions[0];
+            const stopIdentifier = getStopIdentifier(dir.stop, entry.agency);
+            return (
+              <div
+                key={`${entry.agency.currentFeedIndex}-${entry.route.routeShortName}`}
+                className="bg-gray-100 dark:bg-zinc-900 border-b border-gray-400 dark:border-zinc-700 last:border-b-0 p-2 border-l-4"
+                style={{ borderLeftColor: entry.agency.color?.hex || "#666" }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-shrink-0">
+                    <RouteSlim
+                      {...entry.route}
+                      size="xs"
+                      link={`/${entry.agency.slug?.current}/route/${entry.route.displayShortName}`}
+                    />
+                  </div>
+                  <Link
+                    to={`/${dir.stop.agencySlug}/stop/${stopIdentifier}`}
+                    className="inline-flex items-stretch hover:text-blue-500 rounded overflow-hidden"
+                  >
+                    <span className="font-medium text-xs text-gray-700 dark:text-zinc-300 truncate max-w-[120px] px-2 flex items-center bg-gray-200 dark:bg-zinc-800">
+                      {shortenStopName(dir.stop.stopName)}
+                    </span>
+                    <div className="hidden sm:flex">
+                      <StopBadge
+                        stopId={stopIdentifier}
+                        size="xs"
+                        borderColor={entry.agency.color?.hex}
+                      />
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            );
+          }
+
+          // Different stops per direction - show with direction info below
+          return (
+            <div
+              key={`${entry.agency.currentFeedIndex}-${entry.route.routeShortName}`}
+              className="bg-gray-100 dark:bg-zinc-900 border-b border-gray-400 dark:border-zinc-700 last:border-b-0 p-2 border-l-4"
+              style={{ borderLeftColor: entry.agency.color?.hex || "#666" }}
+            >
+              <div className="mb-1.5 flex-shrink-0">
+                <RouteSlim
+                  {...entry.route}
+                  size="xs"
+                  link={`/${entry.agency.slug?.current}/route/${entry.route.displayShortName}`}
+                />
+              </div>
+              <div className="ml-1">
+                {directions.map((dir, idx) => {
                   const stopIdentifier = getStopIdentifier(
                     dir.stop,
                     entry.agency
@@ -123,7 +186,7 @@ const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
                       {idx > 0 && (
                         <hr className="border-gray-300 dark:border-zinc-700 ml-0 mr-12 my-1" />
                       )}
-                      <div className="flex items-center justify-between sm:justify-start gap-2 py-1">
+                      <div className="flex items-center justify-between gap-2 py-1 w-full">
                         <div className="text-xs text-gray-500 dark:text-zinc-500 w-[40%] sm:w-[40%] flex-shrink-0 leading-tight">
                           {dir.directionDescription && (
                             <div className="text-xs">
@@ -136,7 +199,7 @@ const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
                             <div>
                               to{" "}
                               <span className="font-regular">
-                                {dir.directionHeadsign}
+                                {shortenHeadsign(dir.directionHeadsign)}
                               </span>
                             </div>
                           )}
@@ -147,24 +210,27 @@ const StopTransfers = ({ stop, nearbyStops, routes, agencies }) => {
                         </div>
                         <Link
                           to={`/${dir.stop.agencySlug}/stop/${stopIdentifier}`}
-                          className="flex-1 sm:flex-1 flex flex-col sm:flex-row sm:items-center justify-between md:gap-2 hover:text-blue-500 bg-gray-200 dark:bg-zinc-800 px-2 py-1 rounded gap-1"
+                          className="flex items-stretch hover:text-blue-500 rounded overflow-hidden"
                         >
-                          <span className="font-medium text-xs text-gray-700 dark:text-zinc-300 truncate md:whitespace-normal max-w-[140px] md:max-w-none">
-                            {dir.stop.stopName}
+                          <span className="font-medium text-xs text-gray-700 dark:text-zinc-300 px-2 flex items-center bg-gray-200 dark:bg-zinc-800">
+                            {shortenStopName(dir.stop.stopName)}
                           </span>
-                          <StopBadge
-                            stopId={stopIdentifier}
-                            size="xs"
-                            borderColor={entry.agency.color?.hex}
-                          />
+                          <div className="hidden sm:flex">
+                            <StopBadge
+                              stopId={stopIdentifier}
+                              size="xs"
+                              borderColor={entry.agency.color?.hex}
+                            />
+                          </div>
                         </Link>
                       </div>
                     </React.Fragment>
                   );
                 })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

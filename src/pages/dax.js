@@ -8,8 +8,6 @@ import PortableText from "react-portable-text";
 import "../styles/tabs.css";
 import {
   createAgencyData,
-  createRouteData,
-  dayOfWeek,
   getHeadsignsByDirectionId,
   getServiceDays,
   getTripsByServiceAndDirection,
@@ -45,9 +43,7 @@ const Dax = ({ data }) => {
   let { trips, longTrips } = gtfsRoute;
   let { serviceCalendars } = agencyData.feedInfo;
 
-  sanityRoute.directions.forEach((dir, idx) => {
-    // get timepoints for each direction
-    let timepoints = dir.directionTimepoints;
+  sanityRoute.directions.forEach((dir) => {
     // set timepoint = 1 for each stopTime that is a timepoint
     trips.forEach((trip) => {
       trip.stopTimes.forEach((st, idx) => {
@@ -93,8 +89,6 @@ const Dax = ({ data }) => {
     sanityRoute.mapPriority = 2;
   }
 
-  let routeData = createRouteData(gtfsRoute, sanityRoute);
-
   let defaultService = "daily";
 
   const [service, setService] = useState(defaultService);
@@ -115,7 +109,7 @@ const Dax = ({ data }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mt-4 md:gap-8 mb-4">
         <div>
-          <div className="grayHeader -mb-6 z-20 block relative">
+          <div className="grayHeader z-20 block relative">
             Eastbound to Detroit
           </div>
           <RouteTimeTable
@@ -127,7 +121,7 @@ const Dax = ({ data }) => {
           />
         </div>
         <div>
-          <div className="grayHeader -mb-6 z-20 block relative text-lg">
+          <div className="grayHeader z-20 block relative text-lg">
             Westbound to DTW
           </div>
           <RouteTimeTable
@@ -293,19 +287,18 @@ export const query = graphql`
 
 export default Dax;
 
-export const Head = ({ data }) => {
-  const agencyName = data.agency?.name || "DAX";
-  const routeShortName = data.route?.displayShortName || data.route?.shortName || "DAX";
-  const routeLongName = data.route?.longName || "Detroit Air Xpress";
+export const Head = () => {
+  const title = "DAX: Detroit Air Xpress | transit.det.city";
+  const description = "Express bus service, running between Detroit Metro Airport (DTW) and Downtown Detroit.";
 
   return (
     <>
-      <title>{`${agencyName} ${routeShortName}: ${routeLongName}`}</title>
-      <meta name="description" content="Information about the bus service from Detroit Metro airport (DTW), to downtown Detroit. Runs 16 trips per day, every day of the year." />
+      <title>{title}</title>
+      <meta name="description" content={description} />
       <meta property="og:url" content="https://transit.det.city/dax/" />
       <meta property="og:type" content="website" />
-      <meta property="og:title" content="Detroit Air Xpress" />
-      <meta property="og:description" content="Information about the bus service from Detroit Metro airport (DTW), to downtown Detroit. Runs 16 trips per day, every day of the year." />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
       <link rel="canonical" href="https://transit.det.city/dax/" />
     </>
   );

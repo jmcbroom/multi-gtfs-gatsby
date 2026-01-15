@@ -1,22 +1,24 @@
 import bbox from "@turf/bbox";
 import { graphql, Link } from "gatsby";
-import _ from "lodash";
+import { cloneDeep, uniqBy, groupBy } from "lodash-es";
 import "mapbox-gl/dist/mapbox-gl.css";
 import React, { useRef, useState, useMemo, useEffect, useCallback } from "react";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { GeolocateControl, NavigationControl, Popup } from "react-map-gl";
 import RouteBadge from "../components/RouteBadge";
+import PageHeader from "../components/PageHeader";
 import { useTheme } from "../hooks/ThemeContext";
 import { useSanityAgencies } from "../hooks/useSanityAgencies";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import mapboxStyles from "../styles/styleFactory";
 import { createRouteData } from "../util";
 import { ChevronDownIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { faMap } from "@fortawesome/free-solid-svg-icons";
 
 const RegionMapPage = ({ data }) => {
   const { theme } = useTheme();
 
-  let style = _.cloneDeep(mapboxStyles[theme]);
+  let style = cloneDeep(mapboxStyles[theme]);
 
   // State
   const [visibleAgencies, setVisibleAgencies] = useState(new Set());
@@ -180,7 +182,7 @@ const RegionMapPage = ({ data }) => {
   // Derive unique routes from filtered features, filtered by viewport
   const allVisibleRoutes = useMemo(() => {
     // First get unique routes
-    const uniqueRoutes = _.uniqBy(filteredFeatures, (ft) =>
+    const uniqueRoutes = uniqBy(filteredFeatures, (ft) =>
       `${ft.properties.feedIndex}-${ft.properties.routeShortName}`
     );
     // Then filter by viewport if we have visible route keys
@@ -276,7 +278,7 @@ const RegionMapPage = ({ data }) => {
   // Group routes by agency when in agency mode
   const groupedRoutes = useMemo(() => {
     if (sortMode !== "agency") return null;
-    return _.groupBy(sortedRoutes, "feedIndex");
+    return groupBy(sortedRoutes, "feedIndex");
   }, [sortedRoutes, sortMode]);
 
   // Get visible route keys from rendered features
@@ -551,19 +553,22 @@ const RegionMapPage = ({ data }) => {
             {/* Service Days */}
             {r.serviceDays && (
               <div className="mb-3">
-                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-                  Service
-                </div>
-                <div className="flex gap-2 text-xs">
-                  <span className={r.serviceDays.weekday ? "text-gray-700 dark:text-gray-300" : "text-gray-400 dark:text-gray-600 line-through"}>
-                    Weekday
-                  </span>
-                  <span className={r.serviceDays.saturday ? "text-gray-700 dark:text-gray-300" : "text-gray-400 dark:text-gray-600 line-through"}>
-                    Saturday
-                  </span>
-                  <span className={r.serviceDays.sunday ? "text-gray-700 dark:text-gray-300" : "text-gray-400 dark:text-gray-600 line-through"}>
-                    Sunday
-                  </span>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {r.serviceDays.weekday && r.serviceDays.saturday && r.serviceDays.sunday
+                    ? "7 days a week"
+                    : r.serviceDays.weekday && r.serviceDays.saturday && !r.serviceDays.sunday
+                    ? "Weekdays & Saturday"
+                    : r.serviceDays.weekday && !r.serviceDays.saturday && r.serviceDays.sunday
+                    ? "Weekdays & Sunday"
+                    : r.serviceDays.weekday && !r.serviceDays.saturday && !r.serviceDays.sunday
+                    ? "Weekdays only"
+                    : r.serviceDays.saturday && r.serviceDays.sunday
+                    ? "Weekends only"
+                    : r.serviceDays.saturday
+                    ? "Saturday only"
+                    : r.serviceDays.sunday
+                    ? "Sunday only"
+                    : "Limited service"}
                 </div>
               </div>
             )}
@@ -582,9 +587,117 @@ const RegionMapPage = ({ data }) => {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col h-full">
+      {/* Page Header with Agency Filter Chips */}
+      <PageHeader title="Regional map" icon={faMap} fullWidth className="flex-shrink-0 border-b border-gray-200 dark:border-zinc-700">
+        {/* Mobile: Dropdown */}
+        <select
+          className="md:hidden text-xs bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-600 rounded px-2 py-1 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          value=""
+          onChange={(e) => {
+            if (e.target.value) toggleAgency(parseInt(e.target.value));
+          }}
+        >
+          <option value="" disabled>
+            {visibleAgencies.size === sanityAgencies.length
+              ? "All agencies"
+              : `${visibleAgencies.size} of ${sanityAgencies.length} agencies`}
+          </option>
+          {sanityAgencies.map((agency) => {
+            const isActive = visibleAgencies.has(agency.currentFeedIndex);
+            return (
+              <option key={agency.currentFeedIndex} value={agency.currentFeedIndex}>
+                {isActive ? "✓ " : "   "}{agency.name}
+              </option>
+            );
+          })}
+        </select>
+
+        {/* Desktop: Pills */}
+        <div className="hidden md:flex gap-2 overflow-x-auto">
+          {sanityAgencies.map((agency) => {
+            const isActive = visibleAgencies.has(agency.currentFeedIndex);
+            return (
+              <button
+                key={agency.currentFeedIndex}
+                onClick={() => toggleAgency(agency.currentFeedIndex)}
+                className={`
+                  flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium
+                  transition-all duration-200 border
+                  ${isActive
+                    ? "opacity-100"
+                    : "opacity-40 grayscale"
+                  }
+                `}
+                style={{
+                  backgroundColor: isActive ? agency.color?.hex || "#666" : "transparent",
+                  color: isActive ? agency.textColor?.hex || "#fff" : "#666",
+                  borderColor: agency.color?.hex || "#666",
+                }}
+              >
+                {agency.name}
+              </button>
+            );
+          })}
+        </div>
+      </PageHeader>
+
+      <div className="flex flex-col md:flex-row flex-1 min-h-0">
+        {/* Map Container - on top for mobile */}
+        <div className="min-h-[40vh] md:min-h-0 md:flex-1 relative order-first md:order-last">
+          <Mapbox
+          ref={map}
+          mapLib={MapboxGL}
+          mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
+          mapStyle={style}
+          initialViewState={initialViewState}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          onMoveEnd={handleMoveEnd}
+          onLoad={handleLoad}
+          style={{ width: "100%", height: "100%" }}
+        >
+          <NavigationControl showCompass={false} />
+          <GeolocateControl />
+
+          {/* Route Hover Popup */}
+          {hoveredRoute && (
+            <Popup
+              longitude={hoveredRoute.longitude}
+              latitude={hoveredRoute.latitude}
+              anchor="bottom"
+              closeButton={false}
+              closeOnClick={false}
+              offset={10}
+            >
+              <div className="p-1 min-w-[180px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <RouteBadge
+                    route={{
+                      displayShortName: hoveredRoute.displayShortName,
+                      routeColor: hoveredRoute.routeColor,
+                      routeTextColor: hoveredRoute.routeTextColor,
+                    }}
+                    size="small"
+                  />
+                  <span className="font-semibold text-sm truncate">
+                    {hoveredRoute.routeLongName}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {hoveredRoute.agencyName}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  ~{hoveredRoute.tripCount} daily trips
+                </div>
+              </div>
+            </Popup>
+          )}
+        </Mapbox>
+      </div>
+
       {/* Routes Sidebar */}
-      <div className="w-80 flex-shrink-0 bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-700 flex flex-col">
+      <div className="flex-1 md:flex-none md:w-80 flex-shrink-0 bg-white dark:bg-zinc-900 md:border-r border-t md:border-t-0 border-gray-200 dark:border-zinc-700 flex flex-col overflow-hidden">
           {/* Header with count and sort */}
           <div className="px-3 py-2 border-b border-gray-200 dark:border-zinc-700 flex-shrink-0 flex items-center justify-between">
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -606,19 +719,11 @@ const RegionMapPage = ({ data }) => {
             {sortMode === "agency" && groupedRoutes && Object.entries(groupedRoutes).map(([feedIndex, agencyRoutes]) => {
               const agencyInfo = agencyLookup[parseInt(feedIndex)];
               return (
-                <div key={feedIndex}>
-                  {/* Agency Header Bar */}
-                  <div
-                    className="sticky top-0 px-3 py-1.5 flex items-center gap-2 z-10"
-                    style={{
-                      backgroundColor: agencyInfo?.color || "#666",
-                      color: agencyInfo?.textColor || "#fff",
-                    }}
-                  >
-                    <span className="text-xs font-semibold">{agencyInfo?.name || "Agency"}</span>
-                    <span className="text-xs opacity-75">({agencyRoutes.length})</span>
-                  </div>
-                  {/* Routes in this agency */}
+                <div
+                  key={feedIndex}
+                  className="border-l-4"
+                  style={{ borderLeftColor: agencyInfo?.color || "#666" }}
+                >
                   {agencyRoutes.map((r) => renderRouteItem(r))}
                 </div>
               );
@@ -627,87 +732,7 @@ const RegionMapPage = ({ data }) => {
             {/* Flat list for other sort modes */}
             {sortMode !== "agency" && sortedRoutes.map((r) => renderRouteItem(r))}
           </div>
-      </div>
-
-      {/* Map Container */}
-      <div className="flex-1 relative">
-        {/* Agency Filter Chips */}
-        <div className="absolute top-2 left-2 right-2 z-10 flex gap-2 overflow-x-auto pb-1">
-          {sanityAgencies.map((agency) => {
-            const isActive = visibleAgencies.has(agency.currentFeedIndex);
-            return (
-              <button
-                key={agency.currentFeedIndex}
-                onClick={() => toggleAgency(agency.currentFeedIndex)}
-                className={`
-                  flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium
-                  transition-all duration-200 border-2 shadow-sm
-                  ${isActive
-                    ? "opacity-100"
-                    : "opacity-50 grayscale"
-                  }
-                `}
-                style={{
-                  backgroundColor: isActive ? agency.color?.hex || "#666" : "#e5e5e5",
-                  color: isActive ? agency.textColor?.hex || "#fff" : "#666",
-                  borderColor: agency.color?.hex || "#666",
-                }}
-              >
-                {agency.name}
-              </button>
-            );
-          })}
         </div>
-
-        <Mapbox
-        ref={map}
-        mapLib={MapboxGL}
-        mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
-        mapStyle={style}
-        initialViewState={initialViewState}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        onMoveEnd={handleMoveEnd}
-        onLoad={handleLoad}
-        style={{ width: "100%", height: "100%" }}
-      >
-        <NavigationControl showCompass={false} />
-        <GeolocateControl />
-
-        {/* Route Hover Popup */}
-        {hoveredRoute && (
-          <Popup
-            longitude={hoveredRoute.longitude}
-            latitude={hoveredRoute.latitude}
-            anchor="bottom"
-            closeButton={false}
-            closeOnClick={false}
-            offset={10}
-          >
-            <div className="p-1 min-w-[180px]">
-              <div className="flex items-center gap-2 mb-1">
-                <RouteBadge
-                  route={{
-                    displayShortName: hoveredRoute.displayShortName,
-                    routeColor: hoveredRoute.routeColor,
-                    routeTextColor: hoveredRoute.routeTextColor,
-                  }}
-                  size="small"
-                />
-                <span className="font-semibold text-sm truncate">
-                  {hoveredRoute.routeLongName}
-                </span>
-              </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                {hoveredRoute.agencyName}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                ~{hoveredRoute.tripCount} daily trips
-              </div>
-            </div>
-          </Popup>
-        )}
-        </Mapbox>
       </div>
     </div>
   );
@@ -762,3 +787,21 @@ export const query = graphql`
 `;
 
 export default RegionMapPage;
+
+export const Head = () => {
+  const title = "Region Map | transit.det.city";
+  const description = "Interactive map of transit routes across Detroit/Windsor.";
+  const url = "https://transit.det.city/region-map";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={url} />
+    </>
+  );
+};

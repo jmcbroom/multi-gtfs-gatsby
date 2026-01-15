@@ -265,3 +265,25 @@ export const query = graphql`
 `;
 
 export default Bikeshare;
+
+export const Head = ({ data, pageContext }) => {
+  const bikeshare = data.allSanityBikeshare?.edges?.[0]?.node;
+  const name = bikeshare?.name || "Bikeshare";
+  const fullName = bikeshare?.fullName || name;
+  const stationCount = pageContext.data?.length || 0;
+
+  const title = `${name} | transit.det.city`;
+  const description = `${fullName} bikeshare system. ${stationCount} stations with real-time bike and e-bike availability.`;
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={`https://transit.det.city/${bikeshare?.slug?.current}/`} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={`https://transit.det.city/${bikeshare?.slug?.current}/`} />
+    </>
+  );
+};

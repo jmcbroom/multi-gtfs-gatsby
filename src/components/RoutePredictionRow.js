@@ -1,13 +1,10 @@
 import dayjs from "dayjs";
 import React from "react";
 import RouteSlim from "./RouteSlim";
-import _ from "lodash";
+import { uniqBy } from "lodash-es";
 import VehicleBadge from "./VehicleBadge";
 import nearestPoint from "@turf/nearest-point";
-
-const shortenStopName = (stopName) => {
-  return stopName.replace("TRANSIT CENTER", "TC");
-};
+import { shortenHeadsign } from "../util";
 
 const RoutePredictionRow = ({
   vehicle,
@@ -73,7 +70,7 @@ const RoutePredictionRow = ({
       .map((trip) => trip.stopTimes.map((st) => st.stop))
       .flat();
 
-    let uniqueStops = _.uniqBy(stopsFromTrips, "stopId");
+    let uniqueStops = uniqBy(stopsFromTrips, "stopId");
 
     let featureCollection = {
       type: "FeatureCollection",
@@ -94,8 +91,6 @@ const RoutePredictionRow = ({
 
     nearest = nearestPoint(vehicle, featureCollection);
   }
-
-  console.log(predictions)
 
   // Filter predictions to timepoints for the current trip only
   const currentTripId = predictions?.[0]?.tatripid;
@@ -131,13 +126,13 @@ const RoutePredictionRow = ({
             routeLongName={routeLongName}
             routeColor={routeColor}
             routeTextColor={routeTextColor}
-            direction={{ directionHeadsign: headsign }}
+            direction={{ directionHeadsign: shortenHeadsign(headsign) }}
             size="small"
           />
           {/* Next stop name or nearest stop */}
           <div className="text-[10px] text-gray-500 dark:text-zinc-400 mt-0.5 truncate">
             {nextStop ? (
-              <>next: {shortenStopName(nextStop.stpnm)}</>
+              <>next: {shortenHeadsign(nextStop.stpnm)}</>
             ) : nearest && vehicle.properties.agency === 'transit-windsor' ? (
               <>near: {nearest.properties.stopName}</>
             ) : vehicle.properties.agency === 'qline' && vehicle.properties.status ? (
@@ -178,7 +173,7 @@ const RoutePredictionRow = ({
                 key={`${prediction.stpid}-${idx}`}
                 className="flex items-center justify-between text-xs"
               >
-                <span className="truncate mr-2">{shortenStopName(prediction.stpnm)}</span>
+                <span className="truncate mr-2">{shortenHeadsign(prediction.stpnm)}</span>
                 <span className="flex-shrink-0 text-gray-500 dark:text-zinc-400 tabular-nums">
                   {prediction.prdctdn === "DUE" ? (
                     "now"

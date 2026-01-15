@@ -3,12 +3,27 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchange, faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
 import { SearchBox } from "@mapbox/search-js-react";
 
+// Placeholder for SSR when SearchBox is null-loaded
+const SearchBoxPlaceholder = ({ placeholder }) => (
+  <input
+    type="text"
+    placeholder={placeholder}
+    disabled
+    className="w-full px-3 py-2 text-sm bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded"
+  />
+);
+
 // Detroit metro bounding box [west, south, east, north]
 export const DETROIT_BBOX = [-84.159, 41.723, -82.375, 43.168];
 
 /**
  * Origin/Destination input component with geocoding
  */
+const formatPlaceName = (properties) => {
+  const name = properties.name || properties.place_formatted || properties.full_address;
+  return name?.replace(/, United States$/, "");
+};
+
 export const FromToInputs = ({
   origin,
   destination,
@@ -26,7 +41,7 @@ export const FromToInputs = ({
     if (feature) {
       const [lon, lat] = feature.geometry.coordinates;
       setOrigin({
-        name: feature.properties.name || feature.properties.full_address,
+        name: formatPlaceName(feature.properties),
         lat: lat.toFixed(6),
         lon: lon.toFixed(6),
       });
@@ -39,7 +54,7 @@ export const FromToInputs = ({
     if (feature) {
       const [lon, lat] = feature.geometry.coordinates;
       setDestination({
-        name: feature.properties.name || feature.properties.full_address,
+        name: formatPlaceName(feature.properties),
         lat: lat.toFixed(6),
         lon: lon.toFixed(6),
       });
@@ -84,16 +99,22 @@ export const FromToInputs = ({
           ) : (
             <div className="flex-1 flex items-center gap-1 h-full">
               <div className="flex-1">
-                <SearchBox
-                  accessToken={process.env.MAPBOX_ACCESS_TOKEN}
-                  options={{
-                    bbox: DETROIT_BBOX,
-                    proximity: { lng: -83.05, lat: 42.35 },
-                  }}
-                  placeholder="From..."
-                  onRetrieve={handleOriginRetrieve}
-                  theme={{ variables: { boxShadow: "none" } }}
-                />
+                {SearchBox ? (
+                  <SearchBox
+                    accessToken={process.env.MAPBOX_ACCESS_TOKEN}
+                    options={{
+                      bbox: DETROIT_BBOX,
+                      proximity: { lng: -83.05, lat: 42.35 },
+                      types: "address,place,poi,neighborhood,locality",
+                      poi_category_exclusions: "brand",
+                    }}
+                    placeholder="From..."
+                    onRetrieve={handleOriginRetrieve}
+                    theme={{ variables: { boxShadow: "none" } }}
+                  />
+                ) : (
+                  <SearchBoxPlaceholder placeholder="From..." />
+                )}
               </div>
               <button
                 onClick={getCurrentLocation}
@@ -149,16 +170,22 @@ export const FromToInputs = ({
             </div>
           ) : (
             <div className="flex-1 h-full">
-              <SearchBox
-                accessToken={process.env.MAPBOX_ACCESS_TOKEN}
-                options={{
-                  bbox: DETROIT_BBOX,
-                  proximity: { lng: -83.05, lat: 42.35 },
-                }}
-                placeholder="To..."
-                onRetrieve={handleDestinationRetrieve}
-                theme={{ variables: { boxShadow: "none" } }}
-              />
+              {SearchBox ? (
+                <SearchBox
+                  accessToken={process.env.MAPBOX_ACCESS_TOKEN}
+                  options={{
+                    bbox: DETROIT_BBOX,
+                    proximity: { lng: -83.05, lat: 42.35 },
+                    types: "address,place,poi,neighborhood,locality",
+                    poi_category_exclusions: "brand",
+                  }}
+                  placeholder="To..."
+                  onRetrieve={handleDestinationRetrieve}
+                  theme={{ variables: { boxShadow: "none" } }}
+                />
+              ) : (
+                <SearchBoxPlaceholder placeholder="To..." />
+              )}
             </div>
           )}
         </div>

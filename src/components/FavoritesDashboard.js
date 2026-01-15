@@ -3,12 +3,14 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { NavigationControl } from "react-map-gl";
 import mapboxStyles from "../styles/styleFactory";
-import _ from "lodash";
+import { cloneDeep, groupBy, chunk } from "lodash-es";
+import { fetchVehiclesBatched } from "../utils/vehicleFetcher";
 import { useTheme } from "../hooks/ThemeContext";
 import bbox from "@turf/bbox";
 import { useSanityRoutes } from "../hooks/useSanityRoutes";
 import { getStopIdentifier, getApiStopIdentifier } from "../stopUtils";
 import PredictionsList from "./PredictionsList";
+import RealtimeHeader from "./RealtimeHeader";
 import { Link } from "gatsby";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBicycle, faBolt, faParking, faThumbtack, faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
@@ -36,7 +38,6 @@ const FavoritesDashboard = ({
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL);
   const [vehicles, setVehicles] = useState([]);
-  const [fetchCount, setFetchCount] = useState(0);
 
   // Carousel mode state - use props if provided, otherwise use local state
   const [carouselModeLocal, setCarouselModeLocal] = useState(true);
@@ -163,7 +164,7 @@ const FavoritesDashboard = ({
     };
 
     // Set up map style
-    const mapStyle = _.cloneDeep(mapboxStyles[theme]);
+    const mapStyle = cloneDeep(mapboxStyles[theme]);
     mapStyle.sources.stop.data = stopsFc;
     mapStyle.sources.vehicles.data = { type: "FeatureCollection", features: [] };
 
@@ -238,7 +239,7 @@ const FavoritesDashboard = ({
       const allPredictions = [];
 
       // Group stops by agency for efficient fetching
-      const stopsByAgency = _.groupBy(favoriteStops, "agency.agencySlug");
+      const stopsByAgency = groupBy(favoriteStops, "agency.agencySlug");
 
       for (const [agencySlug, stops] of Object.entries(stopsByAgency)) {
         const agency = sanityAgencies.find((a) => a.slug?.current === agencySlug);
@@ -260,7 +261,7 @@ const FavoritesDashboard = ({
         }
 
         // Batch into groups of 10 (API limit)
-        const batches = _.chunk(apiStopIdentifiers, 10);
+        const batches = chunk(apiStopIdentifiers, 10);
 
         for (const batch of batches) {
           try {
@@ -309,50 +310,13 @@ const FavoritesDashboard = ({
       // Always fetch vehicles so they're ready when carousel is enabled
       let allVehicles = [];
       if (dedupedPredictions.length > 0) {
-        const predictionsByAgency = _.groupBy(dedupedPredictions, "agencySlug");
-
-        // Include pinned prediction's vehicle
+        // Include pinned prediction to ensure its vehicle is fetched
         const pinned = pinnedPredictionRef.current;
-        if (pinned) {
-          const agencySlug = pinned.agencySlug;
-          if (!predictionsByAgency[agencySlug]) {
-            predictionsByAgency[agencySlug] = [];
-          }
-          if (!predictionsByAgency[agencySlug].some(p => p.vid === pinned.vid)) {
-            predictionsByAgency[agencySlug].push(pinned);
-          }
-        }
+        const predictionsToFetch = pinned && !dedupedPredictions.some(p => p.vid === pinned.vid)
+          ? [...dedupedPredictions, pinned]
+          : dedupedPredictions;
 
-        for (const [agencySlug, agencyPredictions] of Object.entries(predictionsByAgency)) {
-          const vehicleIds = [...new Set(agencyPredictions.map((p) => p.vid).filter(Boolean))];
-          if (vehicleIds.length === 0) continue;
-
-          try {
-            const response = await fetch(
-              `/.netlify/functions/vehicle?vehicleIds=${vehicleIds.join(",")}&agency=${agencySlug}`
-            );
-            const data = await response.json();
-
-            if (data["bustime-response"]?.vehicle) {
-              const vehiclesWithAgency = data["bustime-response"].vehicle.map((v) => {
-                const route = allRoutes.find(
-                  (r) =>
-                    r.agency?.slug?.current === agencySlug &&
-                    r.shortName === v.rt
-                );
-                return {
-                  ...v,
-                  agencySlug,
-                  routeColor: route?.color?.hex || "#666",
-                  routeTextColor: route?.textColor?.hex || "#fff",
-                };
-              });
-              allVehicles.push(...vehiclesWithAgency);
-            }
-          } catch (err) {
-            console.error(`Error fetching vehicles for ${agencySlug}:`, err);
-          }
-        }
+        allVehicles = await fetchVehiclesBatched(predictionsToFetch, allRoutes);
       }
 
       // Update both states together to minimize re-renders
@@ -363,13 +327,11 @@ const FavoritesDashboard = ({
 
     fetchPredictionsAndVehicles(true);
     setCountdown(REFRESH_INTERVAL);
-    setFetchCount((c) => c + 1);
 
     // Refresh every 30 seconds
     const interval = setInterval(() => {
       fetchPredictionsAndVehicles(false);
       setCountdown(REFRESH_INTERVAL);
-      setFetchCount((c) => c + 1);
     }, REFRESH_INTERVAL * 1000);
     return () => clearInterval(interval);
   }, [favoriteStops, sanityAgencies, allRoutes]);
@@ -577,7 +539,7 @@ const FavoritesDashboard = ({
   const style = useMemo(() => {
     if (!baseStyle) return null;
 
-    const computedStyle = _.cloneDeep(baseStyle);
+    const computedStyle = cloneDeep(baseStyle);
 
     // Add vehicles to the style
     if (vehiclesFc.features.length > 0) {
@@ -612,7 +574,7 @@ const FavoritesDashboard = ({
       const statusByStation = {};
 
       // Group by agency to fetch from correct feed
-      const stationsByAgency = _.groupBy(favoriteBikeshare, "agency.slug.current");
+      const stationsByAgency = groupBy(favoriteBikeshare, "agency.slug.current");
 
       for (const [agencySlug, stations] of Object.entries(stationsByAgency)) {
         const agency = bikeshareAgencies.find((a) => a.slug?.current === agencySlug);
@@ -693,23 +655,21 @@ const FavoritesDashboard = ({
 
   if (!style) return null;
 
-  const initialViewState = {
-    longitude: -83.05,
-    latitude: 42.35,
-    zoom: 10,
-  };
+  // Use bounds from favorites for initial view, fall back to Detroit center
+  const initialViewState = bounds
+    ? {
+        bounds: [[bounds[0], bounds[1]], [bounds[2], bounds[3]]],
+        fitBoundsOptions: { padding: 80, maxZoom: 16 },
+      }
+    : {
+        longitude: -83.05,
+        latitude: 42.35,
+        zoom: 10,
+      };
 
   const handleMapLoad = (evt) => {
     const mapInstance = evt.target;
     setMapLoaded(true);
-
-    // In carousel mode, don't fit to all stops - let the carousel effect handle it
-    if (!carouselMode && bounds) {
-      mapInstance.fitBounds(
-        [[bounds[0], bounds[1]], [bounds[2], bounds[3]]],
-        { padding: 80, maxZoom: 16, duration: 0, linear: true }
-      );
-    }
 
     // Update vehicles source on load
     if (vehiclesFc.features.length > 0) {
@@ -753,11 +713,10 @@ const FavoritesDashboard = ({
 
   // Custom header for predictions panel with carousel controls
   const predictionsHeader = (
-    <div className="grayHeader flex items-center justify-between">
-      <span>Upcoming arrivals</span>
+    <RealtimeHeader title="Upcoming arrivals" countdown={countdown}>
       {/* Only show controls here if not externally controlled (i.e., not in widescreen mode) */}
       {!isExternallyControlled && carouselMode && filteredPredictions.length > 0 && (
-        <div className="flex items-center gap-2">
+        <>
           {pinnedPrediction && (
             <span className="text-[10px] text-blue-500 flex items-center gap-1">
               <FontAwesomeIcon icon={faThumbtack} />
@@ -777,9 +736,9 @@ const FavoritesDashboard = ({
           >
             <FontAwesomeIcon icon={pinnedPrediction || !carouselMode ? faPlay : faPause} />
           </button>
-        </div>
+        </>
       )}
-    </div>
+    </RealtimeHeader>
   );
 
   // Bikeshare section for predictions panel
@@ -833,23 +792,18 @@ const FavoritesDashboard = ({
     </div>
   );
 
-  // Predictions panel using shared PredictionsList component
-  const PredictionsPanel = () => (
-    <PredictionsList
-      predictions={filteredPredictions}
-      vehicles={vehicles}
-      loading={loading}
-      header={predictionsHeader}
-      isActive={isPredictionActive}
-      isPinned={(pred) => pinnedPrediction?.vid === pred.vid && pinnedPrediction?.stpid === pred.stpid}
-      onPredictionClick={handlePredictionClick}
-      getRouteData={getRouteForPrediction}
-      showStopName={true}
-      countdown={countdown}
-    >
-      {bikeshareSection}
-    </PredictionsList>
-  );
+  // Predictions panel props (shared between usages)
+  const predictionsPanelProps = {
+    predictions: filteredPredictions,
+    vehicles,
+    loading,
+    header: predictionsHeader,
+    isActive: isPredictionActive,
+    isPinned: (pred) => pinnedPrediction?.vid === pred.vid && pinnedPrediction?.stpid === pred.stpid,
+    onPredictionClick: handlePredictionClick,
+    getRouteData: getRouteForPrediction,
+    showStopName: true,
+  };
 
   // Map panel
   const MapPanel = () => (
@@ -888,14 +842,18 @@ const FavoritesDashboard = ({
         </div>
 
         {/* Mobile: arrivals take remaining space */}
-        <div className="md:hidden flex-1 overflow-hidden flex flex-col">
-          <PredictionsPanel />
+        <div className="md:hidden flex-1 min-h-0 overflow-hidden flex flex-col">
+          <PredictionsList {...predictionsPanelProps}>
+            {bikeshareSection}
+          </PredictionsList>
         </div>
 
         {/* Desktop: side by side layout - 40/60 split */}
         <div className="hidden md:flex md:flex-row h-full w-full">
           <div className="w-[40%] flex flex-col border-r border-gray-200 dark:border-zinc-700 overflow-hidden">
-            <PredictionsPanel />
+            <PredictionsList {...predictionsPanelProps}>
+              {bikeshareSection}
+            </PredictionsList>
           </div>
           <div className="w-[60%] flex flex-col relative">
             <div className="h-full">
@@ -923,13 +881,17 @@ const FavoritesDashboard = ({
       {/* Mobile: stacked layout */}
       <div className="md:hidden flex flex-col gap-2">
         <MapPanel />
-        <PredictionsPanel />
+        <PredictionsList {...predictionsPanelProps}>
+          {bikeshareSection}
+        </PredictionsList>
       </div>
 
       {/* Desktop: 2-column layout */}
       <div className="hidden md:flex gap-2 h-[500px]">
         <div className="w-1/2 flex flex-col">
-          <PredictionsPanel />
+          <PredictionsList {...predictionsPanelProps}>
+            {bikeshareSection}
+          </PredictionsList>
         </div>
         <div className="w-1/2 flex flex-col">
           <MapPanel />

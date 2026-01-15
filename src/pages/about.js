@@ -1,12 +1,7 @@
 import React from "react";
 import { graphql } from "gatsby";
-import { useSanityAgencies } from "../hooks/useSanityAgencies";
 
 const About = ({ data }) => {
-
-  let { sanityAgencies } = useSanityAgencies();
-  sanityAgencies = sanityAgencies.edges.map(e => e.node);
-
   return (
     <div className="my-6 p-2 leading-6">
       <h3>About this site</h3>
@@ -70,3 +65,21 @@ export const query = graphql`
 `;
 
 export default About;
+
+export const Head = () => {
+  const title = "About | transit.det.city";
+  const description = "About transit.det.city - real-time transit info for Detroit/Windsor.";
+  const url = "https://transit.det.city/about";
+
+  return (
+    <>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <link rel="canonical" href={url} />
+    </>
+  );
+};

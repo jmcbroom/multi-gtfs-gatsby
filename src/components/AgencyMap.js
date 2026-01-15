@@ -4,12 +4,11 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import MapboxGL from "mapbox-gl/dist/mapbox-gl";
 import Mapbox, { GeolocateControl, NavigationControl, Popup } from "react-map-gl";
 import { navigate } from "gatsby";
-import _ from "lodash";
+import { cloneDeep, uniqBy } from "lodash-es";
 import RouteHeader from "./RouteHeader";
 import RouteSlim from "./RouteSlim";
 import VehicleBadge from "./VehicleBadge";
 import { useMapStyle } from "../hooks/useMapStyle";
-import { useMapNavigation } from "../hooks/useMapNavigation";
 
 const AgencyMap = ({ routesFc, stopsFc, agency }) => {
 
@@ -21,8 +20,7 @@ const AgencyMap = ({ routesFc, stopsFc, agency }) => {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
 
   const map = useRef();
-  const { theme, style: baseStyle } = useMapStyle();
-  const { zoomIn, geolocate } = useMapNavigation(map);
+  const { style: baseStyle } = useMapStyle();
 
   // Fetch GTFS-RT vehicle positions
   const fetchVehicles = useCallback(async () => {
@@ -136,7 +134,7 @@ const AgencyMap = ({ routesFc, stopsFc, agency }) => {
   let mapInitialBbox = bbox(bboxFc);
 
   // Clone the base style so we can add route/vehicle data
-  let style = _.cloneDeep(baseStyle);
+  let style = cloneDeep(baseStyle);
 
   if (routeFeatureCollection.features.length > 0) {
     style.sources.routes.data = routeFeatureCollection;
@@ -247,7 +245,7 @@ const AgencyMap = ({ routesFc, stopsFc, agency }) => {
     });
 
     if (map.current.getZoom() > 11.5) {
-      let uniqueRoutes = _.uniqBy(routesOnMap, "properties.routeShortName")
+      let uniqueRoutes = uniqBy(routesOnMap, "properties.routeShortName")
         .map((r) => r.properties)
         .sort(
           (a, b) => parseInt(a.routeShortName) > parseInt(b.routeShortName)
